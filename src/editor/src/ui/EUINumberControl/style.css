@@ -1,0 +1,125 @@
+.blender-number-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 22px;
+  min-width: 80px;
+  background-color: var(--bg-card-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  box-sizing: border-box;
+  overflow: hidden;
+  user-select: none;
+  font-family: inherit;
+  font-size: inherit;
+  color: var(--text);
+}
+
+.blender-number-field[data-state="view"] {
+  cursor: default;
+}
+
+.blender-number-field[data-state="hover"] {
+  cursor: ew-resize;
+  background-color: #464646;
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.blender-number-field[data-state="edit"] {
+  cursor: text;
+  background-color: var(--bg-card-1);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+/* Display and input are flex items — always fill the container width.
+   Padding reserves space for the absolutely-positioned buttons. */
+.blender-number-field__display,
+.blender-number-field__input {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+  padding: 0 20px;
+}
+
+.blender-number-field__display {
+  pointer-events: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.blender-number-field__input {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: inherit;
+  font-family: inherit;
+  font-size: inherit;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.blender-number-field__input::-webkit-outer-spin-button,
+.blender-number-field__input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Buttons: absolutely positioned over the display — never affect layout */
+.blender-number-field__decrement,
+.blender-number-field__increment {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  background: transparent;
+  border: none;
+  color: var(--text-label);
+  font-size: 7px;
+  cursor: pointer;
+  z-index: 1;
+}
+
+.blender-number-field__decrement { left: 0; }
+.blender-number-field__increment { right: 0; }
+
+.blender-number-field__decrement:hover,
+.blender-number-field__increment:hover {
+  background-color: rgba(255, 255, 255, 0.12);
+  color: var(--text);
+}
+
+.blender-number-field__decrement:active,
+.blender-number-field__increment:active {
+  background-color: rgba(255, 255, 255, 0.22);
+}
+
+/* Buttons hidden in view and edit states */
+.blender-number-field[data-state="view"] .blender-number-field__decrement,
+.blender-number-field[data-state="view"] .blender-number-field__increment,
+.blender-number-field[data-state="edit"] .blender-number-field__decrement,
+.blender-number-field[data-state="edit"] .blender-number-field__increment {
+  display: none;
+}
+
+/* Input hidden in view, hover, and scrubbing — display stays visible */
+.blender-number-field[data-state="view"] .blender-number-field__input,
+.blender-number-field[data-state="hover"] .blender-number-field__input,
+.blender-number-field[data-state="scrubbing"] .blender-number-field__input {
+  display: none;
+}
+
+/* Display hidden only in edit — input takes its place */
+.blender-number-field[data-state="edit"] .blender-number-field__display {
+  display: none;
+}
+
+body.blender-scrubbing,
+body.blender-scrubbing * {
+  cursor: ew-resize !important;
+}
