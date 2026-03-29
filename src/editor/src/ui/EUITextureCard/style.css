@@ -1,6 +1,6 @@
 .asset-card {
   display: grid;
-  grid-template-columns: 44px 1fr 24px;
+  grid-template-columns: 44px 1fr 22px;
   align-items: center;
   gap: 6px;
   background: var(--bg-card-0);
@@ -20,20 +20,17 @@
 }
 
 .asset-card-thumb:hover {
-  opacity: 0.75;
+  opacity: 0.5;
 }
 
 .asset-card-name {
-  width: 100%;
-  background: transparent;
-  border: none;
-  border-bottom: 1px solid transparent;
+  min-width: 0;
   color: var(--text);
   font-size: var(--font-size-sm);
-  padding: 2px 0;
-  outline: none;
-  min-width: 0;
   font-family: var(--font);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .asset-card-name:focus {
@@ -48,5 +45,7 @@
 }
 
 .asset-card-delete {
+  width: 22px;
+  height: 22px;
   align-self: center;
 }

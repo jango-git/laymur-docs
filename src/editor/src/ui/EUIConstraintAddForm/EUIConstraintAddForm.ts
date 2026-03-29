@@ -11,8 +11,7 @@ import { CONSTRAINT_REGISTRY } from "../../registry/constraint-registry";
 import type { ElementState } from "../../types";
 import { EUIElementPicker } from "../EUIElementPicker/EUIElementPicker";
 import { EUINumberControl } from "../EUINumberControl/EUINumberControl";
-import type {
-  ElementPickerItem} from "../elementPickerItem";
+import type { ElementPickerItem } from "../elementPickerItem";
 import {
   buildElementPickerItems,
   renderElementPickerItem,
@@ -90,7 +89,9 @@ export class EUIConstraintAddForm {
     this.fieldsContainer.innerHTML = "";
 
     const descriptor = CONSTRAINT_REGISTRY.get(this.typeSelect.value);
-    if (!descriptor) {return;}
+    if (!descriptor) {
+      return;
+    }
 
     let firstElementFieldKey: string | null = null;
     const renderedGroups = new Set<string>();
@@ -102,10 +103,14 @@ export class EUIConstraintAddForm {
             ? () => (this.fieldValues[firstElementFieldKey!] as string) || null
             : null;
         this._renderElementField(field, getExcludeId);
-        if (firstElementFieldKey === null) {firstElementFieldKey = field.key;}
+        if (firstElementFieldKey === null) {
+          firstElementFieldKey = field.key;
+        }
       } else if (field.fieldType === "number") {
         if (field.group) {
-          if (renderedGroups.has(field.group)) {continue;}
+          if (renderedGroups.has(field.group)) {
+            continue;
+          }
           renderedGroups.add(field.group);
           const groupFields = descriptor.fields.filter(
             (f) => f.fieldType === "number" && f.group === field.group,
@@ -161,7 +166,9 @@ export class EUIConstraintAddForm {
       });
 
       const selectedId = await picker.open();
-      if (selectedId === null) {return;}
+      if (selectedId === null) {
+        return;
+      }
 
       this.fieldValues[field.key] = selectedId;
       updateElementPickerButton(
@@ -252,22 +259,29 @@ export class EUIConstraintAddForm {
 
   private _handleAdd(): void {
     const descriptor = CONSTRAINT_REGISTRY.get(this.typeSelect.value);
-    if (!descriptor) {return;}
+    if (!descriptor) {
+      return;
+    }
 
     for (const field of descriptor.fields) {
-      if (field.required && !this.fieldValues[field.key]) {return;}
+      if (field.required && !this.fieldValues[field.key]) {
+        return;
+      }
     }
 
     const elementFields = descriptor.fields.filter((f) => f.fieldType === "element");
     if (
       elementFields.length >= 2 &&
       this.fieldValues[elementFields[0].key] === this.fieldValues[elementFields[1].key]
-    )
-      {return;}
+    ) {
+      return;
+    }
 
     const nameRaw = this.nameInput.value.trim();
     const name = nameRaw || undefined;
-    if (name && !this.context.isNameAvailable(name)) {return;}
+    if (name && !this.context.isNameAvailable(name)) {
+      return;
+    }
 
     this.callbacks.onAdd({
       constraintType: this.typeSelect.value,

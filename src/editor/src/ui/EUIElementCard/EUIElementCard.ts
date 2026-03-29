@@ -1,5 +1,5 @@
 /**
- * EUIElementCard — abstract base for element list cards.
+ * EUIElementCard - abstract base for element list cards.
  *
  * Builds the header (drag handle, type badge, delete button) and name field.
  * Subclasses call this.renderFields(this.fieldsContainer) in their constructor.
@@ -99,9 +99,9 @@ export abstract class EUIElementCard {
     container.appendChild(this.root);
   }
 
-  protected abstract renderFields(container: HTMLElement): void;
-
   public destroy(): void {
     this.root.remove();
   }
+
+  protected abstract renderFields(container: HTMLElement): void;
 }

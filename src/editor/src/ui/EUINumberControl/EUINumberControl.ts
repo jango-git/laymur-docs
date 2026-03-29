@@ -33,7 +33,7 @@ export class EUINumberControl {
   private readonly display: HTMLSpanElement;
   private readonly incrementButton: HTMLButtonElement;
   private readonly input: HTMLInputElement;
-  private currentState: FieldState = null!;
+  private currentState: FieldState = FieldState.VIEW;
 
   private readonly signalValueChangedInternal = new Ferrsign2<number, number>();
 
@@ -81,7 +81,7 @@ export class EUINumberControl {
     this.decrementButton.addEventListener("click", this.handleDecrementClick);
     this.incrementButton.addEventListener("click", this.handleIncrementClick);
 
-    this.transitionTo(FieldState.VIEW);
+    this.root.dataset.state = FieldState.VIEW;
     this.refreshDisplay();
   }
 
@@ -150,10 +150,14 @@ export class EUINumberControl {
   };
 
   private readonly handleMouseDown = (event: MouseEvent): void => {
-    if (this.currentState !== FieldState.HOVER) {return;}
+    if (this.currentState !== FieldState.HOVER) {
+      return;
+    }
 
     const target = event.target as Node;
-    if (this.decrementButton.contains(target) || this.incrementButton.contains(target)) {return;}
+    if (this.decrementButton.contains(target) || this.incrementButton.contains(target)) {
+      return;
+    }
 
     event.preventDefault();
     this.scrubStartX = event.clientX;

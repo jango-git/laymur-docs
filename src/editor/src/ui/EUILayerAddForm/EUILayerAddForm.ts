@@ -5,12 +5,8 @@
  * Uses EUINumberControl for policy parameter fields.
  */
 
-import type {
-  PolicyParamDescriptor} from "../../registry/layer-registry";
-import {
-  POLICY_REGISTRY,
-  defaultPolicyParams,
-} from "../../registry/layer-registry";
+import type { PolicyParamDescriptor } from "../../registry/layer-registry";
+import { POLICY_REGISTRY, defaultPolicyParams } from "../../registry/layer-registry";
 import { EUINumberControl } from "../EUINumberControl/EUINumberControl";
 
 export interface LayerAddFormContext {
@@ -87,33 +83,33 @@ export class EUILayerAddForm {
 
     // Init params and events
     this.policyParams = defaultPolicyParams(this.policySelect.value);
-    this._renderPolicyParams();
+    this.renderPolicyParameters();
 
     this.policySelect.addEventListener("change", () => {
       this.policyParams = defaultPolicyParams(this.policySelect.value);
-      this._renderPolicyParams();
-      this._syncButton();
+      this.renderPolicyParameters();
+      this.syncButton();
     });
 
-    this.nameInput.addEventListener("input", () => this._syncButton());
-    this.addButton.addEventListener("click", () => this._handleAdd());
+    this.nameInput.addEventListener("input", () => this.syncButton());
+    this.addButton.addEventListener("click", () => this.handleAdd());
   }
 
   public destroy(): void {
-    this._destroyNumberControls();
+    this.destroyNumberControls();
   }
 
-  private _renderPolicyParams(): void {
-    this._destroyNumberControls();
+  private renderPolicyParameters(): void {
+    this.destroyNumberControls();
     this.paramsSection.innerHTML = "";
 
     const paramDefs = POLICY_REGISTRY.get(this.policySelect.value)?.params ?? [];
     for (const paramDef of paramDefs) {
-      this.paramsSection.appendChild(this._buildParamRow(paramDef));
+      this.paramsSection.appendChild(this.buildParametersRow(paramDef));
     }
   }
 
-  private _buildParamRow(paramDef: PolicyParamDescriptor): HTMLElement {
+  private buildParametersRow(paramDef: PolicyParamDescriptor): HTMLElement {
     const row = document.createElement("div");
     row.className = "layer-field-row";
 
@@ -135,9 +131,11 @@ export class EUILayerAddForm {
     return row;
   }
 
-  private _handleAdd(): void {
+  private handleAdd(): void {
     const name = this.nameInput.value.trim();
-    if (!name || !this.context.isNameAvailable(name)) {return;}
+    if (!name || !this.context.isNameAvailable(name)) {
+      return;
+    }
 
     this.callbacks.onAdd({
       name,
@@ -146,12 +144,12 @@ export class EUILayerAddForm {
     });
   }
 
-  private _syncButton(): void {
+  private syncButton(): void {
     const name = this.nameInput.value.trim();
     this.addButton.disabled = !name || !this.context.isNameAvailable(name);
   }
 
-  private _destroyNumberControls(): void {
+  private destroyNumberControls(): void {
     for (const control of this.numberControls) {
       control.destroy();
     }

@@ -1,6 +1,6 @@
-import type { ElementCardCallbacks, ElementCardContext} from "./EUIElementCard";
-import { EUIElementCard } from "./EUIElementCard";
 import type { ElementState } from "../../types";
+import type { ElementCardCallbacks, ElementCardContext } from "./EUIElementCard";
+import { EUIElementCard } from "./EUIElementCard";
 
 /** Fallback card for element types with no type-specific fields. */
 export class EUIElementCardGeneric extends EUIElementCard {
@@ -14,7 +14,7 @@ export class EUIElementCardGeneric extends EUIElementCard {
     this.renderFields(this.fieldsContainer);
   }
 
-  protected renderFields(_container: HTMLElement): void {
+  protected renderFields(container: HTMLElement): void {
     // No type-specific fields for generic elements.
   }
 }

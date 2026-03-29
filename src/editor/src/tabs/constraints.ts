@@ -2,7 +2,7 @@
  * constraints.ts
  *
  * Constraints tab: add form + constraint list + preview sync.
- * Form fields are driven entirely by constraint-registry — no per-type branching here.
+ * Form fields are driven entirely by constraint-registry - no per-type branching here.
  *
  * Paired fields: fields sharing the same `group` key are rendered as a single H:/V: row.
  */
@@ -11,11 +11,8 @@ import type { PreviewBridge } from "../bridge/PreviewBridge";
 import { CONSTRAINT_REGISTRY } from "../registry/constraint-registry";
 import { makeSortable } from "../sortable";
 import type { EditorState } from "../state";
-import type {
-  ConstraintAddFormContext} from "../ui/EUIConstraintAddForm/EUIConstraintAddForm";
-import {
-  EUIConstraintAddForm,
-} from "../ui/EUIConstraintAddForm/EUIConstraintAddForm";
+import type { ConstraintAddFormContext } from "../ui/EUIConstraintAddForm/EUIConstraintAddForm";
+import { EUIConstraintAddForm } from "../ui/EUIConstraintAddForm/EUIConstraintAddForm";
 import type {
   ConstraintCardCallbacks,
   ConstraintCardContext,
@@ -41,7 +38,9 @@ export class ConstraintsTab {
 
     this.constraintAddForm = new EUIConstraintAddForm(context, {
       onAdd: ({ constraintType, name, fieldValues }) => {
-        if (!CONSTRAINT_REGISTRY.has(constraintType)) {return;}
+        if (!CONSTRAINT_REGISTRY.has(constraintType)) {
+          return;
+        }
 
         const id = this.editorState.generateConstraintId();
         const layer = this.editorState.activeLayer();
@@ -66,7 +65,9 @@ export class ConstraintsTab {
     this.activeConstraintCards = [];
 
     const list = document.getElementById("constraints-list");
-    if (!list) {return;}
+    if (!list) {
+      return;
+    }
     list.innerHTML = "";
 
     const layer = this.editorState.activeLayer();
@@ -95,7 +96,9 @@ export class ConstraintsTab {
 
     for (const constraint of layer.constraints) {
       const descriptor = CONSTRAINT_REGISTRY.get(constraint.constraintType);
-      if (!descriptor) {continue;}
+      if (!descriptor) {
+        continue;
+      }
       const card = new EUIConstraintCardFieldDriven(
         list,
         constraint,

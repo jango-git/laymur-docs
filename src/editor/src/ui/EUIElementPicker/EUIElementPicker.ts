@@ -76,8 +76,12 @@ export class EUIElementPicker<T> {
     } = this.config;
 
     const filtered = items.filter((item) => {
-      if (excludeId && getId(item) === excludeId) {return false;}
-      if (query && !filterItem(item, query)) {return false;}
+      if (excludeId && getId(item) === excludeId) {
+        return false;
+      }
+      if (query && !filterItem(item, query)) {
+        return false;
+      }
       return true;
     });
 

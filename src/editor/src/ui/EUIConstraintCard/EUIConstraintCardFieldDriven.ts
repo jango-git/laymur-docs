@@ -1,20 +1,18 @@
-import type { ConstraintDescriptor, ConstraintFieldDescriptor } from "../../registry/constraint-registry";
+import type {
+  ConstraintDescriptor,
+  ConstraintFieldDescriptor,
+} from "../../registry/constraint-registry";
 import type { ConstraintState } from "../../types";
 import { EUIElementPicker } from "../EUIElementPicker/EUIElementPicker";
 import { EUINumberControl } from "../EUINumberControl/EUINumberControl";
-import type {
-  ElementPickerItem} from "../elementPickerItem";
+import type { ElementPickerItem } from "../elementPickerItem";
 import {
   buildElementPickerItems,
   renderElementPickerItem,
   updateElementPickerButton,
 } from "../elementPickerItem";
-import type {
-  ConstraintCardCallbacks,
-  ConstraintCardContext} from "./EUIConstraintCard";
-import {
-  EUIConstraintCard,
-} from "./EUIConstraintCard";
+import type { ConstraintCardCallbacks, ConstraintCardContext } from "./EUIConstraintCard";
+import { EUIConstraintCard } from "./EUIConstraintCard";
 
 function formatGroupLabel(groupKey: string): string {
   return groupKey.replace(/([A-Z])/g, " $1").replace(/^./, (c) => c.toUpperCase());
@@ -38,7 +36,9 @@ export class EUIConstraintCardFieldDriven extends EUIConstraintCard {
     let firstElementFieldKey: string | null = null;
 
     for (const field of this.descriptor.fields) {
-      if (field.fieldType !== "element") {continue;}
+      if (field.fieldType !== "element") {
+        continue;
+      }
 
       const getExcludeId =
         field.excludeSelf && firstElementFieldKey !== null
@@ -55,10 +55,14 @@ export class EUIConstraintCardFieldDriven extends EUIConstraintCard {
     const renderedGroups = new Set<string>();
 
     for (const field of this.descriptor.fields) {
-      if (field.fieldType !== "number") {continue;}
+      if (field.fieldType !== "number") {
+        continue;
+      }
 
       if (field.group) {
-        if (renderedGroups.has(field.group)) {continue;}
+        if (renderedGroups.has(field.group)) {
+          continue;
+        }
         renderedGroups.add(field.group);
         const groupFields = this.descriptor.fields.filter(
           (f) => f.fieldType === "number" && f.group === field.group,
@@ -98,7 +102,12 @@ export class EUIConstraintCardFieldDriven extends EUIConstraintCard {
     button.appendChild(display);
 
     const currentValue = (this.constraint.fieldValues[field.key] as string) || null;
-    updateElementPickerButton(display, currentValue, this.context.getElements(), this.context.getAssetUrl);
+    updateElementPickerButton(
+      display,
+      currentValue,
+      this.context.getElements(),
+      this.context.getAssetUrl,
+    );
 
     button.addEventListener("click", async () => {
       const items = buildElementPickerItems(this.context.getElements(), field.noLayer);
@@ -115,10 +124,17 @@ export class EUIConstraintCardFieldDriven extends EUIConstraintCard {
       });
 
       const selectedId = await picker.open();
-      if (selectedId === null) {return;}
+      if (selectedId === null) {
+        return;
+      }
 
       this.constraint.fieldValues[field.key] = selectedId;
-      updateElementPickerButton(display, selectedId, this.context.getElements(), this.context.getAssetUrl);
+      updateElementPickerButton(
+        display,
+        selectedId,
+        this.context.getElements(),
+        this.context.getAssetUrl,
+      );
       this.updateSubtitle();
       this.callbacks.onFieldsUpdate(this.constraint);
     });
@@ -190,5 +206,4 @@ export class EUIConstraintCardFieldDriven extends EUIConstraintCard {
 
     container.appendChild(row);
   }
-
 }

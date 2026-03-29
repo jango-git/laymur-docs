@@ -6,7 +6,7 @@
  *   - type   : UIElement class name (shown in dropdown)
  *   - fields : ordered list of creation-time field descriptors
  *
- * To add a new element type, append an entry here — no other file needs to change.
+ * To add a new element type, append an entry here - no other file needs to change.
  *
  * Supported fieldTypes:
  *   "asset"  : EUIElementPicker populated from state.assets

@@ -9,7 +9,7 @@
  *   - cardDetail : returns the subtitle string shown on the constraint card
  *
  * To add a new constraint type, append an entry here and add the corresponding
- * handler to PREVIEW_CONSTRAINT_REGISTRY in preview.ts — no other file needs to change.
+ * handler to PREVIEW_CONSTRAINT_REGISTRY in preview.ts - no other file needs to change.
  *
  * Supported fieldTypes:
  *   "element" : picker populated from state.elements (+ "Layer" option)
@@ -21,8 +21,8 @@
  *   slider     - true : render as range slider + number input (for 0-1 anchors)
  */
 
-import { Registry } from "./Registry";
 import type { ConstraintState } from "../types";
+import { Registry } from "./Registry";
 
 export type ConstraintFieldType = "element" | "number";
 

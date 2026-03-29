@@ -1,4 +1,4 @@
-import type { PolicyDescriptor} from "../../registry/layer-registry";
+import type { PolicyDescriptor } from "../../registry/layer-registry";
 import { POLICY_REGISTRY, defaultPolicyParams } from "../../registry/layer-registry";
 import type { LayerState } from "../../types";
 import { EUINumberControl } from "../EUINumberControl/EUINumberControl";
@@ -18,14 +18,14 @@ export class EUILayerCardDefault extends EUILayerCard {
     this.renderFields(this.fieldsContainer);
   }
 
-  protected renderFields(container: HTMLElement): void {
-    this.renderNameRow(container);
-    this.renderPolicySection(container);
-  }
-
   public override destroy(): void {
     this.destroyPolicyParamControls();
     super.destroy();
+  }
+
+  protected renderFields(container: HTMLElement): void {
+    this.renderNameRow(container);
+    this.renderPolicySection(container);
   }
 
   private renderNameRow(container: HTMLElement): void {
@@ -75,7 +75,9 @@ export class EUILayerCardDefault extends EUILayerCard {
       const option = document.createElement("option");
       option.value = def.type;
       option.textContent = def.label;
-      if (def.type === this.layer.policyType) {option.selected = true;}
+      if (def.type === this.layer.policyType) {
+        option.selected = true;
+      }
       policySelect.appendChild(option);
     }
 
@@ -87,14 +89,25 @@ export class EUILayerCardDefault extends EUILayerCard {
     paramsSection.className = "layer-policy-params";
     container.appendChild(paramsSection);
 
-    this.renderPolicyParams(paramsSection, POLICY_REGISTRY.get(this.layer.policyType)!);
+    const resizePolicy = POLICY_REGISTRY.get(this.layer.policyType);
+    if (!resizePolicy) {
+      throw new Error(`Unknown policy type: ${this.layer.policyType}`);
+    }
+
+    this.renderPolicyParams(paramsSection, resizePolicy);
 
     policySelect.addEventListener("change", () => {
       this.layer.policyType = policySelect.value;
       this.layer.policyParams = defaultPolicyParams(this.layer.policyType);
       this.destroyPolicyParamControls();
       paramsSection.innerHTML = "";
-      this.renderPolicyParams(paramsSection, POLICY_REGISTRY.get(this.layer.policyType)!);
+
+      const newResizePolicy = POLICY_REGISTRY.get(this.layer.policyType);
+      if (!newResizePolicy) {
+        throw new Error(`Unknown policy type: ${this.layer.policyType}`);
+      }
+
+      this.renderPolicyParams(paramsSection, newResizePolicy);
       this.callbacks.onConfigUpdate(this.layer);
     });
   }

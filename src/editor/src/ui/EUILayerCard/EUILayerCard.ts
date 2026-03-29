@@ -31,7 +31,9 @@ export abstract class EUILayerCard {
 
     this.root = document.createElement("div");
     this.root.className = "layer-card";
-    if (context.isActive) {this.root.classList.add("layer-card-active");}
+    if (context.isActive) {
+      this.root.classList.add("layer-card-active");
+    }
     this.root.draggable = true;
 
     this.root.appendChild(this.buildHeader(context));
@@ -43,8 +45,6 @@ export abstract class EUILayerCard {
     container.appendChild(this.root);
     // Subclass constructors call renderFields(this.fieldsContainer) after super()
   }
-
-  protected abstract renderFields(container: HTMLElement): void;
 
   public destroy(): void {
     if (this.root.parentNode) {
@@ -79,4 +79,6 @@ export abstract class EUILayerCard {
 
     return header;
   }
+
+  protected abstract renderFields(container: HTMLElement): void;
 }

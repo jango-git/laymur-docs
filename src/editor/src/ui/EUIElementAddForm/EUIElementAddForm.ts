@@ -24,11 +24,7 @@ export interface ElementAddFormContext {
 }
 
 export interface ElementAddFormCallbacks {
-  onAdd: (data: {
-    type: string;
-    name: string;
-    fieldValues: Record<string, unknown>;
-  }) => void;
+  onAdd: (data: { type: string; name: string; fieldValues: Record<string, unknown> }) => void;
 }
 
 export class EUIElementAddForm {
@@ -84,7 +80,9 @@ export class EUIElementAddForm {
     this.fieldsContainer.innerHTML = "";
 
     const descriptor = ELEMENT_REGISTRY.get(this.typeSelect.value);
-    if (!descriptor) {return;}
+    if (!descriptor) {
+      return;
+    }
 
     for (const field of descriptor.fields) {
       if (field.fieldType === "asset") {
@@ -124,7 +122,9 @@ export class EUIElementAddForm {
         name: meta.name,
         url: meta.url,
       }));
-      if (items.length === 0) {return;}
+      if (items.length === 0) {
+        return;
+      }
 
       const picker = new EUIElementPicker<AssetPickerItem>({
         items,
@@ -147,7 +147,9 @@ export class EUIElementAddForm {
       });
 
       const newId = await picker.open();
-      if (!newId) {return;}
+      if (!newId) {
+        return;
+      }
 
       this.fieldValues[field.key] = newId;
       this._updateAssetDisplay(display, newId);
@@ -215,13 +217,19 @@ export class EUIElementAddForm {
 
   private _handleAdd(): void {
     const descriptor = ELEMENT_REGISTRY.get(this.typeSelect.value);
-    if (!descriptor) {return;}
+    if (!descriptor) {
+      return;
+    }
 
     const name = this.nameInput.value.trim();
-    if (!name || !this.context.isNameAvailable(name)) {return;}
+    if (!name || !this.context.isNameAvailable(name)) {
+      return;
+    }
 
     for (const field of descriptor.fields) {
-      if (field.required && !this.fieldValues[field.key]) {return;}
+      if (field.required && !this.fieldValues[field.key]) {
+        return;
+      }
     }
 
     this.callbacks.onAdd({

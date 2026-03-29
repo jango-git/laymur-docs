@@ -1,24 +1,23 @@
 import type { AssetMeta } from "../../types";
 
-export interface TextureCardCallbacks {
-  onReplace: (id: string, file: File) => void;
-  onDelete: (id: string) => void;
+export interface EUITextureCardCallbackPack {
+  onAssetReplace: (id: string, file: File) => void;
+  onAssetDelete: (id: string) => void;
   isAssetUsed: (id: string) => boolean;
 }
 
 export class EUITextureCard {
-  private readonly id: string;
   private readonly root: HTMLDivElement;
   private readonly thumbnailElement: HTMLImageElement;
+  private readonly nameText: HTMLDivElement;
+  private readonly deleteButton: HTMLButtonElement;
 
   constructor(
-    container: HTMLElement,
-    id: string,
+    private readonly container: HTMLElement,
+    private readonly id: string,
+    private readonly callbacks: EUITextureCardCallbackPack,
     meta: AssetMeta,
-    callbacks: TextureCardCallbacks,
   ) {
-    this.id = id;
-
     this.root = document.createElement("div");
     this.root.className = "asset-card";
 
@@ -26,50 +25,23 @@ export class EUITextureCard {
     this.thumbnailElement.src = meta.url;
     this.thumbnailElement.className = "asset-card-thumb";
     this.thumbnailElement.title = "Click to replace";
-    this.thumbnailElement.addEventListener("click", () => {
-      const fileInput = document.createElement("input");
-      fileInput.type = "file";
-      fileInput.accept = "image/*";
-      fileInput.addEventListener("change", () => {
-        const file = fileInput.files?.[0];
-        if (!file) {return;}
-        callbacks.onReplace(this.id, file);
-      });
-      fileInput.click();
-    });
+    this.thumbnailElement.addEventListener("click", this.onThumbnailClick);
 
-    const nameInput = document.createElement("input");
-    nameInput.type = "text";
-    nameInput.value = meta.name;
-    nameInput.className = "asset-card-name";
-    nameInput.title = `Asset ID: ${id}`;
-    nameInput.readOnly = true;
+    this.nameText = document.createElement("div");
+    this.nameText.className = "asset-card-name";
+    this.nameText.title = `Asset ID: ${id}`;
+    this.nameText.textContent = meta.name;
 
-    const deleteButton = document.createElement("button");
-    deleteButton.className = "button-icon button-danger asset-card-delete";
-    deleteButton.textContent = "✕";
-    deleteButton.title = "Remove asset";
-    deleteButton.addEventListener("click", async () => {
-      if (callbacks.isAssetUsed(this.id)) {
-        deleteButton.style.color = "var(--danger)";
-        deleteButton.title = "In use — remove element first";
-        setTimeout(() => {
-          deleteButton.style.color = "";
-          deleteButton.title = "Remove asset";
-        }, 2000);
-        return;
-      }
-      callbacks.onDelete(this.id);
-    });
+    this.deleteButton = document.createElement("button");
+    this.deleteButton.className = "button-icon button-danger asset-card-delete";
+    this.deleteButton.textContent = "✕";
+    this.deleteButton.title = "Remove asset";
+    this.deleteButton.addEventListener("click", this.onDeleteButtonClick);
 
     this.root.appendChild(this.thumbnailElement);
-    this.root.appendChild(nameInput);
-    this.root.appendChild(deleteButton);
-    container.appendChild(this.root);
-  }
-
-  public updateThumbnail(url: string): void {
-    this.thumbnailElement.src = url;
+    this.root.appendChild(this.nameText);
+    this.root.appendChild(this.deleteButton);
+    this.container.appendChild(this.root);
   }
 
   public destroy(): void {
@@ -77,4 +49,33 @@ export class EUITextureCard {
       this.root.parentNode.removeChild(this.root);
     }
   }
+
+  private readonly onThumbnailClick = (): void => {
+    const fileInput = document.createElement("input");
+    fileInput.type = "file";
+    fileInput.accept = "image/*";
+    fileInput.addEventListener("change", () => {
+      const file = fileInput.files?.[0];
+      if (file) {
+        this.callbacks.onAssetReplace(this.id, file);
+      }
+    });
+
+    fileInput.click();
+  };
+
+  private readonly onDeleteButtonClick = (): void => {
+    if (!this.callbacks.isAssetUsed(this.id)) {
+      this.callbacks.onAssetDelete(this.id);
+      return;
+    }
+
+    this.deleteButton.style.color = "var(--danger)";
+    this.deleteButton.title = "In use - remove element first";
+
+    setTimeout(() => {
+      this.deleteButton.style.color = "";
+      this.deleteButton.title = "Remove asset";
+    }, 2000);
+  };
 }

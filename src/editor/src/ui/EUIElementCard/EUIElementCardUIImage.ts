@@ -1,12 +1,12 @@
 /**
- * EUIElementCardUIImage — element card for UIImage elements.
+ * EUIElementCardUIImage - element card for UIImage elements.
  *
  * Adds a texture picker row using EUIElementPicker<AssetPickerItem>.
  */
 
 import type { ElementState } from "../../types";
 import { EUIElementPicker } from "../EUIElementPicker/EUIElementPicker";
-import type { ElementCardCallbacks, ElementCardContext} from "./EUIElementCard";
+import type { ElementCardCallbacks, ElementCardContext } from "./EUIElementCard";
 import { EUIElementCard } from "./EUIElementCard";
 
 interface AssetPickerItem {
@@ -66,7 +66,9 @@ export class EUIElementCardUIImage extends EUIElementCard {
         dataURL: m.dataURL,
       }));
 
-      if (items.length === 0) {return;}
+      if (items.length === 0) {
+        return;
+      }
 
       const pickerModal = new EUIElementPicker<AssetPickerItem>({
         items,
@@ -89,7 +91,9 @@ export class EUIElementCardUIImage extends EUIElementCard {
       });
 
       const newId = await pickerModal.open();
-      if (!newId || newId === this.element.fieldValues["assetId"]) {return;}
+      if (!newId || newId === this.element.fieldValues["assetId"]) {
+        return;
+      }
 
       this.element.fieldValues["assetId"] = newId;
       const newMeta = this.context.getAssets()[newId];

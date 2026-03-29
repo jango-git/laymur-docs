@@ -60,7 +60,9 @@ export abstract class EUIConstraintCard {
   }
 
   protected elementLabel(id: string): string {
-    if (id === "layer") {return "Layer";}
+    if (id === "layer") {
+      return "Layer";
+    }
     const element = this.context.getElements().find((e) => e.id === id);
     return element?.name ?? id;
   }
@@ -125,7 +127,9 @@ export abstract class EUIConstraintCard {
     input.addEventListener("change", () => {
       const newName = input.value.trim();
 
-      if (newName === (this.constraint.name ?? "")) {return;}
+      if (newName === (this.constraint.name ?? "")) {
+        return;
+      }
 
       if (newName === "") {
         this.constraint.name = undefined;

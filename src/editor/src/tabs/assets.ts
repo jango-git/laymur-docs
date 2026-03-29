@@ -6,8 +6,7 @@
 
 import { ELEMENT_REGISTRY } from "../registry/element-registry";
 import type { EditorState } from "../state";
-import type { AssetMeta } from "../types";
-import type { TextureCardCallbacks } from "../ui/EUITextureCard/EUITextureCard";
+import type { EUITextureCardCallbackPack } from "../ui/EUITextureCard/EUITextureCard";
 import { EUITextureCard } from "../ui/EUITextureCard/EUITextureCard";
 
 // ─── IndexedDB helpers ────────────────────────────────────────────────────────
@@ -160,7 +159,9 @@ export class AssetsTab {
     }
     this.activeTextureCards = [];
 
-    if (!this.assetsTabGrid) {return;}
+    if (!this.assetsTabGrid) {
+      return;
+    }
     this.assetsTabGrid.innerHTML = "";
 
     const entries = Object.entries(this.editorState.assets);
@@ -173,13 +174,13 @@ export class AssetsTab {
       return;
     }
 
-    const callbacks: TextureCardCallbacks = {
-      onReplace: async (id, file) => {
+    const callbacks: EUITextureCardCallbackPack = {
+      onAssetReplace: async (id, file) => {
         await this._addAssetFromFile(file, id);
         this.render();
         this.onAssetsChange();
       },
-      onDelete: async (id) => {
+      onAssetDelete: async (id) => {
         await databaseDelete(id);
         unregisterAsset(this.editorState, id);
         this.render();
@@ -189,7 +190,7 @@ export class AssetsTab {
     };
 
     for (const [id, meta] of entries) {
-      const card = new EUITextureCard(this.assetsTabGrid, id, meta, callbacks);
+      const card = new EUITextureCard(this.assetsTabGrid, id, callbacks, meta);
       this.activeTextureCards.push(card);
     }
   }
@@ -200,9 +201,13 @@ export class AssetsTab {
     for (const layer of this.editorState.layers) {
       for (const el of layer.elements) {
         const descriptor = ELEMENT_REGISTRY.get(el.type);
-        if (!descriptor) {continue;}
+        if (!descriptor) {
+          continue;
+        }
         for (const field of descriptor.fields) {
-          if (field.fieldType === "asset" && el.fieldValues[field.key] === assetId) {return true;}
+          if (field.fieldType === "asset" && el.fieldValues[field.key] === assetId) {
+            return true;
+          }
         }
       }
     }

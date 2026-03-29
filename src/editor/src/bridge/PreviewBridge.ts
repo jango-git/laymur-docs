@@ -2,11 +2,11 @@
  * PreviewBridge.ts
  *
  * Typed wrapper around postMessage to the preview iframe.
- * One method per message type — no scattered postMessage calls in other modules.
+ * One method per message type - no scattered postMessage calls in other modules.
  */
 
-import type { EditorMessage } from "./messages";
 import type { LayerState } from "../types";
+import type { EditorMessage } from "./messages";
 
 export class PreviewBridge {
   private readonly frame: HTMLIFrameElement;
