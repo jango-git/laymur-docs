@@ -19,7 +19,7 @@ export class Registry<T extends { type: string }> {
     return this.map.has(type);
   }
 
-  public all(): T[] {
+  public all(): readonly T[] {
     return this.items;
   }
 }

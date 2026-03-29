@@ -1,18 +1,18 @@
 /**
- * ui.js
+ * ui.ts
  *
  * Tab switching.
  */
 
 export function setupTabs(): void {
   const tabsElement = document.getElementById("tabs");
-  if (!tabsElement) {
+  if (tabsElement === null) {
     throw new Error("Tabs element not found");
   }
 
   tabsElement.addEventListener("click", (event) => {
     const clickedButton = (event.target as HTMLElement).closest<HTMLElement>(".tab-button");
-    if (!clickedButton) {
+    if (clickedButton === null) {
       return;
     }
 

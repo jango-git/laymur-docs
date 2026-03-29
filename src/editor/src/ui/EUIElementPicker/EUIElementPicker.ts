@@ -1,12 +1,8 @@
 export interface EUIElementPickerConfig<T> {
   items: T[];
-  /** Функция, возвращающая уникальный ID для элемента */
   getId: (item: T) => string;
-  /** Функция для отрисовки DOM-узла (содержимого) элемента списка */
   renderItem: (item: T) => HTMLElement;
-  /** Функция фильтрации. Возвращает true, если элемент подходит под запрос */
   filterItem: (item: T, query: string) => boolean;
-
   currentId?: string | null;
   excludeId?: string | null;
   placeholderText?: string;
@@ -15,51 +11,76 @@ export interface EUIElementPickerConfig<T> {
 
 export class EUIElementPicker<T> {
   private readonly config: EUIElementPickerConfig<T>;
-  private readonly modal: HTMLElement;
-  private readonly listContainer: HTMLElement;
+  private readonly modal: HTMLDivElement;
+  private readonly listContainer: HTMLDivElement;
   private readonly searchInput: HTMLInputElement;
   private resolvePromise: ((id: string | null) => void) | null = null;
 
   constructor(config: EUIElementPickerConfig<T>) {
     this.config = config;
-    this.modal = this.createDOM();
 
-    this.listContainer = this.modal.querySelector(".ep-list") as HTMLElement;
-    this.searchInput = this.modal.querySelector(".ep-search") as HTMLInputElement;
+    this.searchInput = document.createElement("input");
+    this.searchInput.type = "text";
+    this.searchInput.className = "ep-search";
+    this.searchInput.placeholder = "Search…";
+    this.searchInput.addEventListener("input", this.handleSearchInput);
 
-    this.modal.querySelector(".ep-backdrop")!.addEventListener("click", () => this.close(null));
-    this.modal.querySelector(".ep-close")!.addEventListener("click", () => this.close(null));
-
-    this.searchInput.addEventListener("input", (event) => {
-      const query = (event.target as HTMLInputElement).value.toLowerCase().trim();
-      this.renderList(query);
+    const closeButton = document.createElement("button");
+    closeButton.className = "ep-close";
+    closeButton.setAttribute("aria-label", "Close");
+    closeButton.textContent = "✕";
+    closeButton.addEventListener("click", () => {
+      this.close(null);
     });
+
+    const header = document.createElement("div");
+    header.className = "ep-header";
+    header.appendChild(this.searchInput);
+    header.appendChild(closeButton);
+
+    this.listContainer = document.createElement("div");
+    this.listContainer.className = "ep-list";
+
+    const popup = document.createElement("div");
+    popup.className = "ep-popup";
+    popup.appendChild(header);
+    popup.appendChild(this.listContainer);
+
+    const backdrop = document.createElement("div");
+    backdrop.className = "ep-backdrop";
+    backdrop.addEventListener("click", () => {
+      this.close(null);
+    });
+
+    this.modal = document.createElement("div");
+    this.modal.className = "element-picker-modal";
+    this.modal.appendChild(backdrop);
+    this.modal.appendChild(popup);
   }
 
-  public async open(): Promise<string | null> {
+  public open(): Promise<string | null> {
     document.body.appendChild(this.modal);
     this.renderList("");
-
-    requestAnimationFrame(() => this.searchInput.focus());
-
+    requestAnimationFrame(() => {
+      this.searchInput.focus();
+    });
     return new Promise((resolve) => {
       this.resolvePromise = resolve;
     });
   }
 
-  private close(selectedId: string | null = null): void {
-    if (this.resolvePromise) {
+  private close(selectedId: string | null): void {
+    if (this.resolvePromise !== null) {
       this.resolvePromise(selectedId);
       this.resolvePromise = null;
     }
-    this.destroy();
+    this.modal.remove();
   }
 
-  private destroy(): void {
-    if (this.modal.parentNode) {
-      this.modal.parentNode.removeChild(this.modal);
-    }
-  }
+  private readonly handleSearchInput = (): void => {
+    const query = this.searchInput.value.toLowerCase().trim();
+    this.renderList(query);
+  };
 
   private renderList(query: string): void {
     this.listContainer.innerHTML = "";
@@ -76,10 +97,10 @@ export class EUIElementPicker<T> {
     } = this.config;
 
     const filtered = items.filter((item) => {
-      if (excludeId && getId(item) === excludeId) {
+      if (excludeId !== null && excludeId !== undefined && getId(item) === excludeId) {
         return false;
       }
-      if (query && !filterItem(item, query)) {
+      if (query.length > 0 && !filterItem(item, query)) {
         return false;
       }
       return true;
@@ -88,9 +109,8 @@ export class EUIElementPicker<T> {
     if (filtered.length === 0) {
       const paragraph = document.createElement("p");
       paragraph.className = "ep-placeholder-text";
-      paragraph.textContent = query
-        ? (placeholderText ?? "No matches.")
-        : (emptyText ?? "No items.");
+      paragraph.textContent =
+        query.length > 0 ? (placeholderText ?? "No matches.") : (emptyText ?? "No items.");
       this.listContainer.appendChild(paragraph);
       return;
     }
@@ -104,29 +124,13 @@ export class EUIElementPicker<T> {
       if (id === currentId) {
         row.classList.add("ep-item-selected");
       }
-
       row.appendChild(renderItem(item));
-
-      row.addEventListener("click", () => this.close(id));
+      row.addEventListener("click", () => {
+        this.close(id);
+      });
       fragment.appendChild(row);
     }
 
     this.listContainer.appendChild(fragment);
-  }
-
-  private createDOM(): HTMLElement {
-    const element = document.createElement("div");
-    element.className = "element-picker-modal";
-    element.innerHTML = `
-      <div class="ep-backdrop"></div>
-      <div class="ep-popup">
-        <div class="ep-header">
-          <input type="text" class="ep-search" placeholder="Search…" />
-          <button class="ep-close" aria-label="Close">✕</button>
-        </div>
-        <div class="ep-list"></div>
-      </div>
-    `;
-    return element;
   }
 }

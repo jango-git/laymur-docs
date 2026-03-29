@@ -1,4 +1,4 @@
-.blender-number-field {
+.number-control {
   position: relative;
   display: flex;
   align-items: center;
@@ -7,7 +7,6 @@
   background-color: var(--bg-card-2);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  box-sizing: border-box;
   overflow: hidden;
   user-select: none;
   font-family: inherit;
@@ -15,17 +14,17 @@
   color: var(--text);
 }
 
-.blender-number-field[data-state="view"] {
+.number-control[data-state="view"] {
   cursor: default;
 }
 
-.blender-number-field[data-state="hover"] {
+.number-control[data-state="hover"] {
   cursor: ew-resize;
   background-color: #464646;
   border-color: rgba(255, 255, 255, 0.18);
 }
 
-.blender-number-field[data-state="edit"] {
+.number-control[data-state="edit"] {
   cursor: text;
   background-color: var(--bg-card-1);
   border-color: var(--accent);
@@ -34,22 +33,22 @@
 
 /* Display and input are flex items - always fill the container width.
    Padding reserves space for the absolutely-positioned buttons. */
-.blender-number-field__display,
-.blender-number-field__input {
+.number-control__display,
+.number-control__input {
   flex: 1;
   min-width: 0;
   text-align: center;
   padding: 0 20px;
 }
 
-.blender-number-field__display {
+.number-control__display {
   pointer-events: none;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.blender-number-field__input {
+.number-control__input {
   background: transparent;
   border: none;
   outline: none;
@@ -60,15 +59,15 @@
   appearance: textfield;
 }
 
-.blender-number-field__input::-webkit-outer-spin-button,
-.blender-number-field__input::-webkit-inner-spin-button {
+.number-control__input::-webkit-outer-spin-button,
+.number-control__input::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
 
 /* Buttons: absolutely positioned over the display - never affect layout */
-.blender-number-field__decrement,
-.blender-number-field__increment {
+.number-control__decrement,
+.number-control__increment {
   position: absolute;
   top: 0;
   bottom: 0;
@@ -85,45 +84,45 @@
   z-index: 1;
 }
 
-.blender-number-field__decrement {
+.number-control__decrement {
   left: 0;
 }
-.blender-number-field__increment {
+.number-control__increment {
   right: 0;
 }
 
-.blender-number-field__decrement:hover,
-.blender-number-field__increment:hover {
+.number-control__decrement:hover,
+.number-control__increment:hover {
   background-color: rgba(255, 255, 255, 0.12);
   color: var(--text);
 }
 
-.blender-number-field__decrement:active,
-.blender-number-field__increment:active {
+.number-control__decrement:active,
+.number-control__increment:active {
   background-color: rgba(255, 255, 255, 0.22);
 }
 
 /* Buttons hidden in view and edit states */
-.blender-number-field[data-state="view"] .blender-number-field__decrement,
-.blender-number-field[data-state="view"] .blender-number-field__increment,
-.blender-number-field[data-state="edit"] .blender-number-field__decrement,
-.blender-number-field[data-state="edit"] .blender-number-field__increment {
+.number-control[data-state="view"] .number-control__decrement,
+.number-control[data-state="view"] .number-control__increment,
+.number-control[data-state="edit"] .number-control__decrement,
+.number-control[data-state="edit"] .number-control__increment {
   display: none;
 }
 
 /* Input hidden in view, hover, and scrubbing - display stays visible */
-.blender-number-field[data-state="view"] .blender-number-field__input,
-.blender-number-field[data-state="hover"] .blender-number-field__input,
-.blender-number-field[data-state="scrubbing"] .blender-number-field__input {
+.number-control[data-state="view"] .number-control__input,
+.number-control[data-state="hover"] .number-control__input,
+.number-control[data-state="scrubbing"] .number-control__input {
   display: none;
 }
 
 /* Display hidden only in edit - input takes its place */
-.blender-number-field[data-state="edit"] .blender-number-field__display {
+.number-control[data-state="edit"] .number-control__display {
   display: none;
 }
 
-body.blender-scrubbing,
-body.blender-scrubbing * {
+body.number-control-scrubbing,
+body.number-control-scrubbing * {
   cursor: ew-resize !important;
 }

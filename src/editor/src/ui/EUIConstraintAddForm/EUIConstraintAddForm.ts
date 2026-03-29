@@ -1,11 +1,3 @@
-/**
- * EUIConstraintAddForm
- *
- * Encapsulates the "Add Constraint" footer form.
- * Drives fields from CONSTRAINT_REGISTRY using EUIElementPicker for element
- * fields and EUINumberControl for numeric fields.
- */
-
 import type { ConstraintFieldDescriptor } from "../../registry/constraint-registry";
 import { CONSTRAINT_REGISTRY } from "../../registry/constraint-registry";
 import type { ElementState } from "../../types";
@@ -55,41 +47,45 @@ export class EUIConstraintAddForm {
     this.callbacks = callbacks;
 
     for (const descriptor of CONSTRAINT_REGISTRY.all()) {
-      const opt = document.createElement("option");
-      opt.value = descriptor.type;
-      opt.textContent = descriptor.label;
-      this.typeSelect.appendChild(opt);
+      const option = document.createElement("option");
+      option.value = descriptor.type;
+      option.textContent = descriptor.label;
+      this.typeSelect.appendChild(option);
     }
 
     this.typeSelect.addEventListener("change", () => {
       this.fieldValues = {};
-      this._renderFields();
-      this._syncButton();
+      this.renderFields();
+      this.syncButton();
     });
 
-    this.nameInput.addEventListener("input", () => this._syncButton());
-    this.addButton.addEventListener("click", () => this._handleAdd());
+    this.nameInput.addEventListener("input", () => {
+      this.syncButton();
+    });
+    this.addButton.addEventListener("click", () => {
+      this.handleAdd();
+    });
 
-    this._renderFields();
-    this._syncButton();
+    this.renderFields();
+    this.syncButton();
   }
 
   /** Re-render fields preserving current element selections and number values. */
   public refresh(): void {
-    this._renderFields();
-    this._syncButton();
+    this.renderFields();
+    this.syncButton();
   }
 
   public destroy(): void {
-    this._destroyNumberControls();
+    this.destroyNumberControls();
   }
 
-  private _renderFields(): void {
-    this._destroyNumberControls();
+  private renderFields(): void {
+    this.destroyNumberControls();
     this.fieldsContainer.innerHTML = "";
 
     const descriptor = CONSTRAINT_REGISTRY.get(this.typeSelect.value);
-    if (!descriptor) {
+    if (descriptor === undefined) {
       return;
     }
 
@@ -98,32 +94,32 @@ export class EUIConstraintAddForm {
 
     for (const field of descriptor.fields) {
       if (field.fieldType === "element") {
-        const getExcludeId =
-          field.excludeSelf && firstElementFieldKey !== null
-            ? () => (this.fieldValues[firstElementFieldKey!] as string) || null
-            : null;
-        this._renderElementField(field, getExcludeId);
-        if (firstElementFieldKey === null) {
-          firstElementFieldKey = field.key;
+        let getExcludeId: (() => string | null) | null = null;
+        if (field.excludeSelf === true && firstElementFieldKey !== null) {
+          const capturedKey = firstElementFieldKey;
+          getExcludeId = (): string | null => {
+            const value = this.fieldValues[capturedKey] as string;
+            return value.length > 0 ? value : null;
+          };
         }
-      } else if (field.fieldType === "number") {
-        if (field.group) {
+        this.renderElementField(field, getExcludeId);
+        firstElementFieldKey ??= field.key;
+      } else {
+        if (field.group !== undefined) {
           if (renderedGroups.has(field.group)) {
             continue;
           }
           renderedGroups.add(field.group);
-          const groupFields = descriptor.fields.filter(
-            (f) => f.fieldType === "number" && f.group === field.group,
-          );
-          this._renderPairedRow(groupFields);
+          const groupFields = descriptor.fields.filter((f) => f.group === field.group);
+          this.renderPairedRow(groupFields);
         } else {
-          this._renderNumberRow(field);
+          this.renderNumberRow(field);
         }
       }
     }
   }
 
-  private _renderElementField(
+  private renderElementField(
     field: ConstraintFieldDescriptor,
     getExcludeId: (() => string | null) | null,
   ): void {
@@ -134,64 +130,76 @@ export class EUIConstraintAddForm {
     label.className = "add-field-label";
     label.textContent = field.label;
 
-    const button = document.createElement("div");
-    button.className = "picker-btn";
+    const pickerButton = document.createElement("div");
+    pickerButton.className = "picker-btn";
 
     const display = document.createElement("div");
     display.className = "picker-btn-display";
-    button.appendChild(display);
+    pickerButton.appendChild(display);
 
     if (!(field.key in this.fieldValues)) {
       this.fieldValues[field.key] = "";
     }
+    const rawValue = this.fieldValues[field.key] as string;
     updateElementPickerButton(
       display,
-      (this.fieldValues[field.key] as string) || null,
+      rawValue.length > 0 ? rawValue : null,
       this.context.getElements(),
       this.context.getAssetUrl,
     );
 
-    button.addEventListener("click", async () => {
-      const items = buildElementPickerItems(this.context.getElements(), field.noLayer);
-      const excludeId = getExcludeId ? (getExcludeId() ?? undefined) : undefined;
-      const currentId = (this.fieldValues[field.key] as string) || null;
-
-      const picker = new EUIElementPicker<ElementPickerItem>({
-        items,
-        getId: (item) => item.id,
-        renderItem: (item) => renderElementPickerItem(item, this.context.getAssetUrl),
-        filterItem: (item, query) => item.name.toLowerCase().includes(query),
-        currentId,
-        excludeId,
-      });
-
-      const selectedId = await picker.open();
-      if (selectedId === null) {
-        return;
-      }
-
-      this.fieldValues[field.key] = selectedId;
-      updateElementPickerButton(
-        display,
-        selectedId,
-        this.context.getElements(),
-        this.context.getAssetUrl,
-      );
-      this._syncButton();
+    pickerButton.addEventListener("click", () => {
+      void this.openElementFieldPicker(field, getExcludeId, display);
     });
 
     row.appendChild(label);
-    row.appendChild(button);
+    row.appendChild(pickerButton);
     this.fieldsContainer.appendChild(row);
   }
 
-  private _renderNumberRow(field: ConstraintFieldDescriptor): void {
+  private async openElementFieldPicker(
+    field: ConstraintFieldDescriptor,
+    getExcludeId: (() => string | null) | null,
+    display: HTMLElement,
+  ): Promise<void> {
+    const items = buildElementPickerItems(this.context.getElements(), field.noLayer);
+    const excludeId = getExcludeId !== null ? (getExcludeId() ?? undefined) : undefined;
+    const rawCurrentId = this.fieldValues[field.key] as string;
+    const currentId = rawCurrentId.length > 0 ? rawCurrentId : null;
+
+    const picker = new EUIElementPicker<ElementPickerItem>({
+      items,
+      getId: (item): string => item.id,
+      renderItem: (item): HTMLElement => renderElementPickerItem(item, this.context.getAssetUrl),
+      filterItem: (item, query): boolean => item.name.toLowerCase().includes(query),
+      currentId,
+      excludeId,
+    });
+
+    const selectedId = await picker.open();
+    if (selectedId === null) {
+      return;
+    }
+
+    console.debug("[EUIConstraintAddForm] field %s → %s", field.key, selectedId);
+    this.fieldValues[field.key] = selectedId;
+    updateElementPickerButton(
+      display,
+      selectedId,
+      this.context.getElements(),
+      this.context.getAssetUrl,
+    );
+    this.syncButton();
+  }
+
+  private renderNumberRow(field: ConstraintFieldDescriptor): void {
     const row = document.createElement("div");
     row.className = "add-field-row";
 
     const label = document.createElement("span");
     label.className = "add-field-label";
     label.textContent = field.label;
+    row.appendChild(label);
 
     const initialValue =
       field.key in this.fieldValues
@@ -206,27 +214,26 @@ export class EUIConstraintAddForm {
       step: field.step ?? 1,
     });
 
-    control.signalValueChanged.on((v) => {
-      this.fieldValues[field.key] = v;
+    control.signalValueChanged.on((newValue) => {
+      this.fieldValues[field.key] = newValue;
     });
 
     this.numberControls.push(control);
-    row.insertBefore(label, row.firstChild);
     this.fieldsContainer.appendChild(row);
   }
 
-  private _renderPairedRow(groupFields: ConstraintFieldDescriptor[]): void {
+  private renderPairedRow(groupFields: ConstraintFieldDescriptor[]): void {
     const row = document.createElement("div");
     row.className = "add-paired-row";
 
     const label = document.createElement("span");
     label.className = "add-field-label";
-    label.textContent = formatGroupLabel(groupFields[0].group!);
+    label.textContent = formatGroupLabel(groupFields[0].group ?? "");
     row.appendChild(label);
 
     for (const field of groupFields) {
       const cell = document.createElement("div");
-      cell.className = "constraint-paired-cell";
+      cell.className = "paired-cell";
 
       const roleLabel = document.createElement("span");
       roleLabel.className = "paired-role-label";
@@ -246,8 +253,8 @@ export class EUIConstraintAddForm {
         step: field.step ?? 0.05,
       });
 
-      control.signalValueChanged.on((v) => {
-        this.fieldValues[field.key] = v;
+      control.signalValueChanged.on((newValue) => {
+        this.fieldValues[field.key] = newValue;
       });
 
       this.numberControls.push(control);
@@ -257,14 +264,14 @@ export class EUIConstraintAddForm {
     this.fieldsContainer.appendChild(row);
   }
 
-  private _handleAdd(): void {
+  private handleAdd(): void {
     const descriptor = CONSTRAINT_REGISTRY.get(this.typeSelect.value);
-    if (!descriptor) {
+    if (descriptor === undefined) {
       return;
     }
 
     for (const field of descriptor.fields) {
-      if (field.required && !this.fieldValues[field.key]) {
+      if (field.required === true && !this.isFieldValueSet(this.fieldValues[field.key])) {
         return;
       }
     }
@@ -278,11 +285,12 @@ export class EUIConstraintAddForm {
     }
 
     const nameRaw = this.nameInput.value.trim();
-    const name = nameRaw || undefined;
-    if (name && !this.context.isNameAvailable(name)) {
+    const name = nameRaw.length > 0 ? nameRaw : undefined;
+    if (name !== undefined && !this.context.isNameAvailable(name)) {
       return;
     }
 
+    console.debug("[EUIConstraintAddForm] add type=%s name=%s", this.typeSelect.value, name);
     this.callbacks.onAdd({
       constraintType: this.typeSelect.value,
       name,
@@ -291,19 +299,19 @@ export class EUIConstraintAddForm {
 
     this.nameInput.value = "";
     this.fieldValues = {};
-    this._renderFields();
-    this._syncButton();
+    this.renderFields();
+    this.syncButton();
   }
 
-  private _syncButton(): void {
+  private syncButton(): void {
     const descriptor = CONSTRAINT_REGISTRY.get(this.typeSelect.value);
-    if (!descriptor) {
+    if (descriptor === undefined) {
       this.addButton.disabled = true;
       return;
     }
 
     for (const field of descriptor.fields) {
-      if (field.required && !this.fieldValues[field.key]) {
+      if (field.required === true && !this.isFieldValueSet(this.fieldValues[field.key])) {
         this.addButton.disabled = true;
         return;
       }
@@ -319,7 +327,7 @@ export class EUIConstraintAddForm {
     }
 
     const nameRaw = this.nameInput.value.trim();
-    if (nameRaw && !this.context.isNameAvailable(nameRaw)) {
+    if (nameRaw.length > 0 && !this.context.isNameAvailable(nameRaw)) {
       this.addButton.disabled = true;
       return;
     }
@@ -327,7 +335,14 @@ export class EUIConstraintAddForm {
     this.addButton.disabled = false;
   }
 
-  private _destroyNumberControls(): void {
+  private isFieldValueSet(value: string | number): boolean {
+    if (typeof value === "string") {
+      return value.length > 0;
+    }
+    return true;
+  }
+
+  private destroyNumberControls(): void {
     for (const control of this.numberControls) {
       control.destroy();
     }

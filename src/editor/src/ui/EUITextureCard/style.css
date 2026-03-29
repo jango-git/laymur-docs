@@ -33,19 +33,12 @@
   text-overflow: ellipsis;
 }
 
-.asset-card-name:focus {
-  border-bottom-color: var(--accent);
-  color: #fff;
-}
-
-.asset-card-name[readonly] {
-  cursor: default;
-  pointer-events: none;
-  color: var(--text-muted);
-}
-
 .asset-card-delete {
   width: 22px;
   height: 22px;
-  align-self: center;
+}
+
+.button-icon.asset-card-delete.asset-card-delete--in-use {
+  background: rgba(224, 82, 82, 0.45);
+  color: #fff;
 }

@@ -1,6 +1,6 @@
 /**
  * Shared utilities for rendering element/layer items inside EUIElementPicker buttons.
- * Used by EUIConstraintCardFieldDriven, EUIConstraintAddForm, and EUIElementAddForm.
+ * Used by EUIConstraintCard, EUIConstraintAddForm, and EUIElementAddForm.
  */
 
 import type { ElementState } from "../types";
@@ -43,16 +43,19 @@ export function renderElementPickerItem(
     thumb.className = "picker-btn-thumb picker-btn-thumb-ph";
     thumb.textContent = "⬡";
     wrapper.appendChild(thumb);
-  } else if (item.elementType === "UIImage" && item.assetId) {
+  } else if (item.elementType === "UIImage" && item.assetId !== undefined) {
     const url = getAssetUrl(item.assetId);
-    const thumb = document.createElement(url ? "img" : "div");
-    thumb.className = "picker-btn-thumb" + (url ? "" : " picker-btn-thumb-ph");
-    if (url && thumb instanceof HTMLImageElement) {
-      thumb.src = url;
+    if (url !== undefined) {
+      const img = document.createElement("img");
+      img.className = "picker-btn-thumb";
+      img.src = url;
+      wrapper.appendChild(img);
     } else {
-      (thumb as HTMLDivElement).textContent = "□";
+      const thumb = document.createElement("div");
+      thumb.className = "picker-btn-thumb picker-btn-thumb-ph";
+      thumb.textContent = "□";
+      wrapper.appendChild(thumb);
     }
-    wrapper.appendChild(thumb);
   } else {
     const thumb = document.createElement("div");
     thumb.className = "picker-btn-thumb picker-btn-thumb-ph";
@@ -60,10 +63,10 @@ export function renderElementPickerItem(
     wrapper.appendChild(thumb);
   }
 
-  const name = document.createElement("span");
-  name.className = "picker-btn-name";
-  name.textContent = item.name;
-  wrapper.appendChild(name);
+  const nameElement = document.createElement("span");
+  nameElement.className = "picker-btn-name";
+  nameElement.textContent = item.name;
+  wrapper.appendChild(nameElement);
 
   return wrapper;
 }
@@ -76,11 +79,11 @@ export function updateElementPickerButton(
 ): void {
   display.innerHTML = "";
 
-  if (!id) {
-    const ph = document.createElement("span");
-    ph.className = "picker-btn-placeholder";
-    ph.textContent = "Click to select…";
-    display.appendChild(ph);
+  if (id === null) {
+    const placeholder = document.createElement("span");
+    placeholder.className = "picker-btn-placeholder";
+    placeholder.textContent = "Click to select…";
+    display.appendChild(placeholder);
     return;
   }
 
@@ -89,26 +92,26 @@ export function updateElementPickerButton(
     thumb.className = "picker-btn-thumb picker-btn-thumb-ph";
     thumb.textContent = "⬡";
     display.appendChild(thumb);
-    const name = document.createElement("span");
-    name.className = "picker-btn-name";
-    name.textContent = "Layer";
-    display.appendChild(name);
+    const nameElement = document.createElement("span");
+    nameElement.className = "picker-btn-name";
+    nameElement.textContent = "Layer";
+    display.appendChild(nameElement);
     return;
   }
 
   const element = elements.find((e) => e.id === id);
-  if (!element) {
-    const ph = document.createElement("span");
-    ph.className = "picker-btn-placeholder";
-    ph.textContent = "Unknown";
-    display.appendChild(ph);
+  if (element === undefined) {
+    const placeholder = document.createElement("span");
+    placeholder.className = "picker-btn-placeholder";
+    placeholder.textContent = "Unknown";
+    display.appendChild(placeholder);
     return;
   }
 
   if (element.type === "UIImage") {
     const assetId = element.fieldValues["assetId"] as string | undefined;
-    const url = assetId ? getAssetUrl(assetId) : undefined;
-    if (url) {
+    const url = assetId !== undefined ? getAssetUrl(assetId) : undefined;
+    if (url !== undefined) {
       const img = document.createElement("img");
       img.src = url;
       img.className = "picker-btn-thumb";
@@ -126,8 +129,8 @@ export function updateElementPickerButton(
     display.appendChild(thumb);
   }
 
-  const name = document.createElement("span");
-  name.className = "picker-btn-name";
-  name.textContent = element.name;
-  display.appendChild(name);
+  const nameElement = document.createElement("span");
+  nameElement.className = "picker-btn-name";
+  nameElement.textContent = element.name;
+  display.appendChild(nameElement);
 }

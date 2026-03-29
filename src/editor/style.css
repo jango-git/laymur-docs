@@ -312,6 +312,15 @@ button {
   color: var(--danger);
   background: rgba(224, 82, 82, 0.12);
 }
+.button-icon.button-delete {
+  color: var(--danger);
+  background: rgba(224, 82, 82, 0.12);
+  padding: 3px;
+}
+.button-icon.button-delete:hover {
+  color: var(--danger);
+  background: rgba(224, 82, 82, 0.28);
+}
 
 .button-primary {
   background: var(--accent);
@@ -461,12 +470,31 @@ button {
   gap: 6px;
 }
 
-/* Paired add-form rows */
+/* Paired rows - used in both add forms and constraint cards */
 .add-paired-row {
   display: grid;
   grid-template-columns: 15% 1fr 1fr;
   align-items: center;
   gap: 4px;
+}
+
+.paired-cell {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.paired-cell .number-control {
+  flex: 1;
+  min-width: 0;
+}
+
+.paired-role-label {
+  color: var(--text-muted);
+  font-size: var(--font-size-xs);
+  font-family: var(--font-mono);
+  flex-shrink: 0;
+  width: 14px;
 }
 
 .add-field-label {
@@ -503,63 +531,4 @@ button {
   border: none;
   border-top: 1px solid var(--border);
   margin: 4px 0;
-}
-
-/* ─── Picker button widget (element selectors in forms and cards) ─────────── */
-
-.picker-btn {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  background: var(--bg-input);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 3px 6px;
-  min-height: 28px;
-  cursor: pointer;
-  transition: border-color 0.1s;
-  overflow: hidden;
-}
-.picker-btn:hover {
-  border-color: rgba(255, 255, 255, 0.22);
-}
-
-.picker-btn-display {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  min-width: 0;
-  flex: 1;
-}
-
-.picker-btn-thumb {
-  width: 20px;
-  height: 20px;
-  object-fit: contain;
-  border-radius: 2px;
-  background: rgba(0, 0, 0, 0.3);
-  flex-shrink: 0;
-}
-
-.picker-btn-thumb-ph {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--bg-card-2);
-  color: var(--text-muted);
-  font-size: var(--font-size-sm);
-}
-
-.picker-btn-name {
-  color: var(--text);
-  font-size: var(--font-size-sm);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  min-width: 0;
-}
-
-.picker-btn-placeholder {
-  color: var(--text-muted);
-  font-size: var(--font-size-sm);
 }

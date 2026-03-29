@@ -1,11 +1,3 @@
-/**
- * EUIElementAddForm
- *
- * Encapsulates the "Add Element" footer form.
- * Drives fields from ELEMENT_REGISTRY: "asset" via EUIElementPicker,
- * "number" via EUINumberControl, "text" via plain input.
- */
-
 import type { ElementFieldDescriptor } from "../../registry/element-registry";
 import { ELEMENT_REGISTRY } from "../../registry/element-registry";
 import type { AssetMeta } from "../../types";
@@ -46,56 +38,64 @@ export class EUIElementAddForm {
     this.callbacks = callbacks;
 
     for (const descriptor of ELEMENT_REGISTRY.all()) {
-      const opt = document.createElement("option");
-      opt.value = descriptor.type;
-      opt.textContent = descriptor.type;
-      this.typeSelect.appendChild(opt);
+      const option = document.createElement("option");
+      option.value = descriptor.type;
+      option.textContent = descriptor.type;
+      this.typeSelect.appendChild(option);
     }
 
     this.typeSelect.addEventListener("change", () => {
       this.fieldValues = {};
-      this._renderFields();
-      this._syncButton();
+      this.renderFields();
+      this.syncButton();
     });
 
-    this.nameInput.addEventListener("input", () => this._syncButton());
-    this.addButton.addEventListener("click", () => this._handleAdd());
+    this.nameInput.addEventListener("input", () => {
+      this.syncButton();
+    });
+    this.addButton.addEventListener("click", () => {
+      this.handleAdd();
+    });
 
-    this._renderFields();
-    this._syncButton();
+    this.renderFields();
+    this.syncButton();
   }
 
   /** Re-render fields preserving current values (e.g. when assets change). */
   public refresh(): void {
-    this._renderFields();
-    this._syncButton();
+    this.renderFields();
+    this.syncButton();
   }
 
   public destroy(): void {
-    this._destroyNumberControls();
+    this.destroyNumberControls();
   }
 
-  private _renderFields(): void {
-    this._destroyNumberControls();
+  private renderFields(): void {
+    this.destroyNumberControls();
     this.fieldsContainer.innerHTML = "";
 
     const descriptor = ELEMENT_REGISTRY.get(this.typeSelect.value);
-    if (!descriptor) {
+    if (descriptor === undefined) {
       return;
     }
 
     for (const field of descriptor.fields) {
-      if (field.fieldType === "asset") {
-        this._renderAssetField(field);
-      } else if (field.fieldType === "number") {
-        this._renderNumberField(field);
-      } else if (field.fieldType === "text") {
-        this._renderTextField(field);
+      switch (field.fieldType) {
+        case "asset":
+          this.renderAssetField(field);
+          break;
+        case "number":
+          this.renderNumberField(field);
+          break;
+        case "text":
+          this.renderTextField(field);
+          break;
       }
     }
   }
 
-  private _renderAssetField(field: ElementFieldDescriptor): void {
+  private renderAssetField(field: ElementFieldDescriptor): void {
     const row = document.createElement("div");
     row.className = "add-field-row";
 
@@ -103,89 +103,99 @@ export class EUIElementAddForm {
     label.className = "add-field-label";
     label.textContent = field.label;
 
-    const btn = document.createElement("div");
-    btn.className = "picker-btn";
+    const pickerButton = document.createElement("div");
+    pickerButton.className = "picker-btn";
 
     const display = document.createElement("div");
     display.className = "picker-btn-display";
-    btn.appendChild(display);
+    pickerButton.appendChild(display);
 
     if (!(field.key in this.fieldValues)) {
       this.fieldValues[field.key] = "";
     }
-    this._updateAssetDisplay(display, (this.fieldValues[field.key] as string) || null);
+    this.updateAssetDisplay(display, this.fieldValues[field.key] as string);
 
-    btn.addEventListener("click", async () => {
-      const assets = this.context.getAssets();
-      const items: AssetPickerItem[] = Object.entries(assets).map(([id, meta]) => ({
-        id,
-        name: meta.name,
-        url: meta.url,
-      }));
-      if (items.length === 0) {
-        return;
-      }
-
-      const picker = new EUIElementPicker<AssetPickerItem>({
-        items,
-        getId: (item) => item.id,
-        renderItem: (item) => {
-          const wrapper = document.createElement("div");
-          wrapper.className = "picker-item-content";
-          const img = document.createElement("img");
-          img.src = item.url;
-          img.className = "picker-btn-thumb";
-          const name = document.createElement("span");
-          name.className = "picker-btn-name";
-          name.textContent = item.name;
-          wrapper.appendChild(img);
-          wrapper.appendChild(name);
-          return wrapper;
-        },
-        filterItem: (item, query) => item.name.toLowerCase().includes(query),
-        currentId: (this.fieldValues[field.key] as string) || null,
-      });
-
-      const newId = await picker.open();
-      if (!newId) {
-        return;
-      }
-
-      this.fieldValues[field.key] = newId;
-      this._updateAssetDisplay(display, newId);
-      this._syncButton();
+    pickerButton.addEventListener("click", () => {
+      void this.openAssetFieldPicker(field, display);
     });
 
     row.appendChild(label);
-    row.appendChild(btn);
+    row.appendChild(pickerButton);
     this.fieldsContainer.appendChild(row);
   }
 
-  private _renderNumberField(field: ElementFieldDescriptor): void {
+  private async openAssetFieldPicker(
+    field: ElementFieldDescriptor,
+    display: HTMLElement,
+  ): Promise<void> {
+    const assets = this.context.getAssets();
+    const items: AssetPickerItem[] = Object.entries(assets).map(([id, assetMeta]) => ({
+      id,
+      name: assetMeta.name,
+      url: assetMeta.url,
+    }));
+    if (items.length === 0) {
+      return;
+    }
+
+    const currentAssetId = this.fieldValues[field.key] as string;
+    const picker = new EUIElementPicker<AssetPickerItem>({
+      items,
+      getId: (item): string => item.id,
+      renderItem: (item): HTMLElement => {
+        const wrapper = document.createElement("div");
+        wrapper.className = "picker-item-content";
+        const img = document.createElement("img");
+        img.src = item.url;
+        img.className = "picker-btn-thumb";
+        const nameElement = document.createElement("span");
+        nameElement.className = "picker-btn-name";
+        nameElement.textContent = item.name;
+        wrapper.appendChild(img);
+        wrapper.appendChild(nameElement);
+        return wrapper;
+      },
+      filterItem: (item, query): boolean => item.name.toLowerCase().includes(query),
+      currentId: currentAssetId.length > 0 ? currentAssetId : null,
+    });
+
+    const newId = await picker.open();
+    if (newId === null) {
+      return;
+    }
+
+    this.fieldValues[field.key] = newId;
+    this.updateAssetDisplay(display, newId);
+    this.syncButton();
+  }
+
+  private renderNumberField(field: ElementFieldDescriptor): void {
     const row = document.createElement("div");
     row.className = "add-field-row";
 
     const label = document.createElement("span");
     label.className = "add-field-label";
     label.textContent = field.label;
+    row.appendChild(label);
 
     const initialValue =
       field.key in this.fieldValues
         ? (this.fieldValues[field.key] as number)
-        : ((field.default as number) ?? 0);
+        : typeof field.default === "number"
+          ? field.default
+          : 0;
     this.fieldValues[field.key] = initialValue;
 
     const control = new EUINumberControl(row, { value: initialValue });
-    control.signalValueChanged.on((v) => {
-      this.fieldValues[field.key] = v;
+    control.signalValueChanged.on((newValue) => {
+      this.fieldValues[field.key] = newValue;
     });
 
     this.numberControls.push(control);
-    row.insertBefore(label, row.firstChild);
     this.fieldsContainer.appendChild(row);
   }
 
-  private _renderTextField(field: ElementFieldDescriptor): void {
+  private renderTextField(field: ElementFieldDescriptor): void {
     const row = document.createElement("div");
     row.className = "add-field-row";
 
@@ -207,7 +217,7 @@ export class EUIElementAddForm {
 
     input.addEventListener("input", () => {
       this.fieldValues[field.key] = input.value;
-      this._syncButton();
+      this.syncButton();
     });
 
     row.appendChild(label);
@@ -215,19 +225,19 @@ export class EUIElementAddForm {
     this.fieldsContainer.appendChild(row);
   }
 
-  private _handleAdd(): void {
+  private handleAdd(): void {
     const descriptor = ELEMENT_REGISTRY.get(this.typeSelect.value);
-    if (!descriptor) {
+    if (descriptor === undefined) {
       return;
     }
 
     const name = this.nameInput.value.trim();
-    if (!name || !this.context.isNameAvailable(name)) {
+    if (name.length === 0 || !this.context.isNameAvailable(name)) {
       return;
     }
 
     for (const field of descriptor.fields) {
-      if (field.required && !this.fieldValues[field.key]) {
+      if (field.required === true && !this.isFieldValueSet(this.fieldValues[field.key])) {
         return;
       }
     }
@@ -240,25 +250,25 @@ export class EUIElementAddForm {
 
     this.nameInput.value = "";
     this.fieldValues = {};
-    this._renderFields();
-    this._syncButton();
+    this.renderFields();
+    this.syncButton();
   }
 
-  private _syncButton(): void {
+  private syncButton(): void {
     const descriptor = ELEMENT_REGISTRY.get(this.typeSelect.value);
-    if (!descriptor) {
+    if (descriptor === undefined) {
       this.addButton.disabled = true;
       return;
     }
 
     const name = this.nameInput.value.trim();
-    if (!name || !this.context.isNameAvailable(name)) {
+    if (name.length === 0 || !this.context.isNameAvailable(name)) {
       this.addButton.disabled = true;
       return;
     }
 
     for (const field of descriptor.fields) {
-      if (field.required && !this.fieldValues[field.key]) {
+      if (field.required === true && !this.isFieldValueSet(this.fieldValues[field.key])) {
         this.addButton.disabled = true;
         return;
       }
@@ -267,27 +277,37 @@ export class EUIElementAddForm {
     this.addButton.disabled = false;
   }
 
-  private _updateAssetDisplay(display: HTMLElement, assetId: string | null): void {
+  private isFieldValueSet(value: unknown): boolean {
+    if (typeof value === "string") {
+      return value.length > 0;
+    }
+    if (typeof value === "number") {
+      return true;
+    }
+    return false;
+  }
+
+  private updateAssetDisplay(display: HTMLElement, assetId: string): void {
     display.innerHTML = "";
-    const meta = assetId ? this.context.getAssets()[assetId] : null;
-    if (meta?.url) {
+    const assetMeta = assetId.length > 0 ? this.context.getAssets()[assetId] : undefined;
+    if (assetMeta !== undefined) {
       const img = document.createElement("img");
-      img.src = meta.url;
+      img.src = assetMeta.url;
       img.className = "picker-btn-thumb";
       display.appendChild(img);
-      const name = document.createElement("span");
-      name.className = "picker-btn-name";
-      name.textContent = meta.name;
-      display.appendChild(name);
+      const nameElement = document.createElement("span");
+      nameElement.className = "picker-btn-name";
+      nameElement.textContent = assetMeta.name;
+      display.appendChild(nameElement);
     } else {
-      const ph = document.createElement("span");
-      ph.className = "picker-btn-placeholder";
-      ph.textContent = "Click to select texture…";
-      display.appendChild(ph);
+      const placeholder = document.createElement("span");
+      placeholder.className = "picker-btn-placeholder";
+      placeholder.textContent = "Click to select texture…";
+      display.appendChild(placeholder);
     }
   }
 
-  private _destroyNumberControls(): void {
+  private destroyNumberControls(): void {
     for (const control of this.numberControls) {
       control.destroy();
     }

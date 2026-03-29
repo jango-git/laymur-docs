@@ -1,8 +1,8 @@
 import type { AssetMeta } from "../../types";
 
 export interface EUITextureCardCallbackPack {
-  onAssetReplace: (id: string, file: File) => void;
-  onAssetDelete: (id: string) => void;
+  onAssetReplace: (id: string, file: File) => unknown;
+  onAssetDelete: (id: string) => unknown;
   isAssetUsed: (id: string) => boolean;
 }
 
@@ -33,7 +33,7 @@ export class EUITextureCard {
     this.nameText.textContent = meta.name;
 
     this.deleteButton = document.createElement("button");
-    this.deleteButton.className = "button-icon button-danger asset-card-delete";
+    this.deleteButton.className = "button-icon button-delete asset-card-delete";
     this.deleteButton.textContent = "✕";
     this.deleteButton.title = "Remove asset";
     this.deleteButton.addEventListener("click", this.onDeleteButtonClick);
@@ -45,9 +45,7 @@ export class EUITextureCard {
   }
 
   public destroy(): void {
-    if (this.root.parentNode) {
-      this.root.parentNode.removeChild(this.root);
-    }
+    this.root.remove();
   }
 
   private readonly onThumbnailClick = (): void => {
@@ -57,24 +55,26 @@ export class EUITextureCard {
     fileInput.addEventListener("change", () => {
       const file = fileInput.files?.[0];
       if (file) {
+        console.debug("[EUITextureCard] replacing asset id=%s with file=%s", this.id, file.name);
         this.callbacks.onAssetReplace(this.id, file);
       }
     });
-
     fileInput.click();
   };
 
   private readonly onDeleteButtonClick = (): void => {
     if (!this.callbacks.isAssetUsed(this.id)) {
+      console.debug("[EUITextureCard] deleting asset id=%s", this.id);
       this.callbacks.onAssetDelete(this.id);
       return;
     }
 
-    this.deleteButton.style.color = "var(--danger)";
+    console.debug("[EUITextureCard] delete blocked: asset id=%s is in use", this.id);
+    this.deleteButton.classList.add("asset-card-delete--in-use");
     this.deleteButton.title = "In use - remove element first";
 
     setTimeout(() => {
-      this.deleteButton.style.color = "";
+      this.deleteButton.classList.remove("asset-card-delete--in-use");
       this.deleteButton.title = "Remove asset";
     }, 2000);
   };

@@ -23,8 +23,30 @@
   gap: 5px;
 }
 
-.constraint-card-header .element-card-info {
+.constraint-card-info {
   flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  overflow: hidden;
+}
+
+.constraint-card-type {
+  color: var(--text);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.constraint-card-detail {
+  color: var(--text-muted);
+  font-size: var(--font-size-xs);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .constraint-fields {
@@ -49,21 +71,3 @@
   gap: 4px;
 }
 
-.constraint-paired-cell {
-  display: flex;
-  align-items: center;
-  gap: 3px;
-}
-
-.constraint-paired-cell .blender-number-field {
-  flex: 1;
-  min-width: 0;
-}
-
-.paired-role-label {
-  color: var(--text-muted);
-  font-size: var(--font-size-xs);
-  font-family: var(--font-mono);
-  flex-shrink: 0;
-  width: 14px;
-}

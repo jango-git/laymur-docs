@@ -6,11 +6,12 @@
 
 import { PreviewBridge } from "./bridge/PreviewBridge";
 import { editorState } from "./state";
-import { AssetsTab, loadAssetsIntoState } from "./tabs/assets";
-import { ConstraintsTab } from "./tabs/constraints";
-import { ElementsTab } from "./tabs/elements";
-import { ExportTab } from "./tabs/export";
-import { LayerTab } from "./tabs/layer";
+import { AssetsTab } from "./tabs/AssetsTab";
+import { loadAssetsIntoState } from "./tabs/AssetsTab.Internal";
+import { ConstraintsTab } from "./tabs/ConstraintsTab";
+import { ElementsTab } from "./tabs/ElementsTab";
+import { ExportTab } from "./tabs/ExportTab";
+import { LayersTab } from "./tabs/LayersTab";
 import { setupTabs } from "./ui";
 
 const previewFrame = document.getElementById("preview-frame") as HTMLIFrameElement;
@@ -25,8 +26,8 @@ presetBtns.forEach((btn) => {
   btn.addEventListener("click", () => {
     presetBtns.forEach((b) => b.classList.remove("active"));
     btn.classList.add("active");
-    const w = parseInt((btn as HTMLElement).dataset.w!, 10);
-    const h = parseInt((btn as HTMLElement).dataset.h!, 10);
+    const w = parseInt((btn as HTMLElement).dataset.w ?? "0", 10);
+    const h = parseInt((btn as HTMLElement).dataset.h ?? "0", 10);
     if (w === 0 && h === 0) {
       // Fill mode
       previewWrapper.classList.remove("framed");
@@ -50,7 +51,7 @@ presetBtns.forEach((btn) => {
   }
 });
 
-function applySize(w: number, h: number) {
+function applySize(w: number, h: number): void {
   const stageRect = previewStage.getBoundingClientRect();
   const maxW = stageRect.width - 4;
   const maxH = stageRect.height - 4;
@@ -71,7 +72,7 @@ function applySize(w: number, h: number) {
 let resizing = false;
 let resizeStart: { x: number; y: number; w: number; h: number } | null = null;
 
-resizeHandle!.addEventListener("mousedown", (e) => {
+resizeHandle?.addEventListener("mousedown", (e) => {
   e.preventDefault();
   resizing = true;
   resizeStart = {
@@ -87,7 +88,9 @@ resizeHandle!.addEventListener("mousedown", (e) => {
 });
 
 document.addEventListener("mousemove", (e) => {
-  if (!resizing || !resizeStart) {return;}
+  if (!resizing || !resizeStart) {
+    return;
+  }
   const dx = e.clientX - resizeStart.x;
   const dy = e.clientY - resizeStart.y;
   const stageRect = previewStage.getBoundingClientRect();
@@ -99,7 +102,9 @@ document.addEventListener("mousemove", (e) => {
 });
 
 document.addEventListener("mouseup", () => {
-  if (!resizing) {return;}
+  if (!resizing) {
+    return;
+  }
   resizing = false;
   document.body.style.cursor = "";
   document.body.style.userSelect = "";
@@ -110,8 +115,8 @@ setupTabs();
 
 const bridge = new PreviewBridge(previewFrame);
 
-const layerTab = new LayerTab(editorState, bridge, {
-  onLayerChange() {
+const layerTab = new LayersTab(editorState, bridge, {
+  onLayerChange(): void {
     elementsTab.render();
     constraintsTab.render();
     constraintsTab.refreshAddForm();
@@ -121,11 +126,11 @@ layerTab.render();
 layerTab.renderAddForm();
 
 const elementsTab = new ElementsTab(editorState, bridge, {
-  onElementDeleted(id) {
+  onElementDeleted(id): void {
     constraintsTab.removeForElement(id);
     constraintsTab.render();
   },
-  onElementsChange() {
+  onElementsChange(): void {
     constraintsTab.refreshAddForm();
   },
 });
@@ -135,10 +140,10 @@ const constraintsTab = new ConstraintsTab(editorState, bridge);
 constraintsTab.render();
 
 const exportTab = new ExportTab(editorState, bridge, {
-  onInitializePreview() {
+  onInitializePreview(): void {
     layerTab.initializePreview();
   },
-  onSceneLoad() {
+  onSceneLoad(): void {
     layerTab.render();
     layerTab.renderAddForm();
     elementsTab.render();
@@ -151,7 +156,7 @@ const exportTab = new ExportTab(editorState, bridge, {
 exportTab.render();
 
 const assetsTab = new AssetsTab(editorState, {
-  onAssetsChange() {
+  onAssetsChange(): void {
     elementsTab.refreshAddForm();
   },
 });

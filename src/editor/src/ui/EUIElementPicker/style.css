@@ -113,3 +113,62 @@
   min-width: 0;
   flex: 1;
 }
+
+/* ─── Picker trigger button (rendered by consumers of EUIElementPicker) ────── */
+
+.picker-btn {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 3px 6px;
+  min-height: 28px;
+  cursor: pointer;
+  transition: border-color 0.1s;
+  overflow: hidden;
+}
+.picker-btn:hover {
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+.picker-btn-display {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  flex: 1;
+}
+
+.picker-btn-thumb {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  border-radius: 2px;
+  background: rgba(0, 0, 0, 0.3);
+  flex-shrink: 0;
+}
+
+.picker-btn-thumb-ph {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-card-2);
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.picker-btn-name {
+  color: var(--text);
+  font-size: var(--font-size-sm);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.picker-btn-placeholder {
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+}

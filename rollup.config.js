@@ -6,7 +6,6 @@ import replace from "@rollup/plugin-replace";
 import minifyPrivatesTransformer from "ts-transformer-minify-privates";
 import { readdirSync } from "node:fs";
 
-// Собираем entry points из examples/*_content.ts
 const exampleEntries = readdirSync("src/examples")
   .filter((f) => f.endsWith("_content.ts"))
   .map((f) => `src/examples/${f}`);
@@ -44,7 +43,7 @@ const plugins = [
   //     drop_console: true,
   //     drop_debugger: true,
   //     pure_getters: true,
-  //     unsafe: false, // можно включить, но риск
+  //     unsafe: false,
   //     unsafe_arrows: true,
   //     unsafe_methods: true,
   //     unsafe_symbols: true,
@@ -81,7 +80,7 @@ export default [
   },
 
   {
-    input: "src/editor/src/preview.ts",
+    input: "src/editor/src/preview/Preview.ts",
     output: {
       file: "dist/editor/preview.js",
       format: "es",

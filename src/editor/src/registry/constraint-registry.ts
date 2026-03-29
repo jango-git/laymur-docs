@@ -50,8 +50,6 @@ export interface ConstraintDescriptor {
 }
 
 export const CONSTRAINT_REGISTRY = new Registry<ConstraintDescriptor>([
-  // ─── Compound / procedural types ────────────────────────────────────────────
-
   {
     type: "distance2d",
     label: "2D Distance",
@@ -72,7 +70,7 @@ export const CONSTRAINT_REGISTRY = new Registry<ConstraintDescriptor>([
         default: 0.5,
         min: 0,
         max: 1,
-        step: 0.05,
+        step: 0.01,
         group: "anchorA",
         groupRole: "h",
         slider: true,
@@ -84,7 +82,7 @@ export const CONSTRAINT_REGISTRY = new Registry<ConstraintDescriptor>([
         default: 0.5,
         min: 0,
         max: 1,
-        step: 0.05,
+        step: 0.01,
         group: "anchorA",
         groupRole: "v",
         slider: true,
@@ -96,7 +94,7 @@ export const CONSTRAINT_REGISTRY = new Registry<ConstraintDescriptor>([
         default: 0.5,
         min: 0,
         max: 1,
-        step: 0.05,
+        step: 0.01,
         group: "anchorB",
         groupRole: "h",
         slider: true,
@@ -108,7 +106,7 @@ export const CONSTRAINT_REGISTRY = new Registry<ConstraintDescriptor>([
         default: 0.5,
         min: 0,
         max: 1,
-        step: 0.05,
+        step: 0.01,
         group: "anchorB",
         groupRole: "v",
         slider: true,
@@ -132,7 +130,7 @@ export const CONSTRAINT_REGISTRY = new Registry<ConstraintDescriptor>([
         groupRole: "v",
       },
     ],
-    cardDetail(c, elementLabel) {
+    cardDetail(c, elementLabel): string {
       return `${elementLabel(c.fieldValues.elementA as string)} → ${elementLabel(c.fieldValues.elementB as string)}`;
     },
   },
@@ -168,7 +166,7 @@ export const CONSTRAINT_REGISTRY = new Registry<ConstraintDescriptor>([
         groupRole: "v",
       },
     ],
-    cardDetail(c, elementLabel) {
+    cardDetail(c, elementLabel): string {
       return `${elementLabel(c.fieldValues.elementA as string)} → ${elementLabel(c.fieldValues.elementB as string)}`;
     },
   },
@@ -176,16 +174,14 @@ export const CONSTRAINT_REGISTRY = new Registry<ConstraintDescriptor>([
     type: "size2d",
     label: "2D Size",
     fields: [
-      { key: "elementA", label: "Element", fieldType: "element", required: true },
+      { key: "elementA", label: "Element", fieldType: "element", required: true, noLayer: true },
       { key: "width", label: "Width", fieldType: "number", default: 1, step: 0.1 },
       { key: "height", label: "Height", fieldType: "number", default: 1, step: 0.1 },
     ],
-    cardDetail(c, elementLabel) {
+    cardDetail(c, elementLabel): string {
       return elementLabel(c.fieldValues.elementA as string);
     },
   },
-
-  // ─── Regular types ────────────────────────────────────────────
 
   {
     type: "aspect",
@@ -200,7 +196,7 @@ export const CONSTRAINT_REGISTRY = new Registry<ConstraintDescriptor>([
       },
       { key: "value", label: "Aspect (w/h)", fieldType: "number", default: 1, step: 0.1 },
     ],
-    cardDetail(c, elementLabel) {
+    cardDetail(c, elementLabel): string {
       return elementLabel(c.fieldValues.elementA as string);
     },
   },
@@ -225,7 +221,7 @@ export const CONSTRAINT_REGISTRY = new Registry<ConstraintDescriptor>([
         default: 0.5,
         min: 0,
         max: 1,
-        step: 0.05,
+        step: 0.01,
         slider: true,
       },
       {
@@ -235,11 +231,11 @@ export const CONSTRAINT_REGISTRY = new Registry<ConstraintDescriptor>([
         default: 0.5,
         min: 0,
         max: 1,
-        step: 0.05,
+        step: 0.01,
         slider: true,
       },
     ],
-    cardDetail(c, elementLabel) {
+    cardDetail(c, elementLabel): string {
       return `${elementLabel(c.fieldValues.elementA as string)} → ${elementLabel(c.fieldValues.elementB as string)}`;
     },
   },
@@ -264,7 +260,7 @@ export const CONSTRAINT_REGISTRY = new Registry<ConstraintDescriptor>([
         default: 0.5,
         min: 0,
         max: 1,
-        step: 0.05,
+        step: 0.01,
         slider: true,
       },
       {
@@ -274,11 +270,11 @@ export const CONSTRAINT_REGISTRY = new Registry<ConstraintDescriptor>([
         default: 0.5,
         min: 0,
         max: 1,
-        step: 0.05,
+        step: 0.01,
         slider: true,
       },
     ],
-    cardDetail(c, elementLabel) {
+    cardDetail(c, elementLabel): string {
       return `${elementLabel(c.fieldValues.elementA as string)} → ${elementLabel(c.fieldValues.elementB as string)}`;
     },
   },
@@ -286,10 +282,10 @@ export const CONSTRAINT_REGISTRY = new Registry<ConstraintDescriptor>([
     type: "width",
     label: "Fixed Width",
     fields: [
-      { key: "elementA", label: "Element", fieldType: "element", required: true },
+      { key: "elementA", label: "Element", fieldType: "element", required: true, noLayer: true },
       { key: "value", label: "Width", fieldType: "number", default: 1, step: 0.1 },
     ],
-    cardDetail(c, elementLabel) {
+    cardDetail(c, elementLabel): string {
       return elementLabel(c.fieldValues.elementA as string);
     },
   },
@@ -297,10 +293,10 @@ export const CONSTRAINT_REGISTRY = new Registry<ConstraintDescriptor>([
     type: "height",
     label: "Fixed Height",
     fields: [
-      { key: "elementA", label: "Element", fieldType: "element", required: true },
+      { key: "elementA", label: "Element", fieldType: "element", required: true, noLayer: true },
       { key: "value", label: "Height", fieldType: "number", default: 1, step: 0.1 },
     ],
-    cardDetail(c, elementLabel) {
+    cardDetail(c, elementLabel): string {
       return elementLabel(c.fieldValues.elementA as string);
     },
   },
@@ -319,7 +315,7 @@ export const CONSTRAINT_REGISTRY = new Registry<ConstraintDescriptor>([
       },
       { key: "value", label: "Proportion", fieldType: "number", default: 1, step: 0.1 },
     ],
-    cardDetail(c, elementLabel) {
+    cardDetail(c, elementLabel): string {
       return `${elementLabel(c.fieldValues.elementA as string)} → ${elementLabel(c.fieldValues.elementB as string)}`;
     },
   },
@@ -338,7 +334,7 @@ export const CONSTRAINT_REGISTRY = new Registry<ConstraintDescriptor>([
       },
       { key: "value", label: "Proportion", fieldType: "number", default: 1, step: 0.1 },
     ],
-    cardDetail(c, elementLabel) {
+    cardDetail(c, elementLabel): string {
       return `${elementLabel(c.fieldValues.elementA as string)} → ${elementLabel(c.fieldValues.elementB as string)}`;
     },
   },

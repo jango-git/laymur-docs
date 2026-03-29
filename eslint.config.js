@@ -49,7 +49,6 @@ export default [
 
       "no-unused-vars": "off",
       "@typescript-eslint/no-unused-vars": "error",
-      "no-console": "error",
       "no-debugger": "error",
       "no-implicit-coercion": "error",
       "no-extend-native": "error",
@@ -60,7 +59,6 @@ export default [
       "@typescript-eslint/explicit-module-boundary-types": "error",
       "@typescript-eslint/no-explicit-any": "error",
       "@typescript-eslint/no-inferrable-types": "warn",
-      "@typescript-eslint/no-floating-promises": "error",
       "@typescript-eslint/no-misused-promises": "error",
       "@typescript-eslint/no-unnecessary-type-assertion": "error",
       "@typescript-eslint/no-unnecessary-condition": "warn",

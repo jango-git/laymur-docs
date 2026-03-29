@@ -1,10 +1,3 @@
-/**
- * PreviewBridge.ts
- *
- * Typed wrapper around postMessage to the preview iframe.
- * One method per message type - no scattered postMessage calls in other modules.
- */
-
 import type { LayerState } from "../types";
 import type { EditorMessage } from "./messages";
 
@@ -15,24 +8,25 @@ export class PreviewBridge {
     this.frame = frame;
   }
 
-  private send(msg: EditorMessage) {
-    this.frame.contentWindow?.postMessage(msg, "*");
-  }
-
-  whenReady(callback: () => void) {
-    if (this.frame.contentDocument?.readyState === "complete") {
+  public whenReady(callback: () => void): void {
+    this.frame.addEventListener("load", () => {
+      console.debug("[bridge] whenReady: load event fired");
       callback();
-    } else {
-      this.frame.addEventListener("load", callback, { once: true });
+    });
+    if (this.frame.contentDocument?.readyState === "complete") {
+      console.debug("[bridge] whenReady: iframe already ready, firing immediately");
+      callback();
     }
   }
 
-  resetScene() {
-    this.send({ type: "RESET_SCENE" });
+  public resetScene(): void {
+    console.debug("[bridge] postMessage RESET_SCENE");
+    this.sendMessage({ type: "RESET_SCENE" });
   }
 
-  addLayer(layer: LayerState) {
-    this.send({
+  public addLayer(layer: LayerState): void {
+    console.debug("[bridge] postMessage ADD_LAYER layerId=%s", layer.id);
+    this.sendMessage({
       type: "ADD_LAYER",
       layerId: layer.id,
       name: layer.name,
@@ -41,16 +35,14 @@ export class PreviewBridge {
     });
   }
 
-  setActiveLayer(layerId: string) {
-    this.send({ type: "SET_ACTIVE_LAYER", layerId });
+  public setActiveLayer(layerId: string): void {
+    console.debug("[bridge] postMessage SET_ACTIVE_LAYER layerId=%s", layerId);
+    this.sendMessage({ type: "SET_ACTIVE_LAYER", layerId });
   }
 
-  removeLayer(layerId: string) {
-    this.send({ type: "REMOVE_LAYER", layerId });
-  }
-
-  setLayerConfig(layer: LayerState) {
-    this.send({
+  public updateLayer(layer: LayerState): void {
+    console.debug("[bridge] postMessage SET_LAYER_CONFIG layerId=%s", layer.id);
+    this.sendMessage({
       type: "SET_LAYER_CONFIG",
       layerId: layer.id,
       name: layer.name,
@@ -59,41 +51,57 @@ export class PreviewBridge {
     });
   }
 
-  addImage(id: string, layerId: string, dataURL: string) {
-    this.send({ type: "ADD_IMAGE", id, layerId, dataURL });
+  public removeLayer(layerId: string): void {
+    console.debug("[bridge] postMessage REMOVE_LAYER layerId=%s", layerId);
+    this.sendMessage({ type: "REMOVE_LAYER", layerId });
   }
 
-  removeElement(id: string, layerId: string) {
-    this.send({ type: "REMOVE_ELEMENT", id, layerId });
+  public addImage(id: string, layerId: string, dataURL: string): void {
+    console.debug("[bridge] postMessage ADD_IMAGE id=%s layerId=%s dataURL=%s", id, layerId, dataURL.slice(0, 40) + "…");
+    this.sendMessage({ type: "ADD_IMAGE", id, layerId, dataURL });
   }
 
-  reorderElements(layerId: string, orderedIds: string[]) {
-    this.send({ type: "REORDER_ELEMENTS", layerId, orderedIds });
+  public removeElement(id: string, layerId: string): void {
+    console.debug("[bridge] postMessage REMOVE_ELEMENT id=%s layerId=%s", id, layerId);
+    this.sendMessage({ type: "REMOVE_ELEMENT", id, layerId });
   }
 
-  setElementTexture(id: string, layerId: string, dataURL: string) {
-    this.send({ type: "SET_ELEMENT_TEXTURE", id, layerId, dataURL });
+  public reorderElements(layerId: string, orderedIds: string[]): void {
+    console.debug("[bridge] postMessage REORDER_ELEMENTS layerId=%s ids=%o", layerId, orderedIds);
+    this.sendMessage({ type: "REORDER_ELEMENTS", layerId, orderedIds });
   }
 
-  addConstraint(
+  public setElementTexture(id: string, layerId: string, dataURL: string): void {
+    console.debug("[bridge] postMessage SET_ELEMENT_TEXTURE id=%s layerId=%s dataURL=%s", id, layerId, dataURL.slice(0, 40) + "…");
+    this.sendMessage({ type: "SET_ELEMENT_TEXTURE", id, layerId, dataURL });
+  }
+
+  public addConstraint(
     id: string,
     layerId: string,
     constraintType: string,
     fieldValues: Record<string, string | number>,
-  ) {
-    this.send({ type: "ADD_CONSTRAINT", id, layerId, constraintType, fieldValues });
+  ): void {
+    console.debug("[bridge] postMessage ADD_CONSTRAINT id=%s layerId=%s type=%s", id, layerId, constraintType);
+    this.sendMessage({ type: "ADD_CONSTRAINT", id, layerId, constraintType, fieldValues });
   }
 
-  updateConstraint(
+  public updateConstraint(
     id: string,
     layerId: string,
     constraintType: string,
     fieldValues: Record<string, string | number>,
-  ) {
-    this.send({ type: "UPDATE_CONSTRAINT", id, layerId, constraintType, fieldValues });
+  ): void {
+    console.debug("[bridge] postMessage UPDATE_CONSTRAINT id=%s layerId=%s type=%s", id, layerId, constraintType);
+    this.sendMessage({ type: "UPDATE_CONSTRAINT", id, layerId, constraintType, fieldValues });
   }
 
-  removeConstraint(id: string, layerId: string) {
-    this.send({ type: "REMOVE_CONSTRAINT", id, layerId });
+  public removeConstraint(id: string, layerId: string): void {
+    console.debug("[bridge] postMessage REMOVE_CONSTRAINT id=%s layerId=%s", id, layerId);
+    this.sendMessage({ type: "REMOVE_CONSTRAINT", id, layerId });
+  }
+
+  private sendMessage(message: EditorMessage): void {
+    this.frame.contentWindow?.postMessage(message, "*");
   }
 }

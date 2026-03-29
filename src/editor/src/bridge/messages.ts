@@ -1,10 +1,6 @@
-/**
- * messages.ts
- *
- * Discriminated union for all postMessage types sent from editor → preview iframe.
- */
-
-export interface ResetSceneMessage { type: "RESET_SCENE" }
+export interface ResetSceneMessage {
+  type: "RESET_SCENE";
+}
 
 export interface AddLayerMessage {
   type: "ADD_LAYER";
@@ -14,9 +10,15 @@ export interface AddLayerMessage {
   policyParams: Record<string, number>;
 }
 
-export interface SetActiveLayerMessage { type: "SET_ACTIVE_LAYER"; layerId: string }
+export interface SetActiveLayerMessage {
+  type: "SET_ACTIVE_LAYER";
+  layerId: string;
+}
 
-export interface RemoveLayerMessage { type: "REMOVE_LAYER"; layerId: string }
+export interface RemoveLayerMessage {
+  type: "REMOVE_LAYER";
+  layerId: string;
+}
 
 export interface SetLayerConfigMessage {
   type: "SET_LAYER_CONFIG";

@@ -31,6 +31,22 @@
   font-size: var(--font-size-sm);
   font-weight: 600;
   flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.element-card-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.element-field-row {
+  display: grid;
+  grid-template-columns: 90px 1fr;
+  align-items: center;
+  gap: 6px;
 }
 
 /* Inline texture picker row */

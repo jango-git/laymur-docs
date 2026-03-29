@@ -2,14 +2,14 @@ import type { FerrsignView2 } from "ferrsign";
 import { Ferrsign2 } from "ferrsign";
 import { MathUtils } from "three";
 
-enum FieldState {
+enum EUINumberControlState {
   VIEW = "view",
   HOVER = "hover",
   SCRUBBING = "scrubbing",
   EDIT = "edit",
 }
 
-interface Options {
+interface EUINumberControlOptions {
   value: number;
   min: number;
   max: number;
@@ -33,11 +33,11 @@ export class EUINumberControl {
   private readonly display: HTMLSpanElement;
   private readonly incrementButton: HTMLButtonElement;
   private readonly input: HTMLInputElement;
-  private currentState: FieldState = FieldState.VIEW;
+  private currentState: EUINumberControlState = EUINumberControlState.VIEW;
 
   private readonly signalValueChangedInternal = new Ferrsign2<number, number>();
 
-  constructor(container: HTMLElement, options: Partial<Options> = {}) {
+  constructor(container: HTMLElement, options: Partial<EUINumberControlOptions> = {}) {
     this.container = container;
     this.currentValue = options.value ?? 0;
     this.minValue = options.min ?? -Infinity;
@@ -46,25 +46,25 @@ export class EUINumberControl {
     this.precisionValue = options.precision ?? this.inferPrecision(this.stepValue);
 
     this.root = document.createElement("div");
-    this.root.className = "blender-number-field";
+    this.root.className = "number-control";
 
     this.decrementButton = document.createElement("button");
-    this.decrementButton.className = "blender-number-field__decrement";
+    this.decrementButton.className = "number-control__decrement";
     this.decrementButton.textContent = "\u25C0";
     this.decrementButton.tabIndex = -1;
     this.decrementButton.setAttribute("aria-label", "Decrease value");
 
     this.display = document.createElement("span");
-    this.display.className = "blender-number-field__display";
+    this.display.className = "number-control__display";
 
     this.incrementButton = document.createElement("button");
-    this.incrementButton.className = "blender-number-field__increment";
+    this.incrementButton.className = "number-control__increment";
     this.incrementButton.textContent = "\u25B6";
     this.incrementButton.tabIndex = -1;
     this.incrementButton.setAttribute("aria-label", "Increase value");
 
     this.input = document.createElement("input");
-    this.input.className = "blender-number-field__input";
+    this.input.className = "number-control__input";
     this.input.type = "number";
 
     this.root.appendChild(this.decrementButton);
@@ -81,7 +81,7 @@ export class EUINumberControl {
     this.decrementButton.addEventListener("click", this.handleDecrementClick);
     this.incrementButton.addEventListener("click", this.handleIncrementClick);
 
-    this.root.dataset.state = FieldState.VIEW;
+    this.root.dataset.state = EUINumberControlState.VIEW;
     this.refreshDisplay();
   }
 
@@ -134,23 +134,23 @@ export class EUINumberControl {
     this.input.removeEventListener("blur", this.handleInputBlur);
     this.decrementButton.removeEventListener("click", this.handleDecrementClick);
     this.incrementButton.removeEventListener("click", this.handleIncrementClick);
-    this.container.removeChild(this.root);
+    this.root.remove();
   }
 
   private readonly handleMouseEnter = (): void => {
-    if (this.currentState === FieldState.VIEW) {
-      this.transitionTo(FieldState.HOVER);
+    if (this.currentState === EUINumberControlState.VIEW) {
+      this.transitionTo(EUINumberControlState.HOVER);
     }
   };
 
   private readonly handleMouseLeave = (): void => {
-    if (this.currentState === FieldState.HOVER) {
-      this.transitionTo(FieldState.VIEW);
+    if (this.currentState === EUINumberControlState.HOVER) {
+      this.transitionTo(EUINumberControlState.VIEW);
     }
   };
 
   private readonly handleMouseDown = (event: MouseEvent): void => {
-    if (this.currentState !== FieldState.HOVER) {
+    if (this.currentState !== EUINumberControlState.HOVER) {
       return;
     }
 
@@ -169,13 +169,13 @@ export class EUINumberControl {
   private readonly handleDocumentMouseMove = (event: MouseEvent): void => {
     const deltaX = event.clientX - this.scrubStartX;
 
-    if (this.currentState === FieldState.HOVER) {
+    if (this.currentState === EUINumberControlState.HOVER) {
       if (Math.abs(deltaX) > 3) {
-        this.transitionTo(FieldState.SCRUBBING);
+        this.transitionTo(EUINumberControlState.SCRUBBING);
       }
     }
 
-    if (this.currentState === FieldState.SCRUBBING) {
+    if (this.currentState === EUINumberControlState.SCRUBBING) {
       const rawValue = this.scrubStartValue + deltaX * this.stepValue;
       this.applyValue(rawValue);
     }
@@ -184,17 +184,17 @@ export class EUINumberControl {
   private readonly handleDocumentMouseUp = (event: MouseEvent): void => {
     this.unbindGlobalScrubEvents();
 
-    if (this.currentState === FieldState.HOVER) {
-      this.transitionTo(FieldState.EDIT);
+    if (this.currentState === EUINumberControlState.HOVER) {
+      this.transitionTo(EUINumberControlState.EDIT);
       return;
     }
 
-    if (this.currentState === FieldState.SCRUBBING) {
+    if (this.currentState === EUINumberControlState.SCRUBBING) {
       const elementUnderPointer = document.elementFromPoint(event.clientX, event.clientY);
-      if (elementUnderPointer && this.root.contains(elementUnderPointer)) {
-        this.transitionTo(FieldState.HOVER);
+      if (elementUnderPointer !== null && this.root.contains(elementUnderPointer)) {
+        this.transitionTo(EUINumberControlState.HOVER);
       } else {
-        this.transitionTo(FieldState.VIEW);
+        this.transitionTo(EUINumberControlState.VIEW);
       }
     }
   };
@@ -203,12 +203,14 @@ export class EUINumberControl {
     if (event.key === "Enter") {
       this.commitEdit();
     } else if (event.key === "Escape") {
-      this.transitionTo(this.root.matches(":hover") ? FieldState.HOVER : FieldState.VIEW);
+      this.transitionTo(
+        this.root.matches(":hover") ? EUINumberControlState.HOVER : EUINumberControlState.VIEW,
+      );
     }
   };
 
   private readonly handleInputBlur = (): void => {
-    if (this.currentState === FieldState.EDIT) {
+    if (this.currentState === EUINumberControlState.EDIT) {
       this.commitEdit();
     }
   };
@@ -233,7 +235,7 @@ export class EUINumberControl {
     document.removeEventListener("mouseup", this.handleDocumentMouseUp);
   }
 
-  private transitionTo(nextState: FieldState): void {
+  private transitionTo(nextState: EUINumberControlState): void {
     if (this.currentState === nextState) {
       return;
     }
@@ -241,7 +243,7 @@ export class EUINumberControl {
     this.currentState = nextState;
     this.root.dataset.state = nextState;
 
-    if (nextState === FieldState.EDIT) {
+    if (nextState === EUINumberControlState.EDIT) {
       this.input.value = String(this.currentValue);
       requestAnimationFrame(() => {
         this.input.focus();
@@ -249,20 +251,22 @@ export class EUINumberControl {
       });
     }
 
-    if (nextState === FieldState.SCRUBBING) {
-      document.body.classList.add("blender-scrubbing");
+    if (nextState === EUINumberControlState.SCRUBBING) {
+      document.body.classList.add("number-control-scrubbing");
     } else {
-      document.body.classList.remove("blender-scrubbing");
+      document.body.classList.remove("number-control-scrubbing");
     }
   }
 
   private commitEdit(): void {
     const parsedValue = parseFloat(this.input.value);
     if (isNaN(parsedValue)) {
-      throw new Error("BlenderLikeNumberField: invalid number");
+      throw new Error("EUINumberControl: invalid number");
     }
     this.applyValue(parsedValue);
-    this.transitionTo(this.root.matches(":hover") ? FieldState.HOVER : FieldState.VIEW);
+    this.transitionTo(
+      this.root.matches(":hover") ? EUINumberControlState.HOVER : EUINumberControlState.VIEW,
+    );
   }
 
   private applyValue(value: number): void {
@@ -272,6 +276,7 @@ export class EUINumberControl {
 
     const previousValue = this.currentValue;
     this.currentValue = MathUtils.clamp(value, this.minValue, this.maxValue);
+    console.debug("[EUINumberControl] value: %o → %o", previousValue, this.currentValue);
     this.refreshDisplay();
     this.signalValueChangedInternal.emit(this.currentValue, previousValue);
   }
