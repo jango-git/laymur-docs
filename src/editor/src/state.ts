@@ -85,4 +85,4 @@ export class EditorState {
   }
 }
 
-export const editorState = new EditorState();
+export const EDITOR_STATE = new EditorState();

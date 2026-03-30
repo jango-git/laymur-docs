@@ -7,7 +7,7 @@
  */
 
 import type { PreviewBridge } from "../bridge/PreviewBridge";
-import { makeSortable } from "../sortable";
+import { makeSortable } from "../miscellaneous/make-sortable";
 import type { EditorState } from "../state";
 import type { AssetMeta, LayerState } from "../types";
 import { EUILayerAddForm } from "../ui/EUILayerAddForm/EUILayerAddForm";
@@ -19,6 +19,7 @@ import {
 
 export interface LayersTabCallbacks {
   onLayerChange: () => void;
+  onAfterInitialize: () => void;
 }
 
 export class LayersTab {
@@ -146,6 +147,7 @@ export class LayersTab {
         );
       }
     }
+    this.callbacks.onAfterInitialize?.();
   }
 
   private deleteLayer(id: string): void {

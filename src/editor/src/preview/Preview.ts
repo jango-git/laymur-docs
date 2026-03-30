@@ -1,4 +1,5 @@
 import { UIFullscreenLayer, UIImage } from "laymur";
+import { UILayerDebug } from "laymur/debug";
 import type { Texture } from "three";
 import { Clock, SRGBColorSpace, TextureLoader, WebGLRenderer } from "three";
 import type { EditorMessage } from "../bridge/messages";
@@ -90,6 +91,7 @@ async function handleMessage(event: MessageEvent<EditorMessage>): Promise<void> 
           elementEntry.element.destroy();
           elementEntry.texture.dispose();
         }
+        layerCtx.debug.destroy();
       }
       layerMap.clear();
       pendingConstraints.length = 0;
@@ -104,6 +106,7 @@ async function handleMessage(event: MessageEvent<EditorMessage>): Promise<void> 
       layer.resizePolicy = buildPolicy(msg.policyType, msg.policyParams);
       layerMap.set(msg.layerId, {
         layer,
+        debug: new UILayerDebug(layer),
         elementMap: new Map(),
         constraintMap: new Map(),
       });
@@ -129,6 +132,7 @@ async function handleMessage(event: MessageEvent<EditorMessage>): Promise<void> 
         elementEntry.element.destroy();
         elementEntry.texture.dispose();
       }
+      layerCtx.debug.destroy();
       layerMap.delete(msg.layerId);
       break;
     }
@@ -266,6 +270,43 @@ async function handleMessage(event: MessageEvent<EditorMessage>): Promise<void> 
         handle.destroy();
         layerCtx.constraintMap.delete(msg.id);
       }
+      break;
+    }
+
+    case "SET_LAYER_DEBUG": {
+      console.debug("[preview] SET_LAYER_DEBUG layerId=%s filters=%o", msg.layerId, msg.filters);
+      const layerContext = layerMap.get(msg.layerId);
+      if (layerContext === undefined) {
+        break;
+      }
+      const { debug } = layerContext;
+      if (msg.filters.showAspect !== undefined) {
+        debug.showAspect = msg.filters.showAspect;
+      }
+      if (msg.filters.showHeight !== undefined) {
+        debug.showHeight = msg.filters.showHeight;
+      }
+      if (msg.filters.showWidth !== undefined) {
+        debug.showWidth = msg.filters.showWidth;
+      }
+      if (msg.filters.showHorizontalDistance !== undefined) {
+        debug.showHorizontalDistance = msg.filters.showHorizontalDistance;
+      }
+      if (msg.filters.showHorizontalInterpolation !== undefined) {
+        debug.showHorizontalInterpolation = msg.filters.showHorizontalInterpolation;
+      }
+      if (msg.filters.showVerticalDistance !== undefined) {
+        debug.showVerticalDistance = msg.filters.showVerticalDistance;
+      }
+      if (msg.filters.showVerticalInterpolation !== undefined) {
+        debug.showVerticalInterpolation = msg.filters.showVerticalInterpolation;
+      }
+      break;
+    }
+
+    case "SET_THEME": {
+      console.debug("[preview] SET_THEME theme=%s", msg.theme);
+      document.documentElement.setAttribute("data-theme", msg.theme);
       break;
     }
   }

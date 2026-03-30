@@ -20,8 +20,8 @@
 
 .number-control[data-state="hover"] {
   cursor: ew-resize;
-  background-color: #464646;
-  border-color: rgba(255, 255, 255, 0.18);
+  background-color: var(--bg-card-1);
+  border-color: var(--border-hover);
 }
 
 .number-control[data-state="edit"] {
@@ -93,13 +93,13 @@
 
 .number-control__decrement:hover,
 .number-control__increment:hover {
-  background-color: rgba(255, 255, 255, 0.12);
+  background-color: var(--overlay-hover);
   color: var(--text);
 }
 
 .number-control__decrement:active,
 .number-control__increment:active {
-  background-color: rgba(255, 255, 255, 0.22);
+  background-color: var(--overlay-active);
 }
 
 /* Buttons hidden in view and edit states */

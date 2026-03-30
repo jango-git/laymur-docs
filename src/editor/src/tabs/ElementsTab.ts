@@ -5,8 +5,8 @@
  */
 
 import type { PreviewBridge } from "../bridge/PreviewBridge";
+import { makeSortable } from "../miscellaneous/make-sortable";
 import { ELEMENT_REGISTRY } from "../registry/element-registry";
-import { makeSortable } from "../sortable";
 import type { EditorState } from "../state";
 import type { AssetMeta } from "../types";
 import { EUIElementAddForm } from "../ui/EUIElementAddForm/EUIElementAddForm";

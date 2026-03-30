@@ -1,6 +1,6 @@
 import type { PreviewBridge } from "../bridge/PreviewBridge";
+import { makeSortable } from "../miscellaneous/make-sortable";
 import { CONSTRAINT_REGISTRY } from "../registry/constraint-registry";
-import { makeSortable } from "../sortable";
 import type { EditorState } from "../state";
 import type { AssetMeta } from "../types";
 import type { ConstraintAddFormContext } from "../ui/EUIConstraintAddForm/EUIConstraintAddForm";

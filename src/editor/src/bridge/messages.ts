@@ -76,6 +76,30 @@ export interface RemoveConstraintMessage {
   layerId: string;
 }
 
+export type DebugFilters = Partial<
+  Record<
+    | "showAspect"
+    | "showHeight"
+    | "showWidth"
+    | "showHorizontalDistance"
+    | "showHorizontalInterpolation"
+    | "showVerticalDistance"
+    | "showVerticalInterpolation",
+    boolean
+  >
+>;
+
+export interface SetLayerDebugMessage {
+  type: "SET_LAYER_DEBUG";
+  layerId: string;
+  filters: DebugFilters;
+}
+
+export interface SetThemeMessage {
+  type: "SET_THEME";
+  theme: "dark" | "light";
+}
+
 export type EditorMessage =
   | ResetSceneMessage
   | AddLayerMessage
@@ -88,4 +112,6 @@ export type EditorMessage =
   | SetElementTextureMessage
   | AddConstraintMessage
   | UpdateConstraintMessage
-  | RemoveConstraintMessage;
+  | RemoveConstraintMessage
+  | SetLayerDebugMessage
+  | SetThemeMessage;

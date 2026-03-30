@@ -24,6 +24,7 @@ import {
   UIVerticalProportionConstraint,
   UIWidthConstraint,
 } from "laymur";
+import type { UILayerDebug } from "laymur/debug";
 import type { Texture } from "three";
 
 export type FieldValues = Record<string, string | number>;
@@ -55,6 +56,7 @@ export interface ConstraintHandle {
 
 export interface LayerContext {
   layer: UIFullscreenLayer;
+  debug: UILayerDebug;
   elementMap: Map<string, ElementEntry>;
   constraintMap: Map<string, ConstraintHandle>;
 }

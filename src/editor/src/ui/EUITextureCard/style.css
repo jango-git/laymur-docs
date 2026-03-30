@@ -14,7 +14,7 @@
   height: 44px;
   object-fit: contain;
   border-radius: 3px;
-  background: rgba(0, 0, 0, 0.3);
+  background: var(--overlay-bg);
   cursor: pointer;
   transition: opacity 0.1s;
 }
@@ -39,6 +39,6 @@
 }
 
 .button-icon.asset-card-delete.asset-card-delete--in-use {
-  background: rgba(224, 82, 82, 0.45);
+  background: color-mix(in srgb, var(--danger) 45%, transparent);
   color: #fff;
 }

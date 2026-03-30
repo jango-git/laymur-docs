@@ -1,5 +1,7 @@
 import type { LayerState } from "../types";
-import type { EditorMessage } from "./messages";
+import type { DebugFilters, EditorMessage } from "./messages";
+
+export type Theme = "dark" | "light";
 
 export class PreviewBridge {
   private readonly frame: HTMLIFrameElement;
@@ -57,7 +59,12 @@ export class PreviewBridge {
   }
 
   public addImage(id: string, layerId: string, dataURL: string): void {
-    console.debug("[bridge] postMessage ADD_IMAGE id=%s layerId=%s dataURL=%s", id, layerId, dataURL.slice(0, 40) + "…");
+    console.debug(
+      "[bridge] postMessage ADD_IMAGE id=%s layerId=%s dataURL=%s",
+      id,
+      layerId,
+      dataURL.slice(0, 40) + "…",
+    );
     this.sendMessage({ type: "ADD_IMAGE", id, layerId, dataURL });
   }
 
@@ -72,7 +79,12 @@ export class PreviewBridge {
   }
 
   public setElementTexture(id: string, layerId: string, dataURL: string): void {
-    console.debug("[bridge] postMessage SET_ELEMENT_TEXTURE id=%s layerId=%s dataURL=%s", id, layerId, dataURL.slice(0, 40) + "…");
+    console.debug(
+      "[bridge] postMessage SET_ELEMENT_TEXTURE id=%s layerId=%s dataURL=%s",
+      id,
+      layerId,
+      dataURL.slice(0, 40) + "…",
+    );
     this.sendMessage({ type: "SET_ELEMENT_TEXTURE", id, layerId, dataURL });
   }
 
@@ -82,7 +94,12 @@ export class PreviewBridge {
     constraintType: string,
     fieldValues: Record<string, string | number>,
   ): void {
-    console.debug("[bridge] postMessage ADD_CONSTRAINT id=%s layerId=%s type=%s", id, layerId, constraintType);
+    console.debug(
+      "[bridge] postMessage ADD_CONSTRAINT id=%s layerId=%s type=%s",
+      id,
+      layerId,
+      constraintType,
+    );
     this.sendMessage({ type: "ADD_CONSTRAINT", id, layerId, constraintType, fieldValues });
   }
 
@@ -92,13 +109,28 @@ export class PreviewBridge {
     constraintType: string,
     fieldValues: Record<string, string | number>,
   ): void {
-    console.debug("[bridge] postMessage UPDATE_CONSTRAINT id=%s layerId=%s type=%s", id, layerId, constraintType);
+    console.debug(
+      "[bridge] postMessage UPDATE_CONSTRAINT id=%s layerId=%s type=%s",
+      id,
+      layerId,
+      constraintType,
+    );
     this.sendMessage({ type: "UPDATE_CONSTRAINT", id, layerId, constraintType, fieldValues });
   }
 
   public removeConstraint(id: string, layerId: string): void {
     console.debug("[bridge] postMessage REMOVE_CONSTRAINT id=%s layerId=%s", id, layerId);
     this.sendMessage({ type: "REMOVE_CONSTRAINT", id, layerId });
+  }
+
+  public setLayerDebug(layerId: string, filters: DebugFilters): void {
+    console.debug("[bridge] postMessage SET_LAYER_DEBUG layerId=%s filters=%o", layerId, filters);
+    this.sendMessage({ type: "SET_LAYER_DEBUG", layerId, filters });
+  }
+
+  public setTheme(theme: Theme): void {
+    console.debug("[bridge] postMessage SET_THEME theme=%s", theme);
+    this.sendMessage({ type: "SET_THEME", theme });
   }
 
   private sendMessage(message: EditorMessage): void {

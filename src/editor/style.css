@@ -1,3 +1,4 @@
+@import "./src/ui/PreviewToolbar/style.css";
 @import "./src/ui/EUINumberControl/style.css";
 @import "./src/ui/EUIElementPicker/style.css";
 @import "./src/ui/EUIConstraintCard/style.css";
@@ -16,6 +17,7 @@
 
 :root {
   --bg-root: #141414;
+  --bg-preview: #0e0e0e;
   --bg-sidebar: #1c1c1c;
   --bg-card-0: #252525;
   --bg-card-1: #2e2e2e;
@@ -25,8 +27,17 @@
   --text: #cccccc;
   --text-muted: #666666;
   --text-label: #888888;
-  --accent: #4d9fff;
-  --danger: #e05252;
+  --accent: #60a5fa;
+  --success: #22c55e;
+  --success-dim: #15803d;
+  --success-dim-text: #86efac;
+  --danger: #f87171;
+  --debug: #f0c040;
+  --border-hover: rgba(255, 255, 255, 0.22);
+  --overlay-subtle: rgba(255, 255, 255, 0.07);
+  --overlay-hover: rgba(255, 255, 255, 0.12);
+  --overlay-active: rgba(255, 255, 255, 0.22);
+  --overlay-bg: rgba(0, 0, 0, 0.3);
   --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-mono: "SF Mono", "Fira Code", Consolas, monospace;
   --font-size-base: 12px;
@@ -34,6 +45,31 @@
   --font-size-xs: 10px;
   --radius: 6px;
   --radius-sm: 4px;
+}
+
+html[data-theme="light"] {
+  --bg-root: #f0f0f0;
+  --bg-preview: #c8c8c8;
+  --bg-sidebar: #e6e6e6;
+  --bg-card-0: #dcdcdc;
+  --bg-card-1: #d2d2d2;
+  --bg-card-2: #bebebe;
+  --bg-input: #e8e8e8;
+  --border: rgba(0, 0, 0, 0.1);
+  --text: #1a1a1a;
+  --text-muted: #777777;
+  --text-label: #555555;
+  --accent: #2563eb;
+  --success: #16a34a;
+  --success-dim: #166534;
+  --success-dim-text: #bbf7d0;
+  --danger: #dc2626;
+  --debug: #a06800;
+  --border-hover: rgba(0, 0, 0, 0.25);
+  --overlay-subtle: rgba(0, 0, 0, 0.05);
+  --overlay-hover: rgba(0, 0, 0, 0.08);
+  --overlay-active: rgba(0, 0, 0, 0.14);
+  --overlay-bg: rgba(0, 0, 0, 0.12);
 }
 
 html,
@@ -44,6 +80,12 @@ body {
   color: var(--text);
   font-family: var(--font);
   font-size: var(--font-size-base);
+  user-select: none;
+}
+input,
+textarea,
+select {
+  user-select: text;
 }
 
 /* Remove number input spinners */
@@ -69,7 +111,7 @@ input[type="number"] {
   flex: 0 0 60%;
   display: flex;
   flex-direction: column;
-  background: #0e0e0e;
+  background: var(--bg-preview);
   overflow: hidden;
   min-height: 0;
 }
@@ -106,12 +148,12 @@ input[type="number"] {
 }
 .preset-btn:hover {
   color: var(--text);
-  border-color: rgba(255, 255, 255, 0.18);
+  border-color: var(--border-hover);
 }
 .preset-btn.active {
   color: var(--accent);
   border-color: var(--accent);
-  background: rgba(77, 159, 255, 0.08);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
 }
 
 #preview-size-label {
@@ -142,7 +184,7 @@ input[type="number"] {
 
 #preview-iframe-wrapper.framed {
   box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.1),
+    0 0 0 1px var(--border),
     0 8px 40px rgba(0, 0, 0, 0.6);
   border-radius: var(--radius);
   overflow: hidden;
@@ -178,11 +220,11 @@ input[type="number"] {
   height: 0;
   border-style: solid;
   border-width: 0 0 10px 10px;
-  border-color: transparent transparent rgba(255, 255, 255, 0.25) transparent;
+  border-color: transparent transparent var(--text-muted) transparent;
   transition: border-color 0.1s;
 }
 #preview-resize-handle:hover::after {
-  border-color: transparent transparent rgba(255, 255, 255, 0.55) transparent;
+  border-color: transparent transparent var(--text) transparent;
 }
 
 #sidebar {
@@ -279,11 +321,11 @@ input[type="number"] {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.12);
+  background: var(--overlay-hover);
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: var(--overlay-active);
 }
 
 /* Buttons */
@@ -306,20 +348,20 @@ button {
 }
 .button-icon:hover {
   color: var(--text);
-  background: rgba(255, 255, 255, 0.07);
+  background: var(--overlay-subtle);
 }
 .button-icon.button-danger:hover {
   color: var(--danger);
-  background: rgba(224, 82, 82, 0.12);
+  background: color-mix(in srgb, var(--danger) 12%, transparent);
 }
 .button-icon.button-delete {
   color: var(--danger);
-  background: rgba(224, 82, 82, 0.12);
+  background: color-mix(in srgb, var(--danger) 12%, transparent);
   padding: 3px;
 }
 .button-icon.button-delete:hover {
   color: var(--danger);
-  background: rgba(224, 82, 82, 0.28);
+  background: color-mix(in srgb, var(--danger) 28%, transparent);
 }
 
 .button-primary {
@@ -354,7 +396,7 @@ button {
 }
 
 .button-success {
-  background: #2d8a52;
+  background: var(--success);
   color: #fff;
   font-size: var(--font-size-sm);
   font-weight: 600;
@@ -367,8 +409,8 @@ button {
 }
 
 .button-success-dim {
-  background: #1c5c36;
-  color: #9ecfb3;
+  background: var(--success-dim);
+  color: var(--success-dim-text);
   font-size: var(--font-size-sm);
   font-weight: 600;
   padding: 7px 12px;
@@ -516,6 +558,32 @@ button {
   font-family: var(--font-mono);
 }
 .param-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.input-labeled-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.input-label {
+  white-space: nowrap;
+  font-size: var(--font-size-sm);
+  color: var(--text-muted, var(--text));
+}
+.input-full {
+  width: 100%;
+  box-sizing: border-box;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: var(--font-size-sm);
+  padding: 4px 6px;
+  font-family: var(--font-mono);
+}
+.input-full:focus {
   outline: none;
   border-color: var(--accent);
 }

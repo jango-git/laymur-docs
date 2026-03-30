@@ -1,0 +1,90 @@
+#preview-toolbar {
+  justify-content: space-between;
+}
+
+#debug-filters {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  margin-left: auto;
+}
+
+.debug-toggle-btn {
+  background: var(--bg-card-0);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  padding: 4px 10px;
+  cursor: pointer;
+  transition:
+    color 0.1s,
+    border-color 0.1s,
+    background 0.1s;
+}
+.debug-toggle-btn:hover {
+  color: var(--text);
+  border-color: var(--border-hover);
+}
+.debug-toggle-btn.active {
+  color: var(--debug);
+  border-color: var(--debug);
+  background: color-mix(in srgb, var(--debug) 10%, transparent);
+}
+
+.debug-filter-btn {
+  background: var(--bg-card-0);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  font-family: var(--font-mono);
+  padding: 4px 6px;
+  cursor: pointer;
+  transition:
+    color 0.1s,
+    border-color 0.1s,
+    background 0.1s;
+}
+.debug-filter-btn:hover {
+  color: var(--text);
+  border-color: var(--border-hover);
+}
+.debug-filter-btn.active {
+  color: var(--debug);
+  border-color: var(--debug);
+  background: color-mix(in srgb, var(--debug) 10%, transparent);
+}
+
+.theme-toggle {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  justify-content: center;
+}
+
+.theme-dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  padding: 0;
+  transition: border-color 0.15s;
+}
+
+.theme-dot-dark {
+  background: #1a1a1a;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.2);
+}
+
+.theme-dot-light {
+  background: #f0f0f0;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.15);
+}
+
+.theme-dot.active {
+  border-color: var(--accent);
+}

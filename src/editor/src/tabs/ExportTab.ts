@@ -32,15 +32,22 @@ export class ExportTab {
     }
     container.innerHTML = "";
 
-    const sceneRow = document.createElement("div");
-    sceneRow.className = "button-row";
+    const filenameRow = document.createElement("div");
+    filenameRow.className = "input-labeled-row";
 
-    const saveButton = document.createElement("button");
-    saveButton.className = "button-primary";
-    saveButton.textContent = "Save Scene";
-    saveButton.addEventListener("click", () => {
-      this.saveScene();
-    });
+    const filenameLabel = document.createElement("span");
+    filenameLabel.className = "input-label";
+    filenameLabel.textContent = "Default File Name:";
+
+    const filenameInput = document.createElement("input");
+    filenameInput.type = "text";
+    filenameInput.className = "input-full";
+    filenameInput.placeholder = "default file name";
+    filenameInput.value = "laymur-scene";
+
+    filenameRow.appendChild(filenameLabel);
+    filenameRow.appendChild(filenameInput);
+    container.appendChild(filenameRow);
 
     const loadInput = document.createElement("input");
     loadInput.type = "file";
@@ -50,24 +57,22 @@ export class ExportTab {
       void this.handleLoadFileChange(loadInput);
     });
 
+    const buttonsRow = document.createElement("div");
+    buttonsRow.className = "button-row";
+
+    const saveButton = document.createElement("button");
+    saveButton.className = "button-primary";
+    saveButton.textContent = "Save Scene";
+    saveButton.addEventListener("click", () => {
+      this.saveScene(filenameInput.value.trim() || "scene");
+    });
+
     const loadButton = document.createElement("button");
     loadButton.className = "button-secondary";
     loadButton.textContent = "Load Scene";
     loadButton.addEventListener("click", () => {
       loadInput.click();
     });
-
-    sceneRow.appendChild(saveButton);
-    sceneRow.appendChild(loadButton);
-    container.appendChild(sceneRow);
-    container.appendChild(loadInput);
-
-    const divider = document.createElement("hr");
-    divider.className = "export-divider";
-    container.appendChild(divider);
-
-    const tsRow = document.createElement("div");
-    tsRow.className = "button-row";
 
     const tsActiveButton = document.createElement("button");
     tsActiveButton.className = "button-success";
@@ -83,13 +88,16 @@ export class ExportTab {
       this.exportAllLayersTs();
     });
 
-    tsRow.appendChild(tsActiveButton);
-    tsRow.appendChild(tsAllButton);
-    container.appendChild(tsRow);
+    buttonsRow.appendChild(saveButton);
+    buttonsRow.appendChild(loadButton);
+    buttonsRow.appendChild(tsActiveButton);
+    buttonsRow.appendChild(tsAllButton);
+    container.appendChild(buttonsRow);
+    container.appendChild(loadInput);
   }
 
-  private saveScene(): void {
-    console.debug("[ExportTab] saveScene");
+  private saveScene(filename: string): void {
+    console.debug("[ExportTab] saveScene filename=%s", filename);
     const usedAssetIds = this.collectUsedAssetIds();
 
     const assets: Record<string, { name: string; dataURL: string }> = {};
@@ -124,7 +132,7 @@ export class ExportTab {
       assets,
     };
 
-    downloadFile(JSON.stringify(scene, null, 2), "scene.json", "application/json");
+    downloadFile(JSON.stringify(scene, null, 2), `${filename}.json`, "application/json");
   }
 
   private collectUsedAssetIds(): Set<string> {
