@@ -126,3 +126,13 @@ body.number-control-scrubbing,
 body.number-control-scrubbing * {
   cursor: ew-resize !important;
 }
+
+@keyframes number-control-flash {
+  0%   { box-shadow: 0 0 0 2px transparent; }
+  30%  { box-shadow: 0 0 0 2px #e05252; }
+  100% { box-shadow: 0 0 0 2px transparent; }
+}
+
+.number-control--flash {
+  animation: number-control-flash 0.5s ease-out forwards;
+}

@@ -13,7 +13,7 @@
  *
  * Supported fieldTypes:
  *   "element" : picker populated from state.elements (+ "Layer" option)
- *   "number"  : EUINumberControl (optionally with slider:true for 0-1 range)
+ *   "number"  : ENumberControl (optionally with slider:true for 0-1 range)
  *
  * Paired fields:
  *   group      - string key; fields sharing the same group are rendered as one H:/V: row

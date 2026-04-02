@@ -19,7 +19,7 @@ function openDatabase(): Promise<IDBDatabase> {
   });
 }
 
-export async function databasePut(record: { id: string; name: string; blob: Blob }): Promise<void> {
+export async function databasePut(record: { id: string; name: string; blob: Blob; assetType?: "image" | "font" }): Promise<void> {
   const database = await openDatabase();
   return new Promise((resolve, reject) => {
     const transaction = database.transaction(ASSETS_STORE_NAME, "readwrite");
@@ -71,7 +71,27 @@ export async function registerAsset(
   const url = URL.createObjectURL(blob);
   const dataURL = await blobToDataURL(blob);
   console.debug("[assets] registerAsset id=%s name=%s", id, name);
-  editorState.assets[id] = { name, url, dataURL };
+  editorState.assets[id] = { assetType: "image", name, url, dataURL };
+}
+
+export async function registerFontAsset(
+  editorState: EditorState,
+  id: string,
+  name: string,
+  fontFamily: string,
+  blob: Blob,
+): Promise<void> {
+  const existingAsset = editorState.assets[id] as AssetMeta | undefined;
+  if (existingAsset !== undefined) {
+    URL.revokeObjectURL(existingAsset.url);
+  }
+  const url = URL.createObjectURL(blob);
+  const dataURL = await blobToDataURL(blob);
+  const face = new FontFace(fontFamily, `url(${dataURL})`);
+  await face.load();
+  document.fonts.add(face);
+  console.debug("[assets] registerFontAsset id=%s fontFamily=%s", id, fontFamily);
+  editorState.assets[id] = { assetType: "font", name, url, dataURL, fontFamily };
 }
 
 export function unregisterAsset(editorState: EditorState, id: string): void {
@@ -88,13 +108,20 @@ export async function addAssetFromDataURL(
   id: string,
   name: string,
   dataURL: string,
+  assetType?: "image" | "font",
+  fontFamily?: string,
 ): Promise<void> {
   console.debug("[assets] addAssetFromDataURL id=%s name=%s", id, name);
   try {
     const response = await fetch(dataURL);
     const blob = await response.blob();
-    await databasePut({ id, name, blob });
-    await registerAsset(editorState, id, name, blob);
+    if (assetType === "font" && fontFamily !== undefined) {
+      await databasePut({ id, name, blob, assetType: "font" });
+      await registerFontAsset(editorState, id, name, fontFamily, blob);
+    } else {
+      await databasePut({ id, name, blob, assetType: "image" });
+      await registerAsset(editorState, id, name, blob);
+    }
   } catch (error) {
     console.warn(`[assets] addAssetFromDataURL failed for "${id}":`, error);
   }
@@ -105,8 +132,14 @@ export async function loadAssetsIntoState(editorState: EditorState): Promise<voi
   try {
     const records = await databaseGetAll();
     console.debug("[assets] loadAssetsIntoState: found %d record(s)", records.length);
-    for (const { id, name, blob } of records) {
-      await registerAsset(editorState, id, name, blob);
+    for (const record of records) {
+      const assetType = (record as { assetType?: string }).assetType ?? "image";
+      if (assetType === "font") {
+        const fontFamily = record.name.replace(/\.[^.]+$/, "");
+        await registerFontAsset(editorState, record.id, record.name, fontFamily, record.blob);
+      } else {
+        await registerAsset(editorState, record.id, record.name, record.blob);
+      }
     }
   } catch (error) {
     console.warn("[assets] loadAssetsIntoState: failed to load from IndexedDB:", error);

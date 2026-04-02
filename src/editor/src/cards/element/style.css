@@ -1,0 +1,4 @@
+/* Element cards have no interactive header — type label only */
+.card--element .card__header {
+  cursor: default;
+}

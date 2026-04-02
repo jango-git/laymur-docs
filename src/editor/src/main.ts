@@ -5,6 +5,7 @@
  */
 
 import { PreviewBridge } from "./bridge/PreviewBridge";
+import { EDITOR_BUS } from "./events";
 import { EDITOR_STATE } from "./state";
 import { AssetsTab } from "./tabs/AssetsTab";
 import { loadAssetsIntoState } from "./tabs/AssetsTab.Internal";
@@ -23,68 +24,23 @@ const previewToolbarEl = document.getElementById("preview-toolbar") as HTMLEleme
 setupTabs();
 
 const bridge = new PreviewBridge(previewFrame);
+const bus = EDITOR_BUS;
 
-const previewToolbar = new PreviewToolbar(
-  bridge,
-  previewToolbarEl,
-  previewWrapper,
-  previewStage,
-  previewFrame,
-);
+new PreviewToolbar(bridge, bus, previewToolbarEl, previewWrapper, previewStage, previewFrame);
 
-const layerTab = new LayersTab(EDITOR_STATE, bridge, {
-  onLayerChange(): void {
-    previewToolbar.setActiveLayer(EDITOR_STATE.activeLayerId);
-    elementsTab.render();
-    constraintsTab.render();
-    constraintsTab.refreshAddForm();
-  },
-  onAfterInitialize(): void {
-    previewToolbar.setActiveLayer(EDITOR_STATE.activeLayerId);
-  },
-});
-layerTab.render();
-layerTab.renderAddForm();
+const layersTab = new LayersTab(EDITOR_STATE, bridge, bus);
+layersTab.render();
+layersTab.renderAddForm();
 
-const elementsTab = new ElementsTab(EDITOR_STATE, bridge, {
-  onElementDeleted(id): void {
-    constraintsTab.removeForElement(id);
-    constraintsTab.render();
-  },
-  onElementsChange(): void {
-    constraintsTab.refreshAddForm();
-  },
-});
-elementsTab.render();
+new ElementsTab(EDITOR_STATE, bridge, bus).render();
+new ConstraintsTab(EDITOR_STATE, bridge, bus).render();
+new ExportTab(EDITOR_STATE, bridge, bus).render();
 
-const constraintsTab = new ConstraintsTab(EDITOR_STATE, bridge);
-constraintsTab.render();
-
-const exportTab = new ExportTab(EDITOR_STATE, bridge, {
-  onInitializePreview(): void {
-    layerTab.initializePreview();
-  },
-  onSceneLoad(): void {
-    layerTab.render();
-    layerTab.renderAddForm();
-    elementsTab.render();
-    constraintsTab.render();
-    constraintsTab.refreshAddForm();
-    assetsTab.render();
-    elementsTab.refreshAddForm();
-  },
-});
-exportTab.render();
-
-const assetsTab = new AssetsTab(EDITOR_STATE, {
-  onAssetsChange(): void {
-    elementsTab.refreshAddForm();
-  },
-});
-assetsTab.render(); // show placeholder immediately while IndexedDB loads
+const assetsTab = new AssetsTab(EDITOR_STATE, bus, bridge);
+assetsTab.render();
 
 // Load persisted assets from IndexedDB
 loadAssetsIntoState(EDITOR_STATE).then(() => {
   assetsTab.render();
-  elementsTab.refreshAddForm();
+  bus.assetsChanged.emit();
 });

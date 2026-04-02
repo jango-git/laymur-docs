@@ -1,7 +1,7 @@
+import { ENumberControl } from "../../Controls/ENumberControl/ENumberControl";
 import type { PolicyDescriptor } from "../../registry/layer-registry";
 import { defaultPolicyParams, POLICY_REGISTRY } from "../../registry/layer-registry";
 import type { LayerState } from "../../types";
-import { EUINumberControl } from "../EUINumberControl/EUINumberControl";
 
 export interface LayerCardCallbacks {
   onActivate: (id: string) => void;
@@ -21,7 +21,7 @@ export class EUILayerCard {
   private readonly context: LayerCardContext;
   private readonly root: HTMLDivElement;
   private readonly fieldsContainer: HTMLDivElement;
-  private readonly policyParamControls: EUINumberControl[] = [];
+  private readonly policyParamControls: ENumberControl[] = [];
 
   constructor(
     container: HTMLElement,
@@ -208,7 +208,7 @@ export class EUILayerCard {
       label.textContent = paramDefinition.label;
       row.appendChild(label);
 
-      const control = new EUINumberControl(row, {
+      const control = new ENumberControl(row, {
         value: this.layer.policyParams[paramDefinition.key],
         min: 1,
         step: 1,

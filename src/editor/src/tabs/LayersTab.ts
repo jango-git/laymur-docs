@@ -7,20 +7,17 @@
  */
 
 import type { PreviewBridge } from "../bridge/PreviewBridge";
+import type { EditorBus } from "../events";
 import { makeSortable } from "../miscellaneous/make-sortable";
 import type { EditorState } from "../state";
-import type { AssetMeta, LayerState } from "../types";
+import type { AssetMeta, LayerState, UITextStyleConfig } from "../types";
+import { TEXT_STYLE_DEFAULTS } from "../types";
 import { EUILayerAddForm } from "../ui/EUILayerAddForm/EUILayerAddForm";
 import {
   EUILayerCard,
   type LayerCardCallbacks,
   type LayerCardContext,
 } from "../ui/EUILayerCard/EUILayerCard";
-
-export interface LayersTabCallbacks {
-  onLayerChange: () => void;
-  onAfterInitialize: () => void;
-}
 
 export class LayersTab {
   private activeLayerCards: EUILayerCard[] = [];
@@ -29,10 +26,17 @@ export class LayersTab {
   constructor(
     private readonly editorState: EditorState,
     private readonly bridge: PreviewBridge,
-    private readonly callbacks: Partial<LayersTabCallbacks> = {},
+    private readonly bus: EditorBus,
   ) {
     this.bridge.whenReady(() => {
       this.initializePreview();
+    });
+    this.bus.previewInitializing.on(() => {
+      this.initializePreview();
+    });
+    this.bus.sceneLoaded.on(() => {
+      this.render();
+      this.renderAddForm();
     });
   }
 
@@ -54,7 +58,7 @@ export class LayersTab {
         this.editorState.activeLayerId = id;
         this.bridge.setActiveLayer(id);
         this.render();
-        this.callbacks.onLayerChange?.();
+        this.bus.layerChanged.emit(id);
       },
       onDelete: (id) => {
         this.deleteLayer(id);
@@ -113,12 +117,12 @@ export class LayersTab {
         this.bridge.setActiveLayer(id);
         this.render();
         this.renderAddForm();
-        this.callbacks.onLayerChange?.();
+        this.bus.layerChanged.emit(id);
       },
     });
   }
 
-  public initializePreview(): void {
+  private initializePreview(): void {
     console.debug(
       "[LayersTab] initializePreview: layers=%o",
       this.editorState.layers.map((l) => l.id),
@@ -130,12 +134,24 @@ export class LayersTab {
     this.bridge.setActiveLayer(this.editorState.activeLayerId);
     for (const layer of this.editorState.layers) {
       for (const element of layer.elements) {
+        const color = element.fieldValues.color as string | undefined;
         if (element.type === "UIImage") {
           const assetId = element.fieldValues.assetId as string;
           const asset = this.editorState.assets[assetId] as AssetMeta | undefined;
           if (asset !== undefined) {
-            this.bridge.addImage(element.id, layer.id, asset.dataURL);
+            this.bridge.addImage(element.id, layer.id, asset.dataURL, color);
           }
+        } else if (element.type === "UIText") {
+          this.bridge.addText(
+            element.id,
+            layer.id,
+            (element.fieldValues.content as string | undefined) ?? "",
+            (element.fieldValues.resizeMode as number | undefined) ?? 1,
+            (element.fieldValues.maxLineWidth as number | undefined) ?? 1024,
+            (element.fieldValues.padding as number | undefined) ?? 0,
+            styleFromFieldValues(element.fieldValues),
+            color,
+          );
         }
       }
       for (const constraint of layer.constraints) {
@@ -147,7 +163,7 @@ export class LayersTab {
         );
       }
     }
-    this.callbacks.onAfterInitialize?.();
+    this.bus.previewInitialized.emit(this.editorState.activeLayerId);
   }
 
   private deleteLayer(id: string): void {
@@ -164,6 +180,43 @@ export class LayersTab {
     }
     this.bridge.removeLayer(id);
     this.render();
-    this.callbacks.onLayerChange?.();
+    this.bus.layerChanged.emit(this.editorState.activeLayerId);
   }
+}
+
+function styleFromFieldValues(fieldValues: Record<string, unknown>): UITextStyleConfig {
+  return {
+    color: (fieldValues.style_color as string | undefined) ?? TEXT_STYLE_DEFAULTS.color,
+    align:
+      (fieldValues.style_align as UITextStyleConfig["align"] | undefined) ??
+      TEXT_STYLE_DEFAULTS.align,
+    fontFamily:
+      (fieldValues.style_fontFamily as string | undefined) ?? TEXT_STYLE_DEFAULTS.fontFamily,
+    fontSize: (fieldValues.style_fontSize as number | undefined) ?? TEXT_STYLE_DEFAULTS.fontSize,
+    fontStyle:
+      (fieldValues.style_fontStyle as UITextStyleConfig["fontStyle"] | undefined) ??
+      TEXT_STYLE_DEFAULTS.fontStyle,
+    fontWeight:
+      (fieldValues.style_fontWeight as UITextStyleConfig["fontWeight"] | undefined) ??
+      TEXT_STYLE_DEFAULTS.fontWeight,
+    lineHeight:
+      (fieldValues.style_lineHeight as number | undefined) ?? TEXT_STYLE_DEFAULTS.lineHeight,
+    enableShadow:
+      (fieldValues.style_enableShadow as boolean | undefined) ?? TEXT_STYLE_DEFAULTS.enableShadow,
+    shadowOffsetX:
+      (fieldValues.style_shadowOffsetX as number | undefined) ?? TEXT_STYLE_DEFAULTS.shadowOffsetX,
+    shadowOffsetY:
+      (fieldValues.style_shadowOffsetY as number | undefined) ?? TEXT_STYLE_DEFAULTS.shadowOffsetY,
+    shadowBlur:
+      (fieldValues.style_shadowBlur as number | undefined) ?? TEXT_STYLE_DEFAULTS.shadowBlur,
+    shadowColor:
+      (fieldValues.style_shadowColor as string | undefined) ?? TEXT_STYLE_DEFAULTS.shadowColor,
+    enableStroke:
+      (fieldValues.style_enableStroke as boolean | undefined) ?? TEXT_STYLE_DEFAULTS.enableStroke,
+    strokeColor:
+      (fieldValues.style_strokeColor as string | undefined) ?? TEXT_STYLE_DEFAULTS.strokeColor,
+    strokeThickness:
+      (fieldValues.style_strokeThickness as number | undefined) ??
+      TEXT_STYLE_DEFAULTS.strokeThickness,
+  };
 }

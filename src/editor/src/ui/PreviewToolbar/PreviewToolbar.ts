@@ -1,5 +1,6 @@
 import type { DebugFilters } from "../../bridge/messages";
 import type { PreviewBridge } from "../../bridge/PreviewBridge";
+import type { EditorBus } from "../../events";
 
 const DEBUG_FILTER_KEYS: (keyof DebugFilters)[] = [
   "showAspect",
@@ -33,6 +34,7 @@ export class PreviewToolbar {
 
   constructor(
     private readonly bridge: PreviewBridge,
+    bus: EditorBus,
     toolbarEl: HTMLElement,
     previewWrapper: HTMLElement,
     previewStage: HTMLElement,
@@ -41,9 +43,11 @@ export class PreviewToolbar {
     const { presetButtons, sizeLabel, filterBtns, toggleBtn } = this.render(toolbarEl);
     this.setupPresets(presetButtons, sizeLabel, previewWrapper, previewStage, previewFrame);
     this.setupDebugFilters(filterBtns, toggleBtn);
+    bus.layerChanged.on((layerId) => this.setActiveLayer(layerId));
+    bus.previewInitialized.on((layerId) => this.setActiveLayer(layerId));
   }
 
-  public setActiveLayer(layerId: string): void {
+  private setActiveLayer(layerId: string): void {
     this.activeLayerId = layerId;
     this.bridge.setLayerDebug(layerId, { ...this.filters });
   }
@@ -173,11 +177,16 @@ export class PreviewToolbar {
           applySize(isSwapped ? h : w, isSwapped ? w : h);
         }
       });
-
-      if (btn.classList.contains("active")) {
-        requestAnimationFrame(() => btn.dispatchEvent(new MouseEvent("click")));
-      }
     });
+
+    const initialBtn = presetButtons.find((b) => b.classList.contains("active"));
+    if (initialBtn !== undefined) {
+      const w = parseInt(initialBtn.dataset.w ?? "0", 10);
+      const h = parseInt(initialBtn.dataset.h ?? "0", 10);
+      if (w !== 0 || h !== 0) {
+        requestAnimationFrame(() => applySize(w, h));
+      }
+    }
 
     let resizing = false;
     let resizeStart: { x: number; y: number; w: number; h: number } | null = null;

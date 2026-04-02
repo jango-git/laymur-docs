@@ -1,0 +1,28 @@
+.card--constraint .card__header {
+  cursor: default;
+}
+
+.card__elements {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  flex-shrink: 0;
+  max-width: 50%;
+  overflow: hidden;
+}
+
+.card__element-chip {
+  padding: 0 4px;
+  height: 14px;
+  display: flex;
+  align-items: center;
+  background-color: var(--bg-card-2);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  color: var(--text-label);
+  font-size: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 80px;
+}

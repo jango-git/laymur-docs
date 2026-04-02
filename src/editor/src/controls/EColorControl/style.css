@@ -1,0 +1,58 @@
+.color-control {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 22px;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+.color-control__input {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: none;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.color-control__input:hover {
+  border-color: var(--border-hover);
+}
+
+.color-control__input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+/* Remove native swatch padding in WebKit */
+.color-control__input::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+.color-control__input::-webkit-color-swatch {
+  border: none;
+}
+
+.color-control__input::-moz-color-swatch {
+  border: none;
+}
+
+.color-control__alpha {
+  flex: 1;
+  min-width: 60px;
+}
+
+@keyframes color-control-flash {
+  0%   { box-shadow: 0 0 0 2px transparent; }
+  30%  { box-shadow: 0 0 0 2px #e05252; }
+  100% { box-shadow: 0 0 0 2px transparent; }
+}
+
+.color-control--flash {
+  animation: color-control-flash 0.5s ease-out forwards;
+}

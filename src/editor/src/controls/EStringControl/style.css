@@ -1,0 +1,72 @@
+.string-control {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 22px;
+  min-width: 80px;
+  background-color: var(--bg-card-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  font-family: inherit;
+  font-size: inherit;
+  color: var(--text);
+  cursor: default;
+}
+
+.string-control:hover {
+  background-color: var(--bg-card-1);
+  border-color: var(--border-hover);
+  cursor: text;
+}
+
+.string-control[data-state="edit"] {
+  background-color: var(--bg-card-1);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+  cursor: text;
+}
+
+.string-control__display,
+.string-control__input {
+  flex: 1;
+  min-width: 0;
+  padding: 0 6px;
+}
+
+.string-control__display {
+  pointer-events: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  user-select: none;
+}
+
+.string-control__input {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: inherit;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+/* Input hidden in view state */
+.string-control[data-state="view"] .string-control__input {
+  display: none;
+}
+
+/* Display hidden in edit state */
+.string-control[data-state="edit"] .string-control__display {
+  display: none;
+}
+
+@keyframes string-control-flash {
+  0%   { box-shadow: 0 0 0 2px transparent; }
+  30%  { box-shadow: 0 0 0 2px #e05252; }
+  100% { box-shadow: 0 0 0 2px transparent; }
+}
+
+.string-control--flash {
+  animation: string-control-flash 0.5s ease-out forwards;
+}

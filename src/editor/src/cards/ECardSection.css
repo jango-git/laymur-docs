@@ -1,0 +1,21 @@
+.card-section {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.card-section__header {
+  display: flex;
+  align-items: center;
+  height: 16px;
+  padding: 0 2px;
+  color: var(--text-label);
+  font-size: 11px;
+  user-select: none;
+}
+
+.card-section__body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}

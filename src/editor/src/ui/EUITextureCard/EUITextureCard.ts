@@ -10,6 +10,7 @@ export class EUITextureCard {
   private readonly root: HTMLDivElement;
   private readonly thumbnailElement: HTMLImageElement;
   private readonly nameText: HTMLDivElement;
+  private readonly downloadButton: HTMLButtonElement;
   private readonly deleteButton: HTMLButtonElement;
 
   constructor(
@@ -32,6 +33,17 @@ export class EUITextureCard {
     this.nameText.title = `Asset ID: ${id}`;
     this.nameText.textContent = meta.name;
 
+    this.downloadButton = document.createElement("button");
+    this.downloadButton.className = "button-icon asset-card-download";
+    this.downloadButton.textContent = "Download";
+    this.downloadButton.title = "Download asset";
+    this.downloadButton.addEventListener("click", () => {
+      const a = document.createElement("a");
+      a.href = meta.dataURL;
+      a.download = meta.name;
+      a.click();
+    });
+
     this.deleteButton = document.createElement("button");
     this.deleteButton.className = "button-icon button-delete asset-card-delete";
     this.deleteButton.textContent = "✕";
@@ -40,6 +52,7 @@ export class EUITextureCard {
 
     this.root.appendChild(this.thumbnailElement);
     this.root.appendChild(this.nameText);
+    this.root.appendChild(this.downloadButton);
     this.root.appendChild(this.deleteButton);
     this.container.appendChild(this.root);
   }

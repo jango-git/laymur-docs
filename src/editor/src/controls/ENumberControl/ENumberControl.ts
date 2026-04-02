@@ -2,14 +2,14 @@ import type { FerrsignView2 } from "ferrsign";
 import { Ferrsign2 } from "ferrsign";
 import { MathUtils } from "three";
 
-enum EUINumberControlState {
+enum ENumberControlState {
   VIEW = "view",
   HOVER = "hover",
   SCRUBBING = "scrubbing",
   EDIT = "edit",
 }
 
-interface EUINumberControlOptions {
+interface ENumberControlOptions {
   value: number;
   min: number;
   max: number;
@@ -17,7 +17,7 @@ interface EUINumberControlOptions {
   precision: number;
 }
 
-export class EUINumberControl {
+export class ENumberControl {
   private readonly container: HTMLElement;
   private currentValue: number;
   private minValue: number;
@@ -33,11 +33,11 @@ export class EUINumberControl {
   private readonly display: HTMLSpanElement;
   private readonly incrementButton: HTMLButtonElement;
   private readonly input: HTMLInputElement;
-  private currentState: EUINumberControlState = EUINumberControlState.VIEW;
+  private currentState: ENumberControlState = ENumberControlState.VIEW;
 
   private readonly signalValueChangedInternal = new Ferrsign2<number, number>();
 
-  constructor(container: HTMLElement, options: Partial<EUINumberControlOptions> = {}) {
+  constructor(container: HTMLElement, options: Partial<ENumberControlOptions> = {}) {
     this.container = container;
     this.currentValue = options.value ?? 0;
     this.minValue = options.min ?? -Infinity;
@@ -81,7 +81,7 @@ export class EUINumberControl {
     this.decrementButton.addEventListener("click", this.handleDecrementClick);
     this.incrementButton.addEventListener("click", this.handleIncrementClick);
 
-    this.root.dataset.state = EUINumberControlState.VIEW;
+    this.root.dataset.state = ENumberControlState.VIEW;
     this.refreshDisplay();
   }
 
@@ -125,6 +125,15 @@ export class EUINumberControl {
     this.refreshDisplay();
   }
 
+  public flash(): void {
+    this.root.classList.remove("number-control--flash");
+    void this.root.offsetWidth;
+    this.root.classList.add("number-control--flash");
+    this.root.addEventListener("animationend", () => {
+      this.root.classList.remove("number-control--flash");
+    }, { once: true });
+  }
+
   public destroy(): void {
     this.unbindGlobalScrubEvents();
     this.root.removeEventListener("mouseenter", this.handleMouseEnter);
@@ -138,19 +147,19 @@ export class EUINumberControl {
   }
 
   private readonly handleMouseEnter = (): void => {
-    if (this.currentState === EUINumberControlState.VIEW) {
-      this.transitionTo(EUINumberControlState.HOVER);
+    if (this.currentState === ENumberControlState.VIEW) {
+      this.transitionTo(ENumberControlState.HOVER);
     }
   };
 
   private readonly handleMouseLeave = (): void => {
-    if (this.currentState === EUINumberControlState.HOVER) {
-      this.transitionTo(EUINumberControlState.VIEW);
+    if (this.currentState === ENumberControlState.HOVER) {
+      this.transitionTo(ENumberControlState.VIEW);
     }
   };
 
   private readonly handleMouseDown = (event: MouseEvent): void => {
-    if (this.currentState !== EUINumberControlState.HOVER) {
+    if (this.currentState !== ENumberControlState.HOVER) {
       return;
     }
 
@@ -169,13 +178,13 @@ export class EUINumberControl {
   private readonly handleDocumentMouseMove = (event: MouseEvent): void => {
     const deltaX = event.clientX - this.scrubStartX;
 
-    if (this.currentState === EUINumberControlState.HOVER) {
+    if (this.currentState === ENumberControlState.HOVER) {
       if (Math.abs(deltaX) > 3) {
-        this.transitionTo(EUINumberControlState.SCRUBBING);
+        this.transitionTo(ENumberControlState.SCRUBBING);
       }
     }
 
-    if (this.currentState === EUINumberControlState.SCRUBBING) {
+    if (this.currentState === ENumberControlState.SCRUBBING) {
       const rawValue = this.scrubStartValue + deltaX * this.stepValue;
       this.applyValue(rawValue);
     }
@@ -184,17 +193,17 @@ export class EUINumberControl {
   private readonly handleDocumentMouseUp = (event: MouseEvent): void => {
     this.unbindGlobalScrubEvents();
 
-    if (this.currentState === EUINumberControlState.HOVER) {
-      this.transitionTo(EUINumberControlState.EDIT);
+    if (this.currentState === ENumberControlState.HOVER) {
+      this.transitionTo(ENumberControlState.EDIT);
       return;
     }
 
-    if (this.currentState === EUINumberControlState.SCRUBBING) {
+    if (this.currentState === ENumberControlState.SCRUBBING) {
       const elementUnderPointer = document.elementFromPoint(event.clientX, event.clientY);
       if (elementUnderPointer !== null && this.root.contains(elementUnderPointer)) {
-        this.transitionTo(EUINumberControlState.HOVER);
+        this.transitionTo(ENumberControlState.HOVER);
       } else {
-        this.transitionTo(EUINumberControlState.VIEW);
+        this.transitionTo(ENumberControlState.VIEW);
       }
     }
   };
@@ -204,13 +213,13 @@ export class EUINumberControl {
       this.commitEdit();
     } else if (event.key === "Escape") {
       this.transitionTo(
-        this.root.matches(":hover") ? EUINumberControlState.HOVER : EUINumberControlState.VIEW,
+        this.root.matches(":hover") ? ENumberControlState.HOVER : ENumberControlState.VIEW,
       );
     }
   };
 
   private readonly handleInputBlur = (): void => {
-    if (this.currentState === EUINumberControlState.EDIT) {
+    if (this.currentState === ENumberControlState.EDIT) {
       this.commitEdit();
     }
   };
@@ -235,7 +244,7 @@ export class EUINumberControl {
     document.removeEventListener("mouseup", this.handleDocumentMouseUp);
   }
 
-  private transitionTo(nextState: EUINumberControlState): void {
+  private transitionTo(nextState: ENumberControlState): void {
     if (this.currentState === nextState) {
       return;
     }
@@ -243,7 +252,7 @@ export class EUINumberControl {
     this.currentState = nextState;
     this.root.dataset.state = nextState;
 
-    if (nextState === EUINumberControlState.EDIT) {
+    if (nextState === ENumberControlState.EDIT) {
       this.input.value = String(this.currentValue);
       requestAnimationFrame(() => {
         this.input.focus();
@@ -251,7 +260,7 @@ export class EUINumberControl {
       });
     }
 
-    if (nextState === EUINumberControlState.SCRUBBING) {
+    if (nextState === ENumberControlState.SCRUBBING) {
       document.body.classList.add("number-control-scrubbing");
     } else {
       document.body.classList.remove("number-control-scrubbing");
@@ -261,11 +270,11 @@ export class EUINumberControl {
   private commitEdit(): void {
     const parsedValue = parseFloat(this.input.value);
     if (isNaN(parsedValue)) {
-      throw new Error("EUINumberControl: invalid number");
+      throw new Error("ENumberControl: invalid number");
     }
     this.applyValue(parsedValue);
     this.transitionTo(
-      this.root.matches(":hover") ? EUINumberControlState.HOVER : EUINumberControlState.VIEW,
+      this.root.matches(":hover") ? ENumberControlState.HOVER : ENumberControlState.VIEW,
     );
   }
 
@@ -276,7 +285,7 @@ export class EUINumberControl {
 
     const previousValue = this.currentValue;
     this.currentValue = MathUtils.clamp(value, this.minValue, this.maxValue);
-    console.debug("[EUINumberControl] value: %o → %o", previousValue, this.currentValue);
+    console.debug("[ENumberControl] value: %o → %o", previousValue, this.currentValue);
     this.refreshDisplay();
     this.signalValueChangedInternal.emit(this.currentValue, previousValue);
   }

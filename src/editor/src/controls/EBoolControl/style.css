@@ -1,0 +1,71 @@
+.bool-control {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Hide native checkbox but keep it focusable */
+.bool-control__checkbox {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.bool-control__track {
+  position: relative;
+  width: 32px;
+  height: 16px;
+  background-color: var(--bg-card-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  transition:
+    background-color 0.15s,
+    border-color 0.15s;
+}
+
+.bool-control:hover .bool-control__track {
+  border-color: var(--border-hover);
+}
+
+.bool-control[data-checked="true"] .bool-control__track {
+  background-color: var(--accent);
+  border-color: var(--accent);
+}
+
+.bool-control__thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 10px;
+  height: 10px;
+  background-color: var(--text-label);
+  border-radius: 50%;
+  transition:
+    transform 0.15s,
+    background-color 0.15s;
+}
+
+.bool-control[data-checked="true"] .bool-control__thumb {
+  transform: translateX(16px);
+  background-color: #fff;
+}
+
+/* Focus ring via the hidden checkbox */
+.bool-control__checkbox:focus-visible + .bool-control__track {
+  box-shadow: 0 0 0 2px var(--accent);
+}
+
+@keyframes bool-control-flash {
+  0%   { box-shadow: 0 0 0 2px transparent; }
+  30%  { box-shadow: 0 0 0 2px #e05252; }
+  100% { box-shadow: 0 0 0 2px transparent; }
+}
+
+.bool-control--flash {
+  animation: bool-control-flash 0.5s ease-out forwards;
+}

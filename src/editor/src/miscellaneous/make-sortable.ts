@@ -4,6 +4,12 @@ export function makeSortable(
 ): void {
   let dragging: HTMLElement | null = null;
 
+  const clearDragOver = (): void => {
+    container.querySelectorAll(".drag-over-top, .drag-over-bottom").forEach((el) => {
+      el.classList.remove("drag-over-top", "drag-over-bottom");
+    });
+  };
+
   container.addEventListener("dragstart", (e: DragEvent) => {
     const target = (e.target as HTMLElement).closest("[draggable]");
     if (target === null || !container.contains(target)) {
@@ -21,9 +27,7 @@ export function makeSortable(
   container.addEventListener("dragend", () => {
     dragging?.classList.remove("drag-ghost");
     dragging = null;
-    container.querySelectorAll(".drag-over").forEach((el) => {
-      el.classList.remove("drag-over");
-    });
+    clearDragOver();
   });
 
   container.addEventListener("dragover", (e: DragEvent) => {
@@ -35,17 +39,15 @@ export function makeSortable(
     if (target === null || target === dragging || !container.contains(target)) {
       return;
     }
-    container.querySelectorAll(".drag-over").forEach((el) => {
-      el.classList.remove("drag-over");
-    });
-    target.classList.add("drag-over");
+    clearDragOver();
+    const rect = target.getBoundingClientRect();
+    const isTopHalf = e.clientY < rect.top + rect.height / 2;
+    target.classList.add(isTopHalf ? "drag-over-top" : "drag-over-bottom");
   });
 
   container.addEventListener("dragleave", (e: DragEvent) => {
     if (!container.contains(e.relatedTarget as Node)) {
-      container.querySelectorAll(".drag-over").forEach((el) => {
-        el.classList.remove("drag-over");
-      });
+      clearDragOver();
     }
   });
 
@@ -55,7 +57,7 @@ export function makeSortable(
     if (target === null || target === dragging || !container.contains(target)) {
       return;
     }
-    target.classList.remove("drag-over");
+    target.classList.remove("drag-over-top", "drag-over-bottom");
 
     if (dragging === null) {
       return;

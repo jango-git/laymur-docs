@@ -1,6 +1,6 @@
+import { ENumberControl } from "../../Controls/ENumberControl/ENumberControl";
 import type { PolicyParamDescriptor } from "../../registry/layer-registry";
 import { POLICY_REGISTRY, defaultPolicyParams } from "../../registry/layer-registry";
-import { EUINumberControl } from "../EUINumberControl/EUINumberControl";
 
 export interface EUILayerAddFormCallbackPack {
   onLayerAdded: (data: {
@@ -16,7 +16,7 @@ export class EUILayerAddForm {
   private readonly policySelect: HTMLSelectElement;
   private readonly addButton: HTMLButtonElement;
   private readonly paramsSection: HTMLElement;
-  private numberControls: EUINumberControl[] = [];
+  private numberControls: ENumberControl[] = [];
   private policyParams: Record<string, number> = {};
 
   constructor(
@@ -103,7 +103,7 @@ export class EUILayerAddForm {
     const initialValue = this.policyParams[paramDef.key] ?? paramDef.default;
     this.policyParams[paramDef.key] = initialValue;
 
-    const control = new EUINumberControl(row, { value: initialValue, min: 0 });
+    const control = new ENumberControl(row, { value: initialValue, min: 0 });
 
     control.signalValueChanged.on((v) => {
       this.policyParams[paramDef.key] = v;

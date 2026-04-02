@@ -1,8 +1,8 @@
+import { ENumberControl } from "../../Controls/ENumberControl/ENumberControl";
 import type { ElementFieldDescriptor } from "../../registry/element-registry";
 import { ELEMENT_REGISTRY } from "../../registry/element-registry";
 import type { AssetMeta } from "../../types";
 import { EUIElementPicker } from "../EUIElementPicker/EUIElementPicker";
-import { EUINumberControl } from "../EUINumberControl/EUINumberControl";
 
 interface AssetPickerItem {
   id: string;
@@ -26,7 +26,7 @@ export class EUIElementAddForm {
   private readonly addButton: HTMLButtonElement;
   private readonly context: ElementAddFormContext;
   private readonly callbacks: ElementAddFormCallbacks;
-  private numberControls: EUINumberControl[] = [];
+  private numberControls: ENumberControl[] = [];
   private fieldValues: Record<string, unknown> = {};
 
   constructor(context: ElementAddFormContext, callbacks: ElementAddFormCallbacks) {
@@ -81,6 +81,12 @@ export class EUIElementAddForm {
     }
 
     for (const field of descriptor.fields) {
+      if (!(field.key in this.fieldValues) && field.default !== undefined) {
+        this.fieldValues[field.key] = field.default;
+      }
+      if (!field.required) {
+        continue;
+      }
       switch (field.fieldType) {
         case "asset":
           this.renderAssetField(field);
@@ -186,7 +192,7 @@ export class EUIElementAddForm {
           : 0;
     this.fieldValues[field.key] = initialValue;
 
-    const control = new EUINumberControl(row, { value: initialValue });
+    const control = new ENumberControl(row, { value: initialValue });
     control.signalValueChanged.on((newValue) => {
       this.fieldValues[field.key] = newValue;
     });

@@ -1,10 +1,10 @@
+import { ENumberControl } from "../../Controls/ENumberControl/ENumberControl";
 import type {
   ConstraintDescriptor,
   ConstraintFieldDescriptor,
 } from "../../registry/constraint-registry";
 import type { ConstraintState, ElementState } from "../../types";
 import { EUIElementPicker } from "../EUIElementPicker/EUIElementPicker";
-import { EUINumberControl } from "../EUINumberControl/EUINumberControl";
 import type { ElementPickerItem } from "../elementPickerItem";
 import {
   buildElementPickerItems,
@@ -35,7 +35,7 @@ export class EUIConstraintCard {
   private readonly root: HTMLDivElement;
   private readonly fieldsContainer: HTMLDivElement;
   private readonly detailSpan: HTMLSpanElement;
-  private readonly numberControls: EUINumberControl[] = [];
+  private readonly numberControls: ENumberControl[] = [];
 
   constructor(
     container: HTMLElement,
@@ -287,7 +287,7 @@ export class EUIConstraintCard {
     label.textContent = field.label;
     row.appendChild(label);
 
-    const control = new EUINumberControl(row, {
+    const control = new ENumberControl(row, {
       value: this.constraint.fieldValues[field.key] as number,
       min: field.min,
       max: field.max,
@@ -321,7 +321,7 @@ export class EUIConstraintCard {
       roleLabel.textContent = field.groupRole === "h" ? "H:" : "V:";
       cell.appendChild(roleLabel);
 
-      const control = new EUINumberControl(cell, {
+      const control = new ENumberControl(cell, {
         value: this.constraint.fieldValues[field.key] as number,
         min: field.min,
         max: field.max,

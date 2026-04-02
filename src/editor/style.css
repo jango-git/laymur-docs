@@ -1,9 +1,10 @@
 @import "./src/ui/PreviewToolbar/style.css";
-@import "./src/ui/EUINumberControl/style.css";
+@import "./src/Controls/ENumberControl/style.css";
 @import "./src/ui/EUIElementPicker/style.css";
 @import "./src/ui/EUIConstraintCard/style.css";
 @import "./src/ui/EUILayerCard/style.css";
 @import "./src/ui/EUITextureCard/style.css";
+@import "./src/ui/EUIFontCard/style.css";
 @import "./src/ui/EUIElementCard/style.css";
 
 /* Reset & Root */
@@ -311,6 +312,22 @@ input[type="number"] {
   font-size: var(--font-size-base);
   text-align: center;
   padding: 32px 16px;
+}
+
+.assets-section-label {
+  color: var(--text-label);
+  font-size: var(--font-size-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 6px 2px 2px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 2px;
+}
+
+.export-hint {
+  color: var(--text-muted);
+  font-size: var(--font-size-xs);
+  padding: 4px 2px 0;
 }
 
 /* Scrollbar */

@@ -1,0 +1,61 @@
+.select-control {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 22px;
+  min-width: 80px;
+  background-color: var(--bg-card-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  font-family: inherit;
+  font-size: inherit;
+  color: var(--text);
+}
+
+.select-control:hover {
+  background-color: var(--bg-card-1);
+  border-color: var(--border-hover);
+}
+
+.select-control:focus-within {
+  background-color: var(--bg-card-1);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.select-control__select {
+  flex: 1;
+  min-width: 0;
+  padding: 0 6px;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: inherit;
+  font-family: inherit;
+  font-size: inherit;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+
+  /* Chevron via inline SVG background */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5' viewBox='0 0 8 5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%23888'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 6px center;
+  padding-right: 20px;
+}
+
+.select-control__select option {
+  background-color: var(--bg-card-1);
+  color: var(--text);
+}
+
+@keyframes select-control-flash {
+  0%   { box-shadow: 0 0 0 2px transparent; }
+  30%  { box-shadow: 0 0 0 2px #e05252; }
+  100% { box-shadow: 0 0 0 2px transparent; }
+}
+
+.select-control--flash {
+  animation: select-control-flash 0.5s ease-out forwards;
+}

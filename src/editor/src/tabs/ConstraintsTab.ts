@@ -1,15 +1,16 @@
 import type { PreviewBridge } from "../bridge/PreviewBridge";
+import type { EditorBus } from "../events";
 import { makeSortable } from "../miscellaneous/make-sortable";
 import { CONSTRAINT_REGISTRY } from "../registry/constraint-registry";
 import type { EditorState } from "../state";
 import type { AssetMeta } from "../types";
 import type { ConstraintAddFormContext } from "../ui/EUIConstraintAddForm/EUIConstraintAddForm";
 import { EUIConstraintAddForm } from "../ui/EUIConstraintAddForm/EUIConstraintAddForm";
-import {
-  EUIConstraintCard,
-  type ConstraintCardCallbacks,
-  type ConstraintCardContext,
+import type {
+  ConstraintCardCallbacks,
+  ConstraintCardContext,
 } from "../ui/EUIConstraintCard/EUIConstraintCard";
+import { EUIConstraintCard } from "../ui/EUIConstraintCard/EUIConstraintCard";
 
 export class ConstraintsTab {
   private activeConstraintCards: EUIConstraintCard[] = [];
@@ -18,7 +19,20 @@ export class ConstraintsTab {
   constructor(
     private readonly editorState: EditorState,
     private readonly bridge: PreviewBridge,
+    bus: EditorBus,
   ) {
+    bus.layerChanged.on(() => {
+      this.render();
+      this.refreshAddForm();
+    });
+    bus.elementDeleted.on((id) => {
+      this.removeForElement(id);
+      this.render();
+    });
+    bus.sceneLoaded.on(() => {
+      this.render();
+      this.refreshAddForm();
+    });
     const context: ConstraintAddFormContext = {
       getElements: () => this.editorState.activeLayer().elements,
       getAssetUrl: (assetId) => {
@@ -114,7 +128,7 @@ export class ConstraintsTab {
     });
   }
 
-  public removeForElement(elementId: string): void {
+  private removeForElement(elementId: string): void {
     const toRemove = this.editorState
       .activeLayer()
       .constraints.filter(

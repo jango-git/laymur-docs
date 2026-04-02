@@ -1,8 +1,8 @@
+import { ENumberControl } from "../../Controls/ENumberControl/ENumberControl";
 import type { ConstraintFieldDescriptor } from "../../registry/constraint-registry";
 import { CONSTRAINT_REGISTRY } from "../../registry/constraint-registry";
 import type { ElementState } from "../../types";
 import { EUIElementPicker } from "../EUIElementPicker/EUIElementPicker";
-import { EUINumberControl } from "../EUINumberControl/EUINumberControl";
 import type { ElementPickerItem } from "../elementPickerItem";
 import {
   buildElementPickerItems,
@@ -35,7 +35,7 @@ export class EUIConstraintAddForm {
   private readonly addButton: HTMLButtonElement;
   private readonly context: ConstraintAddFormContext;
   private readonly callbacks: ConstraintAddFormCallbacks;
-  private numberControls: EUINumberControl[] = [];
+  private numberControls: ENumberControl[] = [];
   private fieldValues: Record<string, string | number> = {};
 
   constructor(context: ConstraintAddFormContext, callbacks: ConstraintAddFormCallbacks) {
@@ -207,7 +207,7 @@ export class EUIConstraintAddForm {
         : (field.default ?? 0);
     this.fieldValues[field.key] = initialValue;
 
-    const control = new EUINumberControl(row, {
+    const control = new ENumberControl(row, {
       value: initialValue,
       min: field.min,
       max: field.max,
@@ -246,7 +246,7 @@ export class EUIConstraintAddForm {
           : (field.default ?? 0);
       this.fieldValues[field.key] = initialValue;
 
-      const control = new EUINumberControl(cell, {
+      const control = new ENumberControl(cell, {
         value: initialValue,
         min: field.min,
         max: field.max,

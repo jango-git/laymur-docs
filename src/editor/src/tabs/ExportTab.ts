@@ -5,6 +5,7 @@
  */
 
 import type { PreviewBridge } from "../bridge/PreviewBridge";
+import type { EditorBus } from "../events";
 import { ELEMENT_REGISTRY } from "../registry/element-registry";
 import type { EditorState } from "../state";
 import type { AssetMeta } from "../types";
@@ -13,17 +14,24 @@ import { type SavedScene, downloadFile, generateTs } from "./ExportTab.Internal"
 
 const SCENE_VERSION = 1;
 
-export interface ExportTabCallbacks {
-  onInitializePreview: () => void;
-  onSceneLoad?: () => void;
-}
-
 export class ExportTab {
+  private filenameInput: HTMLInputElement | null = null;
+
   constructor(
     private readonly editorState: EditorState,
     private readonly bridge: PreviewBridge,
-    private readonly callbacks: ExportTabCallbacks,
-  ) {}
+    private readonly bus: EditorBus,
+  ) {
+    document.addEventListener("keydown", (e) => {
+      if (e.code === "KeyS" && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        const base = this.filenameInput?.value.trim() ?? "scene";
+        const now = new Date();
+        const datetime = now.toISOString().replace("T", "_").replace(/:/g, "-").slice(0, 19);
+        this.saveScene(`${base}_${datetime}`);
+      }
+    });
+  }
 
   public render(): void {
     const container = document.getElementById("export-content");
@@ -43,7 +51,8 @@ export class ExportTab {
     filenameInput.type = "text";
     filenameInput.className = "input-full";
     filenameInput.placeholder = "default file name";
-    filenameInput.value = "laymur-scene";
+    filenameInput.value = this.filenameInput?.value ?? "laymur-scene";
+    this.filenameInput = filenameInput;
 
     filenameRow.appendChild(filenameLabel);
     filenameRow.appendChild(filenameInput);
@@ -93,6 +102,12 @@ export class ExportTab {
     buttonsRow.appendChild(tsActiveButton);
     buttonsRow.appendChild(tsAllButton);
     container.appendChild(buttonsRow);
+
+    const hint = document.createElement("p");
+    hint.className = "export-hint";
+    hint.textContent = "Tip: Ctrl+S saves the scene using the file name above.";
+    container.appendChild(hint);
+
     container.appendChild(loadInput);
   }
 
@@ -104,7 +119,13 @@ export class ExportTab {
     for (const id of usedAssetIds) {
       const meta = this.editorState.assets[id] as AssetMeta | undefined;
       if (meta !== undefined) {
-        assets[id] = { name: meta.name, dataURL: meta.dataURL };
+        assets[id] = {
+          name: meta.name,
+          dataURL: meta.dataURL,
+          ...(meta.assetType === "font"
+            ? { assetType: "font" as const, fontFamily: meta.fontFamily }
+            : {}),
+        };
       }
     }
 
@@ -181,12 +202,19 @@ export class ExportTab {
     }
 
     for (const [id, assetData] of Object.entries(scene.assets)) {
-      await addAssetFromDataURL(this.editorState, id, assetData.name, assetData.dataURL);
+      await addAssetFromDataURL(
+        this.editorState,
+        id,
+        assetData.name,
+        assetData.dataURL,
+        assetData.assetType,
+        assetData.fontFamily,
+      );
     }
 
     this.editorState.resetState(scene.layers, scene.activeLayerId);
-    this.callbacks.onInitializePreview();
-    this.callbacks.onSceneLoad?.();
+    this.bus.previewInitializing.emit();
+    this.bus.sceneLoaded.emit();
   }
 
   private exportActiveLayerTs(): void {

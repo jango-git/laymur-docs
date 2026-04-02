@@ -6,12 +6,13 @@
  */
 
 import type { ConstraintState, ElementState, LayerState } from "../types";
+import { TEXT_STYLE_DEFAULTS } from "../types";
 
 export interface SavedScene {
   version: number;
   activeLayerId: string;
   layers: LayerState[];
-  assets: Record<string, { name: string; dataURL: string }>;
+  assets: Record<string, { name: string; dataURL: string; assetType?: "image" | "font"; fontFamily?: string }>;
 }
 
 export function generateTs(layer: LayerState): string {
@@ -28,6 +29,9 @@ export function generateTs(layer: LayerState): string {
     laymurImports.add(element.type);
     if (element.type === "UIImage") {
       threeTypeImports.add("Texture");
+    }
+    if (element.type === "UIText" && (element.fieldValues.resizeMode as number | undefined) === 0) {
+      laymurImports.add("UITextResizeMode");
     }
   }
 
@@ -73,6 +77,10 @@ export function generateTs(layer: LayerState): string {
 
   for (const element of layer.elements) {
     lines.push(`    this.${element.name}Element = ${elementTsConstructor(element)};`);
+    const colorStmt = elementColorStatement(element);
+    if (colorStmt !== null) {
+      lines.push(`    ${colorStmt}`);
+    }
   }
 
   if (layer.constraints.length > 0) {
@@ -143,7 +151,34 @@ function elementTsConstructor(element: ElementState): string {
     const assetId = (element.fieldValues.assetId as string | undefined) ?? "texture";
     return `new UIImage(this, /* TODO: place texture ${assetId} */)`;
   }
+  if (element.type === "UIText") {
+    const content = (element.fieldValues.content as string | undefined) ?? "";
+    const resizeMode = (element.fieldValues.resizeMode as number | undefined) ?? 0;
+    const maxLineWidth = (element.fieldValues.maxLineWidth as number | undefined) ?? 1024;
+    const padding = (element.fieldValues.padding as number | undefined) ?? 0;
+    const opts: string[] = [];
+    if (resizeMode !== 1) {
+      opts.push(`resizeMode: UITextResizeMode.BREAK`);
+    }
+    if (maxLineWidth !== 1024) {
+      opts.push(`maxLineWidth: ${maxLineWidth}`);
+    }
+    if (padding !== 0) {
+      opts.push(`padding: ${padding}`);
+    }
+    opts.push(textStyleTsOpt(element.fieldValues));
+    const optStr = opts.length > 0 ? `, { ${opts.join(", ")} }` : "";
+    return `new UIText(this, ${JSON.stringify(content)}${optStr})`;
+  }
   return `new ${element.type}(this /* TODO */)`;
+}
+
+export function elementColorStatement(element: ElementState): string | null {
+  const color = element.fieldValues.color as string | undefined;
+  if (color === undefined || color === "#ffffffff") {
+    return null;
+  }
+  return `this.${element.name}Element.color.set(${JSON.stringify(color)});`;
 }
 
 function constraintTsClasses(constraintType: string): string[] {
@@ -212,6 +247,31 @@ function constraintTsStatements(
     default:
       return [`/* unknown constraint: ${constraint.constraintType} */`];
   }
+}
+
+function textStyleTsOpt(fv: Record<string, unknown>): string {
+  const d = TEXT_STYLE_DEFAULTS;
+  const s = (key: string, def: string): string => JSON.stringify((fv[key] as string | undefined) ?? def);
+  const n = (key: string, def: number): number => (fv[key] as number | undefined) ?? def;
+  const b = (key: string, def: boolean): boolean => (fv[key] as boolean | undefined) ?? def;
+  const fields = [
+    `color: ${s("style_color", d.color)}`,
+    `align: ${s("style_align", d.align)}`,
+    `fontFamily: ${s("style_fontFamily", d.fontFamily)}`,
+    `fontSize: ${n("style_fontSize", d.fontSize)}`,
+    `fontStyle: ${s("style_fontStyle", d.fontStyle)}`,
+    `fontWeight: ${s("style_fontWeight", d.fontWeight)}`,
+    `lineHeight: ${n("style_lineHeight", d.lineHeight)}`,
+    `enableShadow: ${b("style_enableShadow", d.enableShadow)}`,
+    `shadowOffsetX: ${n("style_shadowOffsetX", d.shadowOffsetX)}`,
+    `shadowOffsetY: ${n("style_shadowOffsetY", d.shadowOffsetY)}`,
+    `shadowBlur: ${n("style_shadowBlur", d.shadowBlur)}`,
+    `shadowColor: ${s("style_shadowColor", d.shadowColor)}`,
+    `enableStroke: ${b("style_enableStroke", d.enableStroke)}`,
+    `strokeColor: ${s("style_strokeColor", d.strokeColor)}`,
+    `strokeThickness: ${n("style_strokeThickness", d.strokeThickness)}`,
+  ];
+  return `commonStyle: { ${fields.join(", ")} }`;
 }
 
 export function downloadFile(content: string, filename: string, mimeType: string): void {
