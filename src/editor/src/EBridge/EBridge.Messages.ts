@@ -155,6 +155,7 @@ export interface EMessageElementProgressUpdate extends EMessage, EMessageElement
 
 export interface EMessageElementSceneAdd extends EMessage, EMessageElementPayloadScene {
   type: EMessageType.ELEMENT_SCENE_ADD;
+  enableDepthBuffer: boolean;
 }
 
 export interface EMessageElementSceneUpdate extends EMessage, EMessageElementPayloadScene {
@@ -172,7 +173,7 @@ export interface EMessageElementTextUpdate extends EMessage, EMessageElementPayl
 export interface EMessageElementRemove extends EMessage {
   type: EMessageType.ELEMENT_REMOVE;
   uuid: string;
-  uuidLayer: string;
+  uuidOwner: string;
 }
 
 // Constraints
@@ -257,6 +258,7 @@ export interface EMessageConstraintSizeVerticalUpdate
 export interface EMessageConstraintRemove extends EMessage {
   type: EMessageType.CONSTRAINT_REMOVE;
   uuid: string;
+  uuidOwner: string;
 }
 
 // Assets

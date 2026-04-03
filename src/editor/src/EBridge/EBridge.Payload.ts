@@ -1,28 +1,30 @@
 import type {
   EAnimatedImageLoopType,
+  EGrapicsDrawCommand,
   ENineSliceRegionMode,
   EProgressMaskFunction,
   EResizePolicyType,
   ESceneUpdateMode,
+  ETextAlign,
+  ETextFontStyle,
+  ETextFontWeight,
+  ETextResizeMode,
 } from "./EBridge.Types";
 
 export interface EMessagePayload {
   uuid: string;
   name: string;
-}
-
-export interface EMessageLayerComponentPayload extends EMessagePayload {
-  uuidLayer: string;
+  uuidOwner: string;
 }
 
 // Layers
-export interface EMessageLayerPayloadLayerFullscreen extends EMessagePayload {
+export interface EMessageLayerPayloadLayerFullscreen extends Omit<EMessagePayload, "uuidOwner"> {
   resizePolicy: EResizePolicyType;
   parameters: [number, number];
 }
 
 // Elements
-export interface EMessageElementPayloadAnimatedImage extends EMessageLayerComponentPayload {
+export interface EMessageElementPayloadAnimatedImage extends EMessagePayload {
   color: string; // rrggbbaa
   sequence: string[]; // image asset UUID
   frameRate: number;
@@ -30,22 +32,17 @@ export interface EMessageElementPayloadAnimatedImage extends EMessageLayerCompon
   loopMode: EAnimatedImageLoopType;
 }
 
-export interface EMessageElementPayloadGraphics extends EMessageLayerComponentPayload {
+export interface EMessageElementPayloadGraphics extends EMessagePayload {
   color: string; // rrggbbaa
-  drawSequence: (
-    | { x: number; y: number; width: number; height: number; color: string }
-    | { x: number; y: number; radius: number; color: string }
-    | { x: number; y: number; radius: number; startAngle: number; endAngle: number; color: string }
-    | { points: [number, number][]; color: string; lineWidth: number }
-  )[];
+  drawSequence: EGrapicsDrawCommand[];
 }
 
-export interface EMessageElementPayloadImage extends EMessageLayerComponentPayload {
+export interface EMessageElementPayloadImage extends EMessagePayload {
   color: string; // rrggbbaa
   texture: string; // image asset UUID
 }
 
-export interface EMessageElementPayloadNineSlice extends EMessageLayerComponentPayload {
+export interface EMessageElementPayloadNineSlice extends EMessagePayload {
   color: string; // rrggbbaa
   texture: string; // image asset UUID
   sliceBorders: [number, number, number, number];
@@ -53,31 +50,30 @@ export interface EMessageElementPayloadNineSlice extends EMessageLayerComponentP
   regionMode: ENineSliceRegionMode;
 }
 
-export interface EMessageElementPayloadProgress extends EMessageLayerComponentPayload {
+export interface EMessageElementPayloadProgress extends EMessagePayload {
   color: string; // rrggbbaa
   texture: string; // image asset UUID
   maskFunction: EProgressMaskFunction;
   progress: number;
 }
 
-export interface EMessageElementPayloadScene extends EMessageLayerComponentPayload {
+export interface EMessageElementPayloadScene extends EMessagePayload {
   color: string; // rrggbbaa
   updateMode: ESceneUpdateMode;
   resolutionFactor: number;
   clearColor: string; // rrggbbaa
-  enableDepthBuffer: boolean;
 }
 
-export interface EMessageElementPayloadText extends EMessageLayerComponentPayload {
+export interface EMessageElementPayloadText extends EMessagePayload {
   color: string; // rrggbbaa
   content: {
     text: string;
     color: string; // rrggbbaa
-    align: "LEFT" | "CENTER" | "RIGHT";
+    align: ETextAlign;
     fontFamily: string;
     fontSize: number;
-    fontStyle: "NORMAL" | "ITALIC" | "OBLIQUE";
-    fontWeight: "NORMAL" | "BOLD" | "BOLDER" | "LIGHTER";
+    fontStyle: ETextFontStyle;
+    fontWeight: ETextFontWeight;
     lineHeight: number;
     enableShadow: boolean;
     shadowOffsetX: number;
@@ -88,28 +84,26 @@ export interface EMessageElementPayloadText extends EMessageLayerComponentPayloa
     strokeColor: string; // rrggbbaa
     strokeThickness: number;
   }[];
-  resizeMode: "BREAK" | "SCALE";
+  resizeMode: ETextResizeMode;
   maxLineWidth: number;
 }
 
 // Constraints
-export interface EMessageConstraintPayloadAspect extends EMessageLayerComponentPayload {
+export interface EMessageConstraintPayloadAspect extends EMessagePayload {
   aspect: number;
 }
 
-export interface EMessageConstraintPayloadDistance extends EMessageLayerComponentPayload {
+export interface EMessageConstraintPayloadDistance extends EMessagePayload {
   anchorA: number;
   anchorB: number;
   distance: number;
 }
 
-export interface EMessageConstraintPayloadProportion extends EMessageLayerComponentPayload {
-  anchorA: number;
-  anchorB: number;
+export interface EMessageConstraintPayloadProportion extends EMessagePayload {
   proportion: number;
 }
 
-export interface EMessageConstraintPayloadSize extends EMessageLayerComponentPayload {
+export interface EMessageConstraintPayloadSize extends EMessagePayload {
   size: number;
 }
 

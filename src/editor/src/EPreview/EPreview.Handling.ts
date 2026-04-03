@@ -1,5 +1,22 @@
-import { UIAnimatedImage, UIFullscreenLayer, UIImage, UINineSlice } from "laymur";
+import {
+  UIAnimatedImage,
+  UIAspectConstraint,
+  UIFullscreenLayer,
+  UIGraphics,
+  UIHeightConstraint,
+  UIHorizontalDistanceConstraint,
+  UIHorizontalProportionConstraint,
+  UIImage,
+  UINineSlice,
+  UIProgress,
+  UIScene,
+  UIText,
+  UIVerticalDistanceConstraint,
+  UIVerticalProportionConstraint,
+  UIWidthConstraint,
+} from "laymur";
 import { UILayerDebug } from "laymur/debug";
+import { Texture } from "three";
 import type {
   EMessage,
   EMessageAssetFontAdd,
@@ -47,15 +64,22 @@ import type {
 } from "../EBridge/EBridge.Messages";
 import { EMessageType } from "../EBridge/EBridge.Messages";
 import {
+  applyDrawSequence,
   ASSET_DATABASE,
+  buildMaskFunction,
   buildResizePolicy,
+  ensureUniqueAsset,
+  ensureUniqueConstraint,
+  ensureUniqueElement,
   getLayerContextActive,
   LAYER_DATABASE,
   loadTexture,
+  resolveAsset,
+  resolveConstraint,
+  resolveElement,
   resolveFontAsset,
   resolveLayerContext,
   resolveTextureAsset,
-  resolveUIElement,
   setLayerContextActive,
 } from "./EPreview.Internal";
 
@@ -241,6 +265,10 @@ function layerFullscreenAdd({
   resizePolicy,
   parameters,
 }: Omit<EMessageLayerFullscreenAdd, "type">): void {
+  if (LAYER_DATABASE.has(uuid)) {
+    throw new Error(`Layer with uuid ${uuid} already exists`);
+  }
+
   const layer = new UIFullscreenLayer({
     name,
     resizePolicy: buildResizePolicy(resizePolicy, parameters),
@@ -312,7 +340,7 @@ function layerSetActive({ uuid, isActive }: Omit<EMessageLayerSetActive, "type">
 
 function elementAnimatedImageAdd({
   uuid,
-  uuidLayer,
+  uuidOwner,
   name,
   color,
   sequence,
@@ -321,10 +349,9 @@ function elementAnimatedImageAdd({
   loopMode,
   playByDefault,
 }: Omit<EMessageElementAnimatedImageAdd, "type">): void {
-  const layerContext = resolveLayerContext(uuidLayer);
-  const images = sequence.map(resolveTextureAsset);
-
-  const animatedImage = new UIAnimatedImage(layerContext.layer, images, {
+  ensureUniqueElement(uuid);
+  const layerContext = resolveLayerContext(uuidOwner);
+  const animatedImage = new UIAnimatedImage(layerContext.layer, sequence.map(resolveTextureAsset), {
     name,
     color,
     frameRate,
@@ -332,13 +359,12 @@ function elementAnimatedImageAdd({
     loopMode,
     playByDefault,
   });
-
   layerContext.elements.set(uuid, animatedImage);
 }
 
 function elementAnimatedImageUpdate({
   uuid,
-  uuidLayer,
+  uuidOwner,
   name,
   color,
   sequence,
@@ -346,7 +372,7 @@ function elementAnimatedImageUpdate({
   timeScale,
   loopMode,
 }: Omit<EMessageElementAnimatedImageUpdate, "type">): void {
-  const animatedImage = resolveUIElement(uuidLayer, uuid) as UIAnimatedImage;
+  const animatedImage = resolveElement(uuidOwner, uuid) as UIAnimatedImage;
   animatedImage.name = name;
   animatedImage.color = color;
   animatedImage.sequence = sequence.map(resolveTextureAsset);
@@ -357,45 +383,58 @@ function elementAnimatedImageUpdate({
 
 function elementGraphicsAdd({
   uuid,
-  uuidLayer,
+  uuidOwner,
   name,
   resolution,
   color,
   drawSequence,
 }: Omit<EMessageElementGraphicsAdd, "type">): void {
-  throw new Error("Not implemented yet: EMessageType.ELEMENT_GRAPHICS_ADD case");
+  ensureUniqueElement(uuid);
+  const layerContext = resolveLayerContext(uuidOwner);
+  const graphics = new UIGraphics(layerContext.layer, {
+    width: resolution[0],
+    height: resolution[1],
+    color,
+    name,
+  });
+  layerContext.elements.set(uuid, graphics);
+  applyDrawSequence(graphics, drawSequence);
 }
 
 function elementGraphicsUpdate({
   uuid,
-  uuidLayer,
+  uuidOwner,
   name,
   color,
   drawSequence,
 }: Omit<EMessageElementGraphicsUpdate, "type">): void {
-  throw new Error("Not implemented yet: EMessageType.ELEMENT_GRAPHICS_UPDATE case");
+  const graphics = resolveElement(uuidOwner, uuid) as UIGraphics;
+  graphics.name = name;
+  graphics.color = color;
+  applyDrawSequence(graphics, drawSequence);
 }
 
 function elementImageAdd({
   uuid,
-  uuidLayer,
+  uuidOwner,
   name,
   color,
   texture,
 }: Omit<EMessageElementImageAdd, "type">): void {
-  const layerContext = resolveLayerContext(uuidLayer);
+  ensureUniqueElement(uuid);
+  const layerContext = resolveLayerContext(uuidOwner);
   const image = new UIImage(layerContext.layer, resolveTextureAsset(texture), { color, name });
   layerContext.elements.set(uuid, image);
 }
 
 function elementImageUpdate({
   uuid,
-  uuidLayer,
+  uuidOwner,
   name,
   color,
   texture,
 }: Omit<EMessageElementImageUpdate, "type">): void {
-  const image = resolveUIElement(uuidLayer, uuid) as UIImage;
+  const image = resolveElement(uuidOwner, uuid) as UIImage;
   image.color = color;
   image.name = name;
   image.texture.set(resolveTextureAsset(texture));
@@ -403,7 +442,7 @@ function elementImageUpdate({
 
 function elementNineSliceAdd({
   uuid,
-  uuidLayer,
+  uuidOwner,
   name,
   color,
   texture,
@@ -411,7 +450,8 @@ function elementNineSliceAdd({
   sliceBorders,
   sliceRegions,
 }: Omit<EMessageElementNineSliceAdd, "type">): void {
-  const layerContext = resolveLayerContext(uuidLayer);
+  ensureUniqueElement(uuid);
+  const layerContext = resolveLayerContext(uuidOwner);
   const nineSlice = new UINineSlice(layerContext.layer, resolveTextureAsset(texture), {
     color,
     name,
@@ -424,7 +464,7 @@ function elementNineSliceAdd({
 
 function elementNineSliceUpdate({
   uuid,
-  uuidLayer,
+  uuidOwner,
   name,
   color,
   texture,
@@ -432,7 +472,7 @@ function elementNineSliceUpdate({
   sliceBorders,
   sliceRegions,
 }: Omit<EMessageElementNineSliceUpdate, "type">): void {
-  const nineSlice = resolveUIElement(uuidLayer, uuid) as UINineSlice;
+  const nineSlice = resolveElement(uuidOwner, uuid) as UINineSlice;
   nineSlice.color = color;
   nineSlice.name = name;
   nineSlice.texture.set(resolveTextureAsset(texture));
@@ -443,31 +483,45 @@ function elementNineSliceUpdate({
 
 function elementProgressAdd({
   uuid,
-  uuidLayer,
+  uuidOwner,
   name,
   color,
   texture,
   maskFunction,
   progress,
 }: Omit<EMessageElementProgressAdd, "type">): void {
-  throw new Error("Not implemented yet: EMessageType.ELEMENT_PROGRESS_ADD case");
+  ensureUniqueElement(uuid);
+  const layerContext = resolveLayerContext(uuidOwner);
+  const progressElement = new UIProgress(layerContext.layer, resolveTextureAsset(texture), {
+    name,
+    color,
+    maskFunction: buildMaskFunction(maskFunction),
+    progress,
+  });
+  layerContext.elements.set(uuid, progressElement);
 }
 
 function elementProgressUpdate({
   uuid,
-  uuidLayer,
+  uuidOwner,
   name,
   color,
   texture,
   maskFunction,
   progress,
 }: Omit<EMessageElementProgressUpdate, "type">): void {
-  throw new Error("Not implemented yet: EMessageType.ELEMENT_PROGRESS_UPDATE case");
+  const layerContext = resolveLayerContext(uuidOwner);
+  const progressElement = layerContext.elements.get(uuid) as UIProgress;
+  progressElement.name = name;
+  progressElement.color = color;
+  progressElement.texture.set(resolveTextureAsset(texture));
+  progressElement.maskFunction = buildMaskFunction(maskFunction);
+  progressElement.progress = progress;
 }
 
 function elementSceneAdd({
   uuid,
-  uuidLayer,
+  uuidOwner,
   name,
   color,
   clearColor,
@@ -475,48 +529,82 @@ function elementSceneAdd({
   resolutionFactor,
   updateMode,
 }: Omit<EMessageElementSceneAdd, "type">): void {
-  throw new Error("Not implemented yet: EMessageType.ELEMENT_SCENE_ADD case");
+  ensureUniqueElement(uuid);
+  const layerContext = resolveLayerContext(uuidOwner);
+  const scene = new UIScene(layerContext.layer, {
+    name,
+    color,
+    clearColor,
+    enableDepthBuffer,
+    resolutionFactor,
+    updateMode,
+  });
+  layerContext.elements.set(uuid, scene);
 }
 
 function elementSceneUpdate({
   uuid,
-  uuidLayer,
+  uuidOwner,
   name,
   color,
   clearColor,
-  enableDepthBuffer,
   resolutionFactor,
   updateMode,
 }: Omit<EMessageElementSceneUpdate, "type">): void {
-  throw new Error("Not implemented yet: EMessageType.ELEMENT_SCENE_UPDATE case");
+  const scene = resolveElement(uuidOwner, uuid) as UIScene;
+  scene.name = name;
+  scene.color = color;
+  scene.clearColor = clearColor;
+  scene.resolutionFactor = resolutionFactor;
+  scene.updateMode = updateMode;
 }
 
 function elementTextAdd({
   uuid,
-  uuidLayer,
+  uuidOwner,
   name,
   color,
   content,
   maxLineWidth,
   resizeMode,
 }: Omit<EMessageElementTextAdd, "type">): void {
-  throw new Error("Not implemented yet: EMessageType.ELEMENT_TEXT_ADD case");
+  ensureUniqueElement(uuid);
+  const layerContext = resolveLayerContext(uuidOwner);
+  const text = new UIText(layerContext.layer, content, { name, color, maxLineWidth, resizeMode });
+  layerContext.elements.set(uuid, text);
 }
 
 function elementTextUpdate({
   uuid,
-  uuidLayer,
+  uuidOwner,
   name,
   color,
   content,
   maxLineWidth,
   resizeMode,
 }: Omit<EMessageElementTextUpdate, "type">): void {
-  throw new Error("Not implemented yet: EMessageType.ELEMENT_TEXT_UPDATE case");
+  const text = resolveElement(uuidOwner, uuid) as UIText;
+  text.name = name;
+  text.color = color;
+  text.content = content;
+  text.maxLineWidth = maxLineWidth;
+  text.resizeMode = resizeMode;
 }
 
-function elementRemove({ uuid, uuidLayer }: Omit<EMessageElementRemove, "type">): void {
-  const element = resolveUIElement(uuidLayer, uuid);
+function elementRemove({ uuid, uuidOwner }: Omit<EMessageElementRemove, "type">): void {
+  const element = resolveElement(uuidOwner, uuid);
+  for (const layerContext of LAYER_DATABASE.values()) {
+    for (const constraint of layerContext.constraints.values()) {
+      if (
+        ("element" in constraint && constraint.element === element) ||
+        ("a" in constraint && constraint.a === element) ||
+        ("b" in constraint && constraint.b === element)
+      ) {
+        throw new Error("Element cannot be removed, it is referenced by a constraint: " + uuid);
+      }
+    }
+  }
+  // todo check if element is in use by constraints
   element.destroy();
 }
 
@@ -524,90 +612,214 @@ function elementRemove({ uuid, uuidLayer }: Omit<EMessageElementRemove, "type">)
 
 function constraintAspectAdd({
   uuid,
-  uuidLayer,
+  uuidOwner,
   name,
   uuidElementA,
   aspect,
 }: Omit<EMessageConstraintAspectAdd, "type">): void {
-  throw new Error("Not implemented yet: EMessageType.CONSTRAINT_ASPECT_ADD case");
+  ensureUniqueConstraint(uuid);
+  const layerContext = resolveLayerContext(uuidOwner);
+  const element = resolveElement(uuidOwner, uuidElementA);
+  const aspectConstraint = new UIAspectConstraint(element, { name, aspect });
+  layerContext.constraints.set(uuid, aspectConstraint);
 }
 
-function constraintAspectUpdate(data: Omit<EMessageConstraintAspectUpdate, "type">): void {
-  throw new Error("Not implemented yet: EMessageType.CONSTRAINT_ASPECT_UPDATE case");
+function constraintAspectUpdate({
+  uuid,
+  uuidOwner,
+  name,
+  aspect,
+}: Omit<EMessageConstraintAspectUpdate, "type">): void {
+  const constraint = resolveConstraint(uuidOwner, uuid) as UIAspectConstraint;
+  constraint.name = name;
+  constraint.aspect = aspect;
 }
 
-function constraintDistanceHorizontalAdd(
-  data: Omit<EMessageConstraintDistanceHorizontalAdd, "type">,
-): void {
-  throw new Error("Not implemented yet: EMessageType.CONSTRAINT_DISTANCE_HORIZONTAL_ADD case");
+function constraintDistanceHorizontalAdd({
+  uuid,
+  uuidOwner,
+  name,
+  uuidElementA,
+  uuidElementB,
+  anchorA,
+  anchorB,
+  distance,
+}: Omit<EMessageConstraintDistanceHorizontalAdd, "type">): void {
+  ensureUniqueConstraint(uuid);
+  const layerContext = resolveLayerContext(uuidOwner);
+  const elementA = resolveElement(uuidOwner, uuidElementA);
+  const elementB = resolveElement(uuidOwner, uuidElementB);
+  const constraint = new UIHorizontalDistanceConstraint(elementA, elementB, {
+    name,
+    anchorA,
+    anchorB,
+    distance,
+  });
+  layerContext.constraints.set(uuid, constraint);
 }
 
-function constraintDistanceHorizontalUpdate(
-  data: Omit<EMessageConstraintDistanceHorizontalUpdate, "type">,
-): void {
-  throw new Error("Not implemented yet: EMessageType.CONSTRAINT_DISTANCE_HORIZONTAL_UPDATE case");
+function constraintDistanceHorizontalUpdate({
+  uuid,
+  uuidOwner,
+  name,
+  anchorA,
+  anchorB,
+  distance,
+}: Omit<EMessageConstraintDistanceHorizontalUpdate, "type">): void {
+  const constraint = resolveConstraint(uuidOwner, uuid) as UIHorizontalDistanceConstraint;
+  constraint.name = name;
+  constraint.anchorA = anchorA;
+  constraint.anchorB = anchorB;
+  constraint.distance = distance;
 }
 
-function constraintDistanceVerticalAdd(
-  data: Omit<EMessageConstraintDistanceVerticalAdd, "type">,
-): void {
-  throw new Error("Not implemented yet: EMessageType.CONSTRAINT_DISTANCE_VERTICAL_ADD case");
+function constraintDistanceVerticalAdd({
+  uuid,
+  uuidOwner,
+  name,
+  uuidElementA,
+  uuidElementB,
+  anchorA,
+  anchorB,
+  distance,
+}: Omit<EMessageConstraintDistanceVerticalAdd, "type">): void {
+  ensureUniqueConstraint(uuid);
+  const layerContext = resolveLayerContext(uuidOwner);
+  const elementA = resolveElement(uuidOwner, uuidElementA);
+  const elementB = resolveElement(uuidOwner, uuidElementB);
+  const constraint = new UIVerticalDistanceConstraint(elementA, elementB, {
+    name,
+    anchorA,
+    anchorB,
+    distance,
+  });
+  layerContext.constraints.set(uuid, constraint);
 }
 
-function constraintDistanceVerticalUpdate(
-  data: Omit<EMessageConstraintDistanceVerticalUpdate, "type">,
-): void {
-  throw new Error("Not implemented yet: EMessageType.CONSTRAINT_DISTANCE_VERTICAL_UPDATE case");
+function constraintDistanceVerticalUpdate({
+  uuid,
+  uuidOwner,
+  name,
+  anchorA,
+  anchorB,
+  distance,
+}: Omit<EMessageConstraintDistanceVerticalUpdate, "type">): void {
+  const constraint = resolveConstraint(uuidOwner, uuid) as UIVerticalDistanceConstraint;
+  constraint.name = name;
+  constraint.anchorA = anchorA;
+  constraint.anchorB = anchorB;
+  constraint.distance = distance;
 }
 
-function constraintProportionHorizontalAdd(
-  data: Omit<EMessageConstraintProportionHorizontalAdd, "type">,
-): void {
-  throw new Error("Not implemented yet: EMessageType.CONSTRAINT_PROPORTION_HORIZONTAL_ADD case");
+function constraintProportionHorizontalAdd({
+  uuid,
+  uuidOwner,
+  name,
+  uuidElementA,
+  uuidElementB,
+  proportion,
+}: Omit<EMessageConstraintProportionHorizontalAdd, "type">): void {
+  ensureUniqueConstraint(uuid);
+  const layerContext = resolveLayerContext(uuidOwner);
+  const elementA = resolveElement(uuidOwner, uuidElementA);
+  const elementB = resolveElement(uuidOwner, uuidElementB);
+  const constraint = new UIHorizontalProportionConstraint(elementA, elementB, { name, proportion });
+  layerContext.constraints.set(uuid, constraint);
 }
 
-function constraintProportionHorizontalUpdate(
-  data: Omit<EMessageConstraintProportionHorizontalUpdate, "type">,
-): void {
-  throw new Error("Not implemented yet: EMessageType.CONSTRAINT_PROPORTION_HORIZONTAL_UPDATE case");
+function constraintProportionHorizontalUpdate({
+  uuid,
+  uuidOwner,
+  name,
+  proportion,
+}: Omit<EMessageConstraintProportionHorizontalUpdate, "type">): void {
+  const constraint = resolveConstraint(uuidOwner, uuid) as UIHorizontalProportionConstraint;
+  constraint.name = name;
+  constraint.proportion = proportion;
 }
 
-function constraintProportionVerticalAdd(
-  data: Omit<EMessageConstraintProportionVerticalAdd, "type">,
-): void {
-  throw new Error("Not implemented yet: EMessageType.CONSTRAINT_PROPORTION_VERTICAL_ADD case");
+function constraintProportionVerticalAdd({
+  uuid,
+  uuidOwner,
+  name,
+  uuidElementA,
+  uuidElementB,
+  proportion,
+}: Omit<EMessageConstraintProportionVerticalAdd, "type">): void {
+  ensureUniqueConstraint(uuid);
+  const layerContext = resolveLayerContext(uuidOwner);
+  const elementA = resolveElement(uuidOwner, uuidElementA);
+  const elementB = resolveElement(uuidOwner, uuidElementB);
+  const constraint = new UIVerticalProportionConstraint(elementA, elementB, { name, proportion });
+  layerContext.constraints.set(uuid, constraint);
 }
 
-function constraintProportionVerticalUpdate(
-  data: Omit<EMessageConstraintProportionVerticalUpdate, "type">,
-): void {
-  throw new Error("Not implemented yet: EMessageType.CONSTRAINT_PROPORTION_VERTICAL_UPDATE case");
+function constraintProportionVerticalUpdate({
+  uuid,
+  uuidOwner,
+  name,
+  proportion,
+}: Omit<EMessageConstraintProportionVerticalUpdate, "type">): void {
+  const constraint = resolveConstraint(uuidOwner, uuid) as UIVerticalProportionConstraint;
+  constraint.name = name;
+  constraint.proportion = proportion;
 }
 
-function constraintSizeHorizontalAdd(
-  data: Omit<EMessageConstraintSizeHorizontalAdd, "type">,
-): void {
-  throw new Error("Not implemented yet: EMessageType.CONSTRAINT_SIZE_HORIZONTAL_ADD case");
+function constraintSizeHorizontalAdd({
+  uuid,
+  uuidOwner,
+  name,
+  uuidElementA,
+  size,
+}: Omit<EMessageConstraintSizeHorizontalAdd, "type">): void {
+  ensureUniqueConstraint(uuid);
+  const layerContext = resolveLayerContext(uuidOwner);
+  const element = resolveElement(uuidOwner, uuidElementA);
+  const constraint = new UIWidthConstraint(element, { name, width: size });
+  layerContext.constraints.set(uuid, constraint);
 }
 
-function constraintSizeHorizontalUpdate(
-  data: Omit<EMessageConstraintSizeHorizontalUpdate, "type">,
-): void {
-  throw new Error("Not implemented yet: EMessageType.CONSTRAINT_SIZE_HORIZONTAL_UPDATE case");
+function constraintSizeHorizontalUpdate({
+  uuid,
+  uuidOwner,
+  name,
+  size,
+}: Omit<EMessageConstraintSizeHorizontalUpdate, "type">): void {
+  const constraint = resolveConstraint(uuidOwner, uuid) as UIWidthConstraint;
+  constraint.name = name;
+  constraint.width = size;
 }
 
-function constraintSizeVerticalAdd(data: Omit<EMessageConstraintSizeVerticalAdd, "type">): void {
-  throw new Error("Not implemented yet: EMessageType.CONSTRAINT_SIZE_VERTICAL_ADD case");
+function constraintSizeVerticalAdd({
+  uuid,
+  uuidOwner,
+  name,
+  uuidElementA,
+  size,
+}: Omit<EMessageConstraintSizeVerticalAdd, "type">): void {
+  ensureUniqueConstraint(uuid);
+  const layerContext = resolveLayerContext(uuidOwner);
+  const element = resolveElement(uuidOwner, uuidElementA);
+  const constraint = new UIHeightConstraint(element, { name, height: size });
+  layerContext.constraints.set(uuid, constraint);
 }
 
-function constraintSizeVerticalUpdate(
-  data: Omit<EMessageConstraintSizeVerticalUpdate, "type">,
-): void {
-  throw new Error("Not implemented yet: EMessageType.CONSTRAINT_SIZE_VERTICAL_UPDATE case");
+function constraintSizeVerticalUpdate({
+  uuid,
+  uuidOwner,
+  name,
+  size,
+}: Omit<EMessageConstraintSizeVerticalUpdate, "type">): void {
+  const constraint = resolveConstraint(uuidOwner, uuid) as UIHeightConstraint;
+  constraint.name = name;
+  constraint.height = size;
 }
 
-function constraintRemove(data: Omit<EMessageConstraintRemove, "type">): void {
-  throw new Error("Not implemented yet: EMessageType.CONSTRAINT_REMOVE case");
+function constraintRemove({ uuid, uuidOwner }: Omit<EMessageConstraintRemove, "type">): void {
+  const layerContext = resolveLayerContext(uuidOwner);
+  const constraint = resolveConstraint(uuidOwner, uuid);
+  constraint.destroy();
+  layerContext.constraints.delete(uuid);
 }
 
 async function assetFontAdd({
@@ -615,6 +827,7 @@ async function assetFontAdd({
   dataURL,
   fontFamily,
 }: Omit<EMessageAssetFontAdd, "type">): Promise<void> {
+  ensureUniqueAsset(uuid);
   console.debug("[preview] LOAD_FONT fontFamily=%s", fontFamily);
   const fontFace = new FontFace(fontFamily, `url(${dataURL})`);
   await fontFace.load();
@@ -627,15 +840,38 @@ async function assetFontUpdate({
   dataURL,
   fontFamily,
 }: Omit<EMessageAssetFontUpdate, "type">): Promise<void> {
-  const fontFace = resolveFontAsset(uuid);
-  document.fonts.delete(fontFace);
+  const oldFontFace = resolveFontAsset(uuid);
+  document.fonts.delete(oldFontFace);
   await assetFontAdd({ uuid, dataURL, fontFamily });
+  const fontFace = resolveFontAsset(uuid);
+
+  for (const layerContext of LAYER_DATABASE.values()) {
+    // Each layer
+    for (const element of layerContext.elements.values()) {
+      // Each element in the layer
+      if (element instanceof UIText) {
+        for (const span of element.content) {
+          if (span.style.fontFamily === fontFamily) {
+            const clonedContent = [...element.content];
+            for (const clonedSpan of clonedContent) {
+              if (clonedSpan.style.fontFamily === fontFace.family) {
+                clonedSpan.style.fontFamily = fontFamily;
+              }
+            }
+            element.content = clonedContent;
+            break;
+          }
+        }
+      }
+    }
+  }
 }
 
 async function assetImageAdd({
   uuid,
   dataURL,
 }: Omit<EMessageAssetImageAdd, "type">): Promise<void> {
+  ensureUniqueAsset(uuid);
   const texture = await loadTexture(dataURL);
   ASSET_DATABASE.set(uuid, texture);
 }
@@ -648,18 +884,74 @@ async function assetImageUpdate({
   const newTexture = await loadTexture(dataURL);
 
   for (const layerContext of LAYER_DATABASE.values()) {
+    // Each layer
     for (const element of layerContext.elements.values()) {
-      if (element instanceof UII)
+      // Each element in the layer
+      if (element instanceof UIAnimatedImage) {
+        for (const frame of element.sequence) {
+          if (frame.texture === oldTexture) {
+            frame.set(newTexture);
+            break;
+          }
+        }
+      } else if (
+        element instanceof UIImage ||
+        element instanceof UINineSlice ||
+        element instanceof UIProgress
+      ) {
+        if (element.texture.texture === oldTexture) {
+          element.texture.set(newTexture);
+        }
+      }
     }
   }
 
-
-  // oldTexture.dispose();
-  // ASSET_DATABASE.set(uuid, newTexture);
+  oldTexture.dispose();
+  ASSET_DATABASE.set(uuid, newTexture);
 }
 
 function assetRemove({ uuid }: Omit<EMessageAssetRemove, "type">): void {
-  throw new Error("Not implemented yet: EMessageType.ASSET_REMOVE case");
+  const asset = resolveAsset(uuid);
+
+  if (asset instanceof Texture) {
+    for (const layerContext of LAYER_DATABASE.values()) {
+      // Each layer
+      for (const element of layerContext.elements.values()) {
+        // Each element in the layer
+        if (element instanceof UIAnimatedImage) {
+          for (const frame of element.sequence) {
+            if (frame.texture === asset) {
+              throw new Error("Cannot remove texture that is currently in use");
+            }
+          }
+        } else if (
+          element instanceof UIImage ||
+          element instanceof UINineSlice ||
+          element instanceof UIProgress
+        ) {
+          if (element.texture.texture === asset) {
+            throw new Error("Cannot remove texture that is currently in use");
+          }
+        }
+      }
+    }
+  } else {
+    for (const layerContext of LAYER_DATABASE.values()) {
+      // Each layer
+      for (const element of layerContext.elements.values()) {
+        // Each element in the layer
+        if (element instanceof UIText) {
+          for (const span of element.content) {
+            if (span.style.fontFamily === asset.family) {
+              throw new Error("Cannot remove font that is currently in use");
+            }
+          }
+        }
+      }
+    }
+  }
+
+  ASSET_DATABASE.delete(uuid);
 }
 
 function commonSetTheme({ theme }: Omit<EMessageCommonSetTheme, "type">): void {
@@ -667,4 +959,17 @@ function commonSetTheme({ theme }: Omit<EMessageCommonSetTheme, "type">): void {
   document.documentElement.setAttribute("data-theme", theme.toLowerCase());
 }
 
-function commonReset(data: Omit<EMessageCommonReset, "type">): void {}
+function commonReset({}: Omit<EMessageCommonReset, "type">): void {
+  for (const layerContext of LAYER_DATABASE.values()) {
+    layerContext.debug.destroy();
+    for (const constraint of layerContext.constraints.values()) {
+      constraint.destroy();
+    }
+    for (const element of layerContext.elements.values()) {
+      element.destroy();
+    }
+    layerContext.layer.destroy();
+  }
+
+  LAYER_DATABASE.clear();
+}

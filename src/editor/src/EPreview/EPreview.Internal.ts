@@ -1,4 +1,7 @@
+import type { UIGraphics } from "laymur";
 import {
+  UIProgressMaskFunctionCircular,
+  UIProgressMaskFunctionDirectional,
   UIResizePolicyCover,
   UIResizePolicyCross,
   UIResizePolicyCrossInverted,
@@ -8,7 +11,8 @@ import {
   UIResizePolicyNone,
 } from "laymur";
 import { Texture, TextureLoader } from "three";
-import { EResizePolicyType } from "../EBridge/EBridge.Types";
+import type { EGrapicsDrawCommand } from "../EBridge/EBridge.Types";
+import { EProgressMaskFunction, EResizePolicyType } from "../EBridge/EBridge.Types";
 import type { AssetType, LayerContext, UIConstraint, UIElement } from "./EPreview.Types";
 
 export const LAYER_DATABASE = new Map<string, LayerContext>();
@@ -60,6 +64,19 @@ export function buildResizePolicy(
   }
 }
 
+export function buildMaskFunction(
+  maskFunction: EProgressMaskFunction,
+): UIProgressMaskFunctionCircular | UIProgressMaskFunctionDirectional {
+  switch (maskFunction) {
+    case EProgressMaskFunction.CIRCULAR:
+      return new UIProgressMaskFunctionCircular();
+    case EProgressMaskFunction.DIRECTIONAL:
+      return new UIProgressMaskFunctionDirectional();
+    default:
+      throw new Error(`Unknown mask function: ${maskFunction}`);
+  }
+}
+
 export function resolveLayerContext(uuid: string): LayerContext {
   const layerData = LAYER_DATABASE.get(uuid);
   if (!layerData) {
@@ -68,20 +85,20 @@ export function resolveLayerContext(uuid: string): LayerContext {
   return layerData;
 }
 
-export function resolveUIElement(uuidLayer: string, uuidElement: string): UIElement {
-  const layerData = resolveLayerContext(uuidLayer);
-  const element = layerData.elements.get(uuidElement);
+export function resolveElement(uuidOwner: string, uuid: string): UIElement {
+  const layerData = resolveLayerContext(uuidOwner);
+  const element = layerData.elements.get(uuid);
   if (!element) {
-    throw new Error(`Element not found: ${uuidElement}`);
+    throw new Error(`Element not found: ${uuid}`);
   }
   return element;
 }
 
-export function resolveUIConstraint(uuidLayer: string, uuidConstraint: string): UIConstraint {
-  const layerData = resolveLayerContext(uuidLayer);
-  const constraint = layerData.constraints.get(uuidConstraint);
+export function resolveConstraint(uuidOwner: string, uuid: string): UIConstraint {
+  const layerData = resolveLayerContext(uuidOwner);
+  const constraint = layerData.constraints.get(uuid);
   if (!constraint) {
-    throw new Error(`Constraint not found: ${uuidConstraint}`);
+    throw new Error(`Constraint not found: ${uuid}`);
   }
   return constraint;
 }
@@ -108,4 +125,60 @@ export function resolveFontAsset(uuid: string): FontFace {
     throw new Error(`Asset is not a font: ${uuid}`);
   }
   return asset;
+}
+
+export function ensureUniqueElement(uuid: string): void {
+  for (const { elements } of LAYER_DATABASE.values()) {
+    if (elements.has(uuid)) {
+      throw new Error(`Element already exists: ${uuid}`);
+    }
+  }
+}
+
+export function ensureUniqueConstraint(uuid: string): void {
+  for (const { constraints } of LAYER_DATABASE.values()) {
+    if (constraints.has(uuid)) {
+      throw new Error(`Constraint already exists: ${uuid}`);
+    }
+  }
+}
+
+export function ensureUniqueAsset(uuid: string): void {
+  if (ASSET_DATABASE.has(uuid)) {
+    throw new Error(`Asset already exists: ${uuid}`);
+  }
+}
+
+export function applyDrawSequence(graphics: UIGraphics, drawSequence: EGrapicsDrawCommand[]): void {
+  graphics.clear();
+
+  for (const drawCommand of drawSequence) {
+    if ("points" in drawCommand) {
+      graphics.drawPolyline(drawCommand.points, drawCommand.color, drawCommand.lineWidth);
+    } else if ("startAngle" in drawCommand) {
+      graphics.drawArc(
+        drawCommand.x,
+        drawCommand.y,
+        drawCommand.radius,
+        drawCommand.startAngle,
+        drawCommand.endAngle,
+        drawCommand.color,
+      );
+    } else if ("radius" in drawCommand) {
+      graphics.drawCircle(drawCommand.x, drawCommand.y, drawCommand.radius, drawCommand.color);
+    } else if (
+      "x" in drawCommand &&
+      "y" in drawCommand &&
+      "width" in drawCommand &&
+      "height" in drawCommand
+    ) {
+      graphics.drawRect(
+        drawCommand.x,
+        drawCommand.y,
+        drawCommand.width,
+        drawCommand.height,
+        drawCommand.color,
+      );
+    }
+  }
 }
