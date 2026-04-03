@@ -1,6 +1,6 @@
 import type {
   EAnimatedImageLoopType,
-  EGrapicsDrawCommand,
+  EGraphicsDrawCommand,
   ENineSliceRegionMode,
   EProgressMaskFunction,
   EResizePolicyType,
@@ -34,7 +34,7 @@ export interface EMessageElementPayloadAnimatedImage extends EMessagePayload {
 
 export interface EMessageElementPayloadGraphics extends EMessagePayload {
   color: string; // rrggbbaa
-  drawSequence: EGrapicsDrawCommand[];
+  drawSequence: EGraphicsDrawCommand[];
 }
 
 export interface EMessageElementPayloadImage extends EMessagePayload {

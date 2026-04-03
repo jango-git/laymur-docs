@@ -10,8 +10,8 @@ import {
   UIResizePolicyFixedWidth,
   UIResizePolicyNone,
 } from "laymur";
-import { Texture, TextureLoader } from "three";
-import type { EGrapicsDrawCommand } from "../EBridge/EBridge.Types";
+import { SRGBColorSpace, Texture, TextureLoader } from "three";
+import type { EGraphicsDrawCommand } from "../EBridge/EBridge.Types";
 import { EProgressMaskFunction, EResizePolicyType } from "../EBridge/EBridge.Types";
 import type { AssetType, LayerContext, UIConstraint, UIElement } from "./EPreview.Types";
 
@@ -22,12 +22,21 @@ let LAYER_ACTIVE: LayerContext | null = null;
 
 const TEXTURE_LOADER = new TextureLoader();
 
-export function loadTexture(url: string): Promise<Texture> {
-  return TEXTURE_LOADER.loadAsync(url);
+export async function loadTexture(dataURL: string): Promise<Texture> {
+  return new Promise((resolve) => {
+    TEXTURE_LOADER.load(dataURL, (texture) => {
+      texture.colorSpace = SRGBColorSpace;
+      resolve(texture);
+    });
+  });
 }
 
 export function setLayerContextActive(uuid: string, isActive: boolean): void {
   LAYER_ACTIVE = isActive ? resolveLayerContext(uuid) : null;
+}
+
+export function resetLayerContextActive(): void {
+  LAYER_ACTIVE = null;
 }
 
 export function getLayerContextActive(): LayerContext | null {
@@ -149,7 +158,10 @@ export function ensureUniqueAsset(uuid: string): void {
   }
 }
 
-export function applyDrawSequence(graphics: UIGraphics, drawSequence: EGrapicsDrawCommand[]): void {
+export function applyDrawSequence(
+  graphics: UIGraphics,
+  drawSequence: EGraphicsDrawCommand[],
+): void {
   graphics.clear();
 
   for (const drawCommand of drawSequence) {

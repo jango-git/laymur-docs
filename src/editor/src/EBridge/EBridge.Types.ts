@@ -34,7 +34,7 @@ export type ETextFontWeight = "normal" | "bold" | "bolder" | "lighter";
 
 export type ETextResizeMode = UITextResizeMode;
 
-export type EGrapicsDrawCommand =
+export type EGraphicsDrawCommand =
   | { x: number; y: number; width: number; height: number; color: string }
   | { x: number; y: number; radius: number; color: string }
   | { x: number; y: number; radius: number; startAngle: number; endAngle: number; color: string }

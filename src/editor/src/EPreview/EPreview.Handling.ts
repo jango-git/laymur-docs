@@ -74,6 +74,7 @@ import {
   getLayerContextActive,
   LAYER_DATABASE,
   loadTexture,
+  resetLayerContextActive,
   resolveAsset,
   resolveConstraint,
   resolveElement,
@@ -83,7 +84,43 @@ import {
   setLayerContextActive,
 } from "./EPreview.Internal";
 
-export function handleMessage(event: MessageEvent<EMessage>): void {
+interface ESequenceMessage {
+  event: MessageEvent<EMessage>;
+  epoch: number;
+}
+
+const SEQUENCE: ESequenceMessage[] = [];
+
+let SEQUENCE_PROCESSING = false;
+let SEQUENCE_EPOCH = 0;
+
+export async function receiveMessage(receivedEvent: MessageEvent<EMessage>): Promise<void> {
+  SEQUENCE.push({ event: receivedEvent, epoch: SEQUENCE_EPOCH });
+
+  if (SEQUENCE_PROCESSING) {
+    return;
+  }
+
+  SEQUENCE_PROCESSING = true;
+
+  while (SEQUENCE.length > 0) {
+    const { event, epoch } = SEQUENCE.shift() as ESequenceMessage;
+
+    if (epoch !== SEQUENCE_EPOCH) {
+      continue;
+    }
+
+    await handleMessage(event);
+
+    if (epoch !== SEQUENCE_EPOCH) {
+      break;
+    }
+  }
+
+  SEQUENCE_PROCESSING = false;
+}
+
+async function handleMessage(event: MessageEvent<EMessage>): Promise<void> {
   const message = event.data;
 
   switch (message.type) {
@@ -228,19 +265,19 @@ export function handleMessage(event: MessageEvent<EMessage>): void {
       break;
 
     case EMessageType.ASSET_FONT_ADD:
-      assetFontAdd(message as EMessageAssetFontAdd);
+      await assetFontAdd(message as EMessageAssetFontAdd);
       break;
 
     case EMessageType.ASSET_FONT_UPDATE:
-      assetFontUpdate(message as EMessageAssetFontUpdate);
+      await assetFontUpdate(message as EMessageAssetFontUpdate);
       break;
 
     case EMessageType.ASSET_IMAGE_ADD:
-      assetImageAdd(message as EMessageAssetImageAdd);
+      await assetImageAdd(message as EMessageAssetImageAdd);
       break;
 
     case EMessageType.ASSET_IMAGE_UPDATE:
-      assetImageUpdate(message as EMessageAssetImageUpdate);
+      await assetImageUpdate(message as EMessageAssetImageUpdate);
       break;
 
     case EMessageType.ASSET_REMOVE:
@@ -260,7 +297,7 @@ export function handleMessage(event: MessageEvent<EMessage>): void {
 // Layers
 
 function layerFullscreenAdd({
-  uuid: uuid,
+  uuid,
   name,
   resizePolicy,
   parameters,
@@ -283,7 +320,7 @@ function layerFullscreenAdd({
 }
 
 function layerFullscreenUpdate({
-  uuid: uuid,
+  uuid,
   name,
   resizePolicy,
   parameters,
@@ -297,15 +334,15 @@ function layerRemove({ uuid }: Omit<EMessageLayerRemove, "type">): void {
   const layerContext = resolveLayerContext(uuid);
 
   if (getLayerContextActive() === layerContext) {
-    setLayerContextActive(uuid, false);
+    throw new Error(`Cannot remove active layer with uuid ${uuid}`);
   }
 
-  for (const constraint of layerContext.constraints.values()) {
-    constraint.destroy();
+  if (layerContext.constraints.size !== 0) {
+    throw new Error(`Cannot remove layer with uuid ${uuid} that still has constraints`);
   }
 
-  for (const element of layerContext.elements.values()) {
-    element.destroy();
+  if (layerContext.elements.size !== 0) {
+    throw new Error(`Cannot remove layer with uuid ${uuid} that still has elements`);
   }
 
   layerContext.layer.destroy();
@@ -510,8 +547,7 @@ function elementProgressUpdate({
   maskFunction,
   progress,
 }: Omit<EMessageElementProgressUpdate, "type">): void {
-  const layerContext = resolveLayerContext(uuidOwner);
-  const progressElement = layerContext.elements.get(uuid) as UIProgress;
+  const progressElement = resolveElement(uuidOwner, uuid) as UIProgress;
   progressElement.name = name;
   progressElement.color = color;
   progressElement.texture.set(resolveTextureAsset(texture));
@@ -592,6 +628,7 @@ function elementTextUpdate({
 }
 
 function elementRemove({ uuid, uuidOwner }: Omit<EMessageElementRemove, "type">): void {
+  const layerContext = resolveLayerContext(uuidOwner);
   const element = resolveElement(uuidOwner, uuid);
   for (const layerContext of LAYER_DATABASE.values()) {
     for (const constraint of layerContext.constraints.values()) {
@@ -604,8 +641,8 @@ function elementRemove({ uuid, uuidOwner }: Omit<EMessageElementRemove, "type">)
       }
     }
   }
-  // todo check if element is in use by constraints
   element.destroy();
+  layerContext.elements.delete(uuid);
 }
 
 // Constraint
@@ -854,8 +891,8 @@ async function assetFontUpdate({
           if (span.style.fontFamily === fontFamily) {
             const clonedContent = [...element.content];
             for (const clonedSpan of clonedContent) {
-              if (clonedSpan.style.fontFamily === fontFace.family) {
-                clonedSpan.style.fontFamily = fontFamily;
+              if (clonedSpan.style.fontFamily === oldFontFace.family) {
+                clonedSpan.style.fontFamily = fontFace.family;
               }
             }
             element.content = clonedContent;
@@ -972,4 +1009,8 @@ function commonReset({}: Omit<EMessageCommonReset, "type">): void {
   }
 
   LAYER_DATABASE.clear();
+  resetLayerContextActive();
+
+  SEQUENCE_EPOCH += 1;
+  SEQUENCE.length = 0;
 }
