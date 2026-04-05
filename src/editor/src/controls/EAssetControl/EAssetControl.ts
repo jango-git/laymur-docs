@@ -3,11 +3,11 @@ import { Ferrsign2 } from "ferrsign";
 
 export interface EAssetControlItem {
   name: string;
-  thumbnail: string; // data URL or blob URL
+  dataURL: string; // data URL
 }
 
 interface EAssetControlOptions<T extends EAssetControlItem> {
-  value: T | null;
+  value: T | undefined;
   nullable: boolean;
   placeholder: string;
 }
@@ -16,7 +16,7 @@ const POPUP_MAX_HEIGHT = 200;
 
 export class EAssetControl<T extends EAssetControlItem> {
   private readonly container: HTMLElement;
-  private currentValue: T | null;
+  private currentValue: T | undefined;
   private readonly nullable: boolean;
   private readonly fetchAssets: () => T[];
   private readonly placeholder: string;
@@ -29,7 +29,7 @@ export class EAssetControl<T extends EAssetControlItem> {
   private readonly searchInput: HTMLInputElement;
   private readonly list: HTMLDivElement;
 
-  private readonly signalValueChangedInternal = new Ferrsign2<T | null, T | null>();
+  private readonly signalValueChangedInternal = new Ferrsign2<T | undefined, T | undefined>();
 
   constructor(
     container: HTMLElement,
@@ -37,7 +37,7 @@ export class EAssetControl<T extends EAssetControlItem> {
     options: Partial<EAssetControlOptions<T>> = {},
   ) {
     this.container = container;
-    this.currentValue = options.value ?? null;
+    this.currentValue = options.value ?? undefined;
     this.nullable = options.nullable ?? true;
     this.fetchAssets = fetchAssets;
     this.placeholder = options.placeholder ?? "—";
@@ -85,15 +85,15 @@ export class EAssetControl<T extends EAssetControlItem> {
     this.refreshDisplay();
   }
 
-  public get signalValueChanged(): FerrsignView2<T | null, T | null> {
+  public get signalValueChanged(): FerrsignView2<T | undefined, T | undefined> {
     return this.signalValueChangedInternal;
   }
 
-  public get value(): T | null {
+  public get value(): T | undefined {
     return this.currentValue;
   }
 
-  public set value(value: T | null) {
+  public set value(value: T | undefined) {
     this.applyValue(value);
   }
 
@@ -101,9 +101,13 @@ export class EAssetControl<T extends EAssetControlItem> {
     this.root.classList.remove("asset-control--flash");
     void this.root.offsetWidth;
     this.root.classList.add("asset-control--flash");
-    this.root.addEventListener("animationend", () => {
-      this.root.classList.remove("asset-control--flash");
-    }, { once: true });
+    this.root.addEventListener(
+      "animationend",
+      () => {
+        this.root.classList.remove("asset-control--flash");
+      },
+      { once: true },
+    );
   }
 
   public destroy(): void {
@@ -160,13 +164,13 @@ export class EAssetControl<T extends EAssetControlItem> {
 
     this.list.innerHTML = "";
 
-    if (this.nullable && this.currentValue !== null) {
+    if (this.nullable && this.currentValue !== undefined) {
       const clearItem = document.createElement("div");
       clearItem.className = "asset-control__item asset-control__item--clear";
       clearItem.textContent = "Clear";
       clearItem.addEventListener("mousedown", (event) => {
         event.preventDefault();
-        this.applyValue(null);
+        this.applyValue(undefined);
         this.close();
       });
       this.list.appendChild(clearItem);
@@ -181,7 +185,7 @@ export class EAssetControl<T extends EAssetControlItem> {
 
       const thumb = document.createElement("img");
       thumb.className = "asset-control__item-thumbnail";
-      thumb.src = asset.thumbnail;
+      thumb.src = asset.dataURL;
       thumb.alt = "";
 
       const name = document.createElement("span");
@@ -201,7 +205,7 @@ export class EAssetControl<T extends EAssetControlItem> {
     }
   }
 
-  private applyValue(value: T | null): void {
+  private applyValue(value: T | undefined): void {
     if (this.equals(value, this.currentValue)) {
       return;
     }
@@ -213,21 +217,21 @@ export class EAssetControl<T extends EAssetControlItem> {
   }
 
   private refreshDisplay(): void {
-    if (this.currentValue === null) {
+    if (this.currentValue === undefined) {
       this.displayThumbnail.src = "";
       this.displayThumbnail.hidden = true;
       this.displayName.textContent = this.placeholder;
       this.display.dataset.empty = "true";
     } else {
-      this.displayThumbnail.src = this.currentValue.thumbnail;
+      this.displayThumbnail.src = this.currentValue.dataURL;
       this.displayThumbnail.hidden = false;
       this.displayName.textContent = this.currentValue.name;
       delete this.display.dataset.empty;
     }
   }
 
-  private equals(a: T | null, b: T | null): boolean {
-    if (a === null || b === null) {
+  private equals(a: T | undefined, b: T | undefined): boolean {
+    if (a === undefined || b === undefined) {
       return a === b;
     }
     const keysA = Object.keys(a) as (keyof T)[];

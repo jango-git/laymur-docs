@@ -8,20 +8,21 @@
   </head>
   <body>
     <div id="app">
-      <div id="preview-panel">
-        <div id="preview-toolbar"></div>
-        <div id="preview-stage">
-          <div id="preview-iframe-wrapper">
-            <iframe id="preview-frame" src="./preview.html"></iframe>
-            <div id="preview-resize-handle"></div>
-          </div>
+      <!-- Viewport (60%) -->
+      <div id="viewport">
+        <div id="viewport-toolbar">
+          <!-- Toolbar content -->
+        </div>
+        <div id="viewport-content">
+          <iframe id="preview-frame" src="./preview.html"></iframe>
         </div>
       </div>
 
-      <div id="sidebar">
+      <!-- Panel (40%) -->
+      <div id="panel">
         <div id="tabs">
           <button class="tab-button active" data-tab="assets">Assets</button>
-          <button class="tab-button" data-tab="layer">Layer</button>
+          <button class="tab-button" data-tab="layers">Layers</button>
           <button class="tab-button" data-tab="elements">Elements</button>
           <button class="tab-button" data-tab="constraints">Constraints</button>
           <button class="tab-button" data-tab="export">Export</button>
@@ -34,72 +35,29 @@
               <div id="assets-grid"></div>
             </div>
             <div class="tab-footer">
-              <button id="button-add-asset" class="button-primary button-full">
-                + Add Texture
-              </button>
+              <button id="button-add-asset" class="button-primary">+ Add Texture</button>
               <input type="file" id="input-asset-file" accept="image/*" multiple hidden />
             </div>
           </div>
 
-          <!-- Layer tab -->
-          <div id="tab-layer" class="tab-panel">
+          <!-- Layers tab -->
+          <div id="tab-layers" class="tab-panel">
             <div class="tab-scroll-area">
-              <div id="layers-list"></div>
-            </div>
-            <div class="tab-footer">
-              <div id="add-layer-row"></div>
+              <div id="layers-content"></div>
             </div>
           </div>
 
           <!-- Elements tab -->
           <div id="tab-elements" class="tab-panel">
             <div class="tab-scroll-area">
-              <div id="elements-list"></div>
-            </div>
-            <div class="tab-footer">
-              <div id="add-element-row">
-                <div class="add-field-row">
-                  <span class="add-field-label">Type</span>
-                  <select id="element-type-select" class="param-select"></select>
-                </div>
-                <div class="add-field-row">
-                  <span class="add-field-label">Name</span>
-                  <input
-                    id="element-name-input"
-                    type="text"
-                    class="param-input"
-                    placeholder="element name"
-                  />
-                </div>
-                <div id="add-element-fields"></div>
-                <button id="add-element-button" class="button-primary button-full">+ Add</button>
-              </div>
+              <div id="elements-content"></div>
             </div>
           </div>
 
           <!-- Constraints tab -->
           <div id="tab-constraints" class="tab-panel">
             <div class="tab-scroll-area">
-              <div id="constraints-list"></div>
-            </div>
-            <div class="tab-footer">
-              <div id="add-constraint-row">
-                <div class="add-field-row">
-                  <span class="add-field-label">Type</span>
-                  <select id="constraint-type-select" class="param-select"></select>
-                </div>
-                <div class="add-field-row">
-                  <span class="add-field-label">Name</span>
-                  <input
-                    id="constraint-name-input"
-                    type="text"
-                    class="param-input"
-                    placeholder="optional"
-                  />
-                </div>
-                <div id="add-constraint-fields"></div>
-                <button id="add-constraint-button" class="button-primary button-full">+ Add</button>
-              </div>
+              <div id="constraints-content"></div>
             </div>
           </div>
 
@@ -112,6 +70,6 @@
         </div>
       </div>
     </div>
-    <script type="module" src="./js/main.js"></script>
+    <script type="module" src="./js/index.js"></script>
   </body>
 </html>

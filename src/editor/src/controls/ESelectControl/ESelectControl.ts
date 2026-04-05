@@ -63,7 +63,7 @@ export class ESelectControl<T> {
       return;
     }
     this.select.selectedIndex = index;
-    this.applyValue(this.options[index].value);
+    this.currentValue = this.options[index].value;
   }
 
   public flash(): void {

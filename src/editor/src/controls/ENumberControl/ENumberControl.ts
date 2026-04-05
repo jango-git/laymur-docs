@@ -106,7 +106,8 @@ export class ENumberControl {
   }
 
   public set value(value: number) {
-    this.applyValue(value);
+    this.currentValue = MathUtils.clamp(value, this.minValue, this.maxValue);
+    this.refreshDisplay();
   }
 
   public set min(min: number) {
@@ -129,9 +130,13 @@ export class ENumberControl {
     this.root.classList.remove("number-control--flash");
     void this.root.offsetWidth;
     this.root.classList.add("number-control--flash");
-    this.root.addEventListener("animationend", () => {
-      this.root.classList.remove("number-control--flash");
-    }, { once: true });
+    this.root.addEventListener(
+      "animationend",
+      () => {
+        this.root.classList.remove("number-control--flash");
+      },
+      { once: true },
+    );
   }
 
   public destroy(): void {
@@ -269,10 +274,9 @@ export class ENumberControl {
 
   private commitEdit(): void {
     const parsedValue = parseFloat(this.input.value);
-    if (isNaN(parsedValue)) {
-      throw new Error("ENumberControl: invalid number");
+    if (!isNaN(parsedValue)) {
+      this.applyValue(parsedValue);
     }
-    this.applyValue(parsedValue);
     this.transitionTo(
       this.root.matches(":hover") ? ENumberControlState.HOVER : ENumberControlState.VIEW,
     );

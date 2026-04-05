@@ -52,7 +52,9 @@ export class EBoolControl {
   }
 
   public set value(value: boolean) {
-    this.applyValue(value);
+    this.currentValue = value;
+    this.checkbox.checked = value;
+    this.root.dataset.checked = String(value);
   }
 
   public flash(): void {

@@ -51,9 +51,15 @@
 }
 
 @keyframes select-control-flash {
-  0%   { box-shadow: 0 0 0 2px transparent; }
-  30%  { box-shadow: 0 0 0 2px #e05252; }
-  100% { box-shadow: 0 0 0 2px transparent; }
+  0% {
+    box-shadow: 0 0 0 2px transparent;
+  }
+  30% {
+    box-shadow: 0 0 0 2px #e05252;
+  }
+  100% {
+    box-shadow: 0 0 0 2px transparent;
+  }
 }
 
 .select-control--flash {

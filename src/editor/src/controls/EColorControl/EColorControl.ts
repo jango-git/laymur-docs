@@ -67,9 +67,13 @@ export class EColorControl {
     this.root.classList.remove("color-control--flash");
     void this.root.offsetWidth;
     this.root.classList.add("color-control--flash");
-    this.root.addEventListener("animationend", () => {
-      this.root.classList.remove("color-control--flash");
-    }, { once: true });
+    this.root.addEventListener(
+      "animationend",
+      () => {
+        this.root.classList.remove("color-control--flash");
+      },
+      { once: true },
+    );
   }
 
   public destroy(): void {

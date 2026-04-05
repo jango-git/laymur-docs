@@ -78,6 +78,18 @@ export class EArrayControl<TItem> {
     return this.signalValueChangedInternal;
   }
 
+  public set value(items: TItem[]) {
+    for (const { item } of this.activeItems) {
+      item.destroy();
+    }
+    this.activeItems.length = 0;
+    this.list.innerHTML = "";
+    for (const item of items) {
+      this.appendItem(item);
+    }
+    this.lastValues = this.collectValues();
+  }
+
   public flash(): void {
     this.root.classList.remove("array-control--flash");
     void this.root.offsetWidth;

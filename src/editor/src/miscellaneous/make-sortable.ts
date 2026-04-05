@@ -2,7 +2,7 @@ export function makeSortable(
   container: HTMLElement,
   onReorder: (fromIndex: number, toIndex: number) => void,
 ): void {
-  let dragging: HTMLElement | null = null;
+  let dragging: HTMLElement | undefined = undefined;
 
   const clearDragOver = (): void => {
     container.querySelectorAll(".drag-over-top, .drag-over-bottom").forEach((el) => {
@@ -26,7 +26,7 @@ export function makeSortable(
 
   container.addEventListener("dragend", () => {
     dragging?.classList.remove("drag-ghost");
-    dragging = null;
+    dragging = undefined;
     clearDragOver();
   });
 
@@ -59,7 +59,7 @@ export function makeSortable(
     }
     target.classList.remove("drag-over-top", "drag-over-bottom");
 
-    if (dragging === null) {
+    if (dragging === undefined) {
       return;
     }
 

@@ -54,7 +54,8 @@ export class EStringControl {
   }
 
   public set value(value: string) {
-    this.applyValue(value);
+    this.currentValue = value;
+    this.refreshDisplay();
   }
 
   public flash(): void {

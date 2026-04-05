@@ -70,32 +70,32 @@ const plugins = [
 
 export default [
   {
-    input: "src/editor/src/main.ts",
+    input: "src/editor/index.ts",
     output: {
-      file: "dist/editor/main.js",
+      file: "dist/editor/index.js",
       format: "es",
       sourcemap: false,
     },
     plugins,
   },
 
-  {
-    input: "src/editor/src/preview/Preview.ts",
-    output: {
-      file: "dist/editor/preview.js",
-      format: "es",
-      sourcemap: false,
-    },
-    plugins,
-  },
+  // {
+  //   input: "src/editor/src/preview/Preview.ts",
+  //   output: {
+  //     file: "dist/editor/preview.js",
+  //     format: "es",
+  //     sourcemap: false,
+  //   },
+  //   plugins,
+  // },
 
-  ...exampleEntries.map((input) => ({
-    input,
-    output: {
-      file: input.replace("src/examples/", "dist/examples/").replace(".ts", ".js"),
-      format: "es",
-      sourcemap: false,
-    },
-    plugins,
-  })),
+  // ...exampleEntries.map((input) => ({
+  //   input,
+  //   output: {
+  //     file: input.replace("src/examples/", "dist/examples/").replace(".ts", ".js"),
+  //     format: "es",
+  //     sourcemap: false,
+  //   },
+  //   plugins,
+  // })),
 ];
