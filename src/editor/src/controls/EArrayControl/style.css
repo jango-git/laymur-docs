@@ -99,7 +99,7 @@
     border-color: var(--border);
   }
   30% {
-    border-color: #e05252;
+    border-color: var(--error);
   }
   100% {
     border-color: var(--border);

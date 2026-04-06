@@ -3,7 +3,7 @@ import { EStoreDeltaOperation } from "../signals";
 import type { EDocument, PartialExceptUUID } from "../types";
 import type { EAnyAsset, EFontAsset, EImageAsset } from "../types.assets";
 import { EAssetType } from "../types.assets";
-import type { EAssetUUID } from "../types.misc";
+import type { EAssetUuid } from "../types.misc";
 
 export class EStoreCommandsAssets {
   constructor(
@@ -16,7 +16,7 @@ export class EStoreCommandsAssets {
     this.signals["emitList"]({ operation: EStoreDeltaOperation.ADD, asset });
   }
 
-  public remove(uuid: EAssetUUID): void {
+  public remove(uuid: EAssetUuid): void {
     const index = this.data.assets.findIndex((a) => a.uuid === uuid);
     if (index === -1) {
       throw new Error(`[EStoreCommandsAssets] Asset not found: (uuid: ${uuid})`);
@@ -25,7 +25,7 @@ export class EStoreCommandsAssets {
     this.signals["emitList"]({ operation: EStoreDeltaOperation.REMOVE, uuid });
   }
 
-  public reorder(uuids: EAssetUUID[]): void {
+  public reorder(uuids: EAssetUuid[]): void {
     this.data.assets.sort((a, b) => uuids.indexOf(a.uuid) - uuids.indexOf(b.uuid));
     this.signals["emitList"]({ operation: EStoreDeltaOperation.REORDER, uuids });
   }
@@ -52,9 +52,9 @@ export class EStoreCommandsAssets {
     this.signals["emitItem"]({ asset });
   }
 
-  private get(uuid: EAssetUUID, type: EAssetType.FONT): EFontAsset;
-  private get(uuid: EAssetUUID, type: EAssetType.IMAGE): EImageAsset;
-  private get<T extends EAnyAsset>(uuid: EAssetUUID, type: EAssetType): T {
+  private get(uuid: EAssetUuid, type: EAssetType.FONT): EFontAsset;
+  private get(uuid: EAssetUuid, type: EAssetType.IMAGE): EImageAsset;
+  private get<T extends EAnyAsset>(uuid: EAssetUuid, type: EAssetType): T {
     for (const asset of this.data.assets) {
       if (asset.type === type && asset.uuid === uuid) {
         return asset as T;

@@ -6,7 +6,7 @@ export interface ESelectControlOption<T> {
   value: T;
 }
 
-interface ESelectControlOptions<T> {
+export interface ESelectControlOptions<T> {
   value: T;
   options: ESelectControlOption<T>[];
 }

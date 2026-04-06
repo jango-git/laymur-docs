@@ -2,18 +2,9 @@ import { ENumberControl } from "../../../controls/ENumberControl/ENumberControl"
 import { ESelectControl } from "../../../controls/ESelectControl/ESelectControl";
 import { STORE } from "../../../document/store";
 import { ELayerType } from "../../../document/types.layers";
-import type { ELayerUUID } from "../../../document/types.misc";
+import type { ELayerUuid } from "../../../document/types.misc";
 import { EResizePolicyType } from "../../../document/types.misc";
-
-const RESIZE_POLICY_OPTIONS = [
-  { label: "None", value: EResizePolicyType.NONE },
-  { label: "Cover", value: EResizePolicyType.COVER },
-  { label: "Fit", value: EResizePolicyType.FIT },
-  { label: "Cross", value: EResizePolicyType.CROSS },
-  { label: "Cross Inverted", value: EResizePolicyType.CROSS_INVERTED },
-  { label: "Fixed Width", value: EResizePolicyType.FIXED_WIDTH },
-  { label: "Fixed Height", value: EResizePolicyType.FIXED_HEIGHT },
-];
+import { RESIZE_POLICY_OPTIONS } from "./EFullscreenLayerCard.Internal";
 
 export class EFullscreenLayerCard {
   private readonly resizePolicyControl: ESelectControl<EResizePolicyType>;
@@ -23,7 +14,7 @@ export class EFullscreenLayerCard {
 
   constructor(
     private readonly container: HTMLElement,
-    private readonly uuid: ELayerUUID,
+    private readonly uuid: ELayerUuid,
   ) {
     const root = document.createElement("div");
     root.className = "layer-card";

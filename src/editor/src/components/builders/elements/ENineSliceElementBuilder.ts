@@ -1,61 +1,78 @@
+import type { FerrsignView1 } from "ferrsign";
+import { Ferrsign1 } from "ferrsign";
 import { EAssetControl } from "../../../controls/EAssetControl/EAssetControl";
+import { EStringControl } from "../../../controls/EStringControl/EStringControl";
 import { STORE } from "../../../document/store";
 import type { EImageAsset } from "../../../document/types.assets";
 import { EElementType } from "../../../document/types.elements";
 import { ENineSliceRegionMode } from "../../../document/types.misc";
+import { UI_STATE } from "../../../ui-state/ui-state";
+import { makeRow } from "../../../utils/rows";
 
 export class ENineSliceElementBuilder {
+  private readonly nameControl: EStringControl;
   private readonly textureControl: EAssetControl<EImageAsset>;
-  private readonly addButton: HTMLButtonElement;
+  private readonly errorMessage: HTMLElement;
+
+  private readonly signalBuildAvailabilityInternal = new Ferrsign1<boolean>();
 
   constructor(container: HTMLElement) {
-    const textureRow = document.createElement("div");
-    textureRow.className = "element-card__row";
-    const textureLabel = document.createElement("span");
-    textureLabel.className = "element-card__label";
-    textureLabel.textContent = "Texture";
-    textureRow.appendChild(textureLabel);
-    container.appendChild(textureRow);
+    this.nameControl = new EStringControl(makeRow(container, "Name"), { placeholder: "name" });
+    this.nameControl.signalValueChanged.on(this.handleDataUpdate);
 
     this.textureControl = new EAssetControl<EImageAsset>(
-      textureRow,
-      STORE.selectors.assets.selectAllImages,
-      { nullable: false },
+      makeRow(container, "Texture"),
+      () => STORE.selectors.assets.selectAllImages(),
+      { nullable: true },
     );
+    this.textureControl.signalValueChanged.on(this.handleDataUpdate);
 
-    this.addButton = document.createElement("button");
-    this.addButton.className = "button-primary";
-    this.addButton.textContent = "+ Add";
-    container.appendChild(this.addButton);
+    this.errorMessage = document.createElement("div");
+    this.errorMessage.className = "element-card__error";
+    container.appendChild(this.errorMessage);
 
-    this.textureControl.signalValueChanged.on(() => this.updateButton());
-    STORE.currentLayerChanged.on(() => this.updateButton());
-    this.updateButton();
+    UI_STATE.signalActiveLayerChanged.on(this.handleDataUpdate);
+    this.handleDataUpdate();
+  }
 
-    this.addButton.addEventListener("click", () => {
-      if (!this.isValid()) {
-        return;
-      }
-      STORE.commands.elements.add(STORE.currentLayerUuid!, {
-        uuid: crypto.randomUUID(),
-        type: EElementType.NINE_SLICE,
-        name: "Nine Slice",
-        color: "#ffffffff",
-        texture: this.textureControl.value!.uuid,
-        sliceBorders: [0, 0, 0, 0],
-        sliceRegions: [0, 0, 0, 0],
-        regionMode: ENineSliceRegionMode.NORMALIZED,
-      });
-      this.textureControl.value = null;
-      this.updateButton();
+  public get buildAvailabilitySignal(): FerrsignView1<boolean> {
+    return this.signalBuildAvailabilityInternal;
+  }
+
+  public build(): void {
+    STORE.commands.elements.add(UI_STATE.forceActiveLayerUuid, {
+      uuid: crypto.randomUUID(),
+      type: EElementType.NINE_SLICE,
+      name: this.nameControl.value,
+      color: "#ffffffff",
+      texture: this.textureControl.forceValue.uuid,
+      sliceBorders: [0, 0, 0, 0],
+      sliceRegions: [0, 0, 0, 0],
+      regionMode: ENineSliceRegionMode.NORMALIZED,
     });
+
+    this.nameControl.value = "";
+    this.textureControl.value = undefined;
+
+    this.handleDataUpdate();
   }
 
-  private isValid(): boolean {
-    return STORE.currentLayerUuid !== null && this.textureControl.value !== null;
-  }
+  private readonly handleDataUpdate = (): void => {
+    const error = STORE.validators.elements.validateNineSliceBuilder(
+      UI_STATE.activeLayerUuid,
+      this.nameControl.value,
+      this.textureControl.value?.uuid,
+    );
+    const isAvailable = error === undefined;
+    this.signalBuildAvailabilityInternal.emit(isAvailable);
 
-  private updateButton(): void {
-    this.addButton.disabled = !this.isValid();
-  }
+    this.errorMessage.textContent = error?.message ?? "";
+    this.errorMessage.style.display = !isAvailable ? "block" : "none";
+
+    if (error?.field === "name") {
+      this.nameControl.flash();
+    } else if (error?.field === "texture") {
+      this.textureControl.flash();
+    }
+  };
 }

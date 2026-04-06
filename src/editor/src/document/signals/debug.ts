@@ -1,10 +1,10 @@
 import type { FerrsignView1 } from "ferrsign";
 import { Ferrsign1 } from "ferrsign";
 import type { ELayerDebug } from "../types.debug";
-import type { ELayerUUID } from "../types.misc";
+import type { ELayerUuid } from "../types.misc";
 
 export interface EStoreDeltaDebug {
-  layerUuid: ELayerUUID;
+  layerUuid: ELayerUuid;
   debug: ELayerDebug;
 }
 

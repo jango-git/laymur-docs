@@ -2,7 +2,7 @@ import type { FerrsignView2 } from "ferrsign";
 import { Ferrsign2 } from "ferrsign";
 import { ENumberControl } from "../ENumberControl/ENumberControl";
 
-interface EColorControlOptions {
+export interface EColorControlOptions {
   value: string; // #RRGGBBAA
 }
 

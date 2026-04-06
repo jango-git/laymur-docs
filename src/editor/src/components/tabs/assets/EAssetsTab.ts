@@ -10,21 +10,38 @@ export class EAssetsTab {
   private readonly cardMap = new Map<string, HTMLElement>();
 
   constructor(container: HTMLElement) {
-    const cardList = container.querySelector<HTMLElement>("#assets-grid");
-    if (!cardList) {
-      throw new Error("[EAssetsTab] #assets-grid not found");
-    }
+    const scrollArea = document.createElement("div");
+    scrollArea.className = "tab-scroll-area";
+    container.appendChild(scrollArea);
+
+    const cardList = document.createElement("div");
+    cardList.id = "assets-grid";
+    scrollArea.appendChild(cardList);
     this.cardList = cardList;
 
-    const addButton = container.querySelector<HTMLButtonElement>("#button-add-asset");
-    const fileInput = container.querySelector<HTMLInputElement>("#input-asset-file");
-    if (addButton && fileInput) {
-      addButton.addEventListener("click", () => fileInput.click());
-      fileInput.addEventListener("change", () => {
-        this.handleFiles(fileInput.files);
-        fileInput.value = "";
-      });
-    }
+    const footer = document.createElement("div");
+    footer.className = "tab-footer";
+    container.appendChild(footer);
+
+    const addButton = document.createElement("button");
+    addButton.id = "button-add-asset";
+    addButton.className = "button-primary";
+    addButton.textContent = "+ Add Texture";
+    footer.appendChild(addButton);
+
+    const fileInput = document.createElement("input");
+    fileInput.id = "input-asset-file";
+    fileInput.type = "file";
+    fileInput.accept = "image/*";
+    fileInput.multiple = true;
+    fileInput.hidden = true;
+    footer.appendChild(fileInput);
+
+    addButton.addEventListener("click", () => fileInput.click());
+    fileInput.addEventListener("change", () => {
+      this.handleFiles(fileInput.files);
+      fileInput.value = "";
+    });
 
     STORE.signals.assets.list.on((delta) => {
       if (delta.operation === EStoreDeltaOperation.ADD) {

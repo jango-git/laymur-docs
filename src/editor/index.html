@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Laymur Editor</title>
-    <link rel="stylesheet" href="./style.css" />
+    <link rel="stylesheet" href="./index.css" />
   </head>
   <body>
     <div id="app">
@@ -30,43 +30,19 @@
 
         <div id="tab-content">
           <!-- Assets tab -->
-          <div id="tab-assets" class="tab-panel active">
-            <div class="tab-scroll-area">
-              <div id="assets-grid"></div>
-            </div>
-            <div class="tab-footer">
-              <button id="button-add-asset" class="button-primary">+ Add Texture</button>
-              <input type="file" id="input-asset-file" accept="image/*" multiple hidden />
-            </div>
-          </div>
+          <div id="tab-assets" class="tab-panel active"></div>
 
           <!-- Layers tab -->
-          <div id="tab-layers" class="tab-panel">
-            <div class="tab-scroll-area">
-              <div id="layers-content"></div>
-            </div>
-          </div>
+          <div id="tab-layers" class="tab-panel"></div>
 
           <!-- Elements tab -->
-          <div id="tab-elements" class="tab-panel">
-            <div class="tab-scroll-area">
-              <div id="elements-content"></div>
-            </div>
-          </div>
+          <div id="tab-elements" class="tab-panel"></div>
 
           <!-- Constraints tab -->
-          <div id="tab-constraints" class="tab-panel">
-            <div class="tab-scroll-area">
-              <div id="constraints-content"></div>
-            </div>
-          </div>
+          <div id="tab-constraints" class="tab-panel"></div>
 
           <!-- Export tab -->
-          <div id="tab-export" class="tab-panel">
-            <div class="tab-scroll-area">
-              <div id="export-content"></div>
-            </div>
-          </div>
+          <div id="tab-export" class="tab-panel"></div>
         </div>
       </div>
     </div>

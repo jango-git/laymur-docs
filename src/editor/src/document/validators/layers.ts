@@ -1,29 +1,26 @@
-import type { EDocument } from "../types";
-import type { ELayerUUID } from "../types.misc";
+import type { EDocument, ELayerContext } from "../types";
+
+interface EValidateFullscreenBuilderError {
+  message: string;
+  field: "name";
+}
 
 export class EStoreValidatorsLayers {
   constructor(private readonly data: EDocument) {}
 
-  public uniqueLayerName(name: string): string[] | undefined {
-    const errors: string[] = [];
-    if (this.data.layerContexts.some((c) => c.layer.name === name)) {
-      errors.push(`Layer name "${name}" is already in use.`);
+  public validateFullscreenBuilder(name?: string): EValidateFullscreenBuilderError | undefined {
+    if (name === undefined || name === "") {
+      return { message: "Name is required", field: "name" };
     }
-    return errors.length > 0 ? errors : undefined;
+
+    if (!this.validateUniqueLayerName(name)) {
+      return { message: "Name is already in use", field: "name" };
+    }
   }
 
-  public uniqueChildName(layerUuid: ELayerUUID, name: string): string[] | undefined {
-    const layerContext = this.data.layerContexts.find((c) => c.layer.uuid === layerUuid);
-    if (!layerContext) {
-      throw new Error(`[EStoreValidatorsLayers] Layer not found: (uuid: ${layerUuid})`);
-    }
-    const errors: string[] = [];
-    if (
-      layerContext.elements.some((e) => e.name === name) ||
-      layerContext.constraints.some((c) => c.name === name)
-    ) {
-      errors.push(`Name "${name}" is already in use in this layer.`);
-    }
-    return errors.length > 0 ? errors : undefined;
+  private validateUniqueLayerName(name: string): boolean {
+    return this.data.layerContexts.every(
+      (layerContext: ELayerContext) => layerContext.layer.name !== name,
+    );
   }
 }

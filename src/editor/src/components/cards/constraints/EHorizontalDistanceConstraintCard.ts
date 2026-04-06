@@ -1,3 +1,107 @@
+import { EAssetControl } from "../../../controls/EAssetControl/EAssetControl";
+import { ENumberControl } from "../../../controls/ENumberControl/ENumberControl";
+import { EVec2Control } from "../../../controls/EVec2Control/EVec2Control";
+import type { EStoreDeltaConstraint } from "../../../document/signals";
+import { STORE } from "../../../document/store";
+import type { EHorizontalDistanceConstraint } from "../../../document/types.constraints";
+import { EConstraintType } from "../../../document/types.constraints";
+import type { EConstraintUuid } from "../../../document/types.misc";
+import type { EConstraintTarget } from "../../../utils/constraint-targets";
+import { getConstraintTargets } from "../../../utils/constraint-targets";
+import { makeRow } from "../../../utils/rows";
+
 export class EHorizontalDistanceConstraintCard {
-  constructor(private readonly container: HTMLElement) {}
+  private readonly elementAControl: EAssetControl<EConstraintTarget>;
+  private readonly elementBControl: EAssetControl<EConstraintTarget>;
+  private readonly anchorsControl: EVec2Control;
+  private readonly distanceControl: ENumberControl;
+
+  constructor(
+    private readonly container: HTMLElement,
+    private readonly uuid: EConstraintUuid,
+  ) {
+    const root = document.createElement("div");
+    root.className = "element-card";
+
+    this.elementAControl = new EAssetControl<EConstraintTarget>(
+      makeRow(root, "Element A"),
+      getConstraintTargets,
+      { nullable: false },
+    );
+    this.elementAControl.signalValueChanged.on(this.onElementAChanged);
+
+    this.elementBControl = new EAssetControl<EConstraintTarget>(
+      makeRow(root, "Element B"),
+      getConstraintTargets,
+      { nullable: false },
+    );
+    this.elementBControl.signalValueChanged.on(this.onElementBChanged);
+
+    this.anchorsControl = new EVec2Control(makeRow(root, "Anchors"), {
+      labels: ["A", "B"],
+      min: 0,
+      max: 1,
+      step: 0.01,
+      precision: 2,
+    });
+    this.anchorsControl.signalValueChanged.on(this.onAnchorsChanged);
+
+    this.distanceControl = new ENumberControl(makeRow(root, "Distance"), {
+      value: 0,
+      min: -99999,
+      max: 99999,
+      step: 1,
+      precision: 1,
+    });
+    this.distanceControl.signalValueChanged.on(this.onDistanceChanged);
+
+    this.container.appendChild(root);
+
+    const initial = STORE.selectors.constraints.select(uuid);
+    if (initial?.type !== EConstraintType.DISTANCE_HORIZONTAL) {
+      throw new Error(
+        "EHorizontalDistanceConstraintCard: initial constraint is not a horizontal distance constraint",
+      );
+    }
+
+    this.refresh(initial);
+    STORE.signals.constraints.item.on(this.onConstraintItemChanged);
+  }
+
+  private refresh(constraint: EHorizontalDistanceConstraint): void {
+    const targets = getConstraintTargets();
+    this.elementAControl.value = targets.find((e) => e.uuid === constraint.elementA);
+    this.elementBControl.value = targets.find((e) => e.uuid === constraint.elementB);
+    this.anchorsControl.value = [constraint.anchorA, constraint.anchorB];
+    this.distanceControl.value = constraint.distance;
+  }
+
+  private readonly onElementAChanged = (next: EConstraintTarget | undefined): void => {
+    if (next !== undefined) {
+      STORE.commands.constraints.writeHorizontalDistance({ uuid: this.uuid, elementA: next.uuid });
+    }
+  };
+
+  private readonly onElementBChanged = (next: EConstraintTarget | undefined): void => {
+    if (next !== undefined) {
+      STORE.commands.constraints.writeHorizontalDistance({ uuid: this.uuid, elementB: next.uuid });
+    }
+  };
+
+  private readonly onAnchorsChanged = ([a, b]: [number, number]): void => {
+    STORE.commands.constraints.writeHorizontalDistance({ uuid: this.uuid, anchorA: a, anchorB: b });
+  };
+
+  private readonly onDistanceChanged = (distance: number): void => {
+    STORE.commands.constraints.writeHorizontalDistance({ uuid: this.uuid, distance });
+  };
+
+  private readonly onConstraintItemChanged = (delta: EStoreDeltaConstraint): void => {
+    if (
+      delta.constraint.uuid === this.uuid &&
+      delta.constraint.type === EConstraintType.DISTANCE_HORIZONTAL
+    ) {
+      this.refresh(delta.constraint);
+    }
+  };
 }

@@ -1,14 +1,14 @@
 export type EColor = string; // RRGGBBAA
 
-export type EAssetUUID = string;
+export type EAssetUuid = string;
 
-export type ELayerUUID = string;
+export type ELayerUuid = string;
 
-export type EElementUUID = string;
+export type EElementUuid = string;
 
-export type EConstraintUUID = string;
+export type EConstraintUuid = string;
 
-export type EChildUUID = string;
+export type EChildUuid = string;
 
 export enum EResizePolicyType {
   COVER = "COVER",
@@ -68,18 +68,63 @@ export enum ETextResizeMode {
   WORLD = "WORLD",
 }
 
-export type EGraphicsDrawCommand =
-  | { x: number; y: number; width: number; height: number; color: string }
-  | { x: number; y: number; radius: number; color: string }
-  | { x: number; y: number; radius: number; startAngle: number; endAngle: number; color: string }
-  | { points: [number, number][]; color: string; lineWidth: number };
+export enum EGraphicsDrawCommandType {
+  ARC = "ARC",
+  CIRCLE = "CIRCLE",
+  POLYLINE = "POLYLINE",
+  RECT = "RECT",
+}
+
+interface EGraphicsDrawCommand {
+  type: EGraphicsDrawCommandType;
+}
+
+export interface EGraphicsArcDrawCommand extends EGraphicsDrawCommand {
+  type: EGraphicsDrawCommandType.ARC;
+  x: number;
+  y: number;
+  radius: number;
+  startAngle: number;
+  endAngle: number;
+  color: string;
+}
+
+export interface EGraphicsCircleDrawCommand extends EGraphicsDrawCommand {
+  type: EGraphicsDrawCommandType.CIRCLE;
+  x: number;
+  y: number;
+  radius: number;
+  color: string;
+}
+
+export interface EGraphicsPolylineDrawCommand extends EGraphicsDrawCommand {
+  type: EGraphicsDrawCommandType.POLYLINE;
+  points: [number, number][];
+  color: string;
+  lineWidth: number;
+}
+
+export interface EGraphicsRectDrawCommand extends EGraphicsDrawCommand {
+  type: EGraphicsDrawCommandType.RECT;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  color: string;
+}
+
+export type EAnyGraphicsDrawCommand =
+  | EGraphicsArcDrawCommand
+  | EGraphicsCircleDrawCommand
+  | EGraphicsPolylineDrawCommand
+  | EGraphicsRectDrawCommand;
 
 export interface ETextChunk {
   text: string;
   style: {
     color: EColor;
     align: ETextAlign;
-    font: EAssetUUID;
+    font: EAssetUuid;
     fontSize: number;
     fontStyle: ETextFontStyle;
     fontWeight: ETextFontWeight;

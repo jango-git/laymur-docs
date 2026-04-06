@@ -19,7 +19,7 @@ function copyStaticFiles(sourceDirectory, destinationDirectory) {
 }
 
 copyStaticFiles("src/editor", join(SITE, "editor"));
-copyStaticFiles("src/examples", join(SITE, "examples"));
+// copyStaticFiles("src/examples", join(SITE, "examples"));
 
 // 4. Copy JS bundles into js/ subdirectories
 function copyBundles(distDirectory, destinationDirectory) {
@@ -32,6 +32,6 @@ function copyBundles(distDirectory, destinationDirectory) {
 }
 
 copyBundles("dist/editor", join(SITE, "editor", "js"));
-copyBundles("dist/examples", join(SITE, "examples", "js"));
+// copyBundles("dist/examples", join(SITE, "examples", "js"));
 
 console.log("✓ Built _site/");

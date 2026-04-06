@@ -1,7 +1,7 @@
 import type { FerrsignView2 } from "ferrsign";
 import { Ferrsign2 } from "ferrsign";
 
-interface EStringControlOptions {
+export interface EStringControlOptions {
   value: string;
   placeholder: string;
 }

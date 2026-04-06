@@ -1,22 +1,15 @@
 import { EBoolControl } from "../../../controls/EBoolControl/EBoolControl";
 import { EColorControl } from "../../../controls/EColorControl/EColorControl";
 import { ENumberControl } from "../../../controls/ENumberControl/ENumberControl";
-import type { ESelectControlOption } from "../../../controls/ESelectControl/ESelectControl";
 import { ESelectControl } from "../../../controls/ESelectControl/ESelectControl";
+import type { EStoreDeltaElement } from "../../../document/signals";
 import { STORE } from "../../../document/store";
 import type { ESceneElement } from "../../../document/types.elements";
 import { EElementType } from "../../../document/types.elements";
-import type { EElementUUID } from "../../../document/types.misc";
+import type { EColor, EElementUuid } from "../../../document/types.misc";
 import { ESceneUpdateMode } from "../../../document/types.misc";
-import { makeRow } from "./helpers";
-
-const UPDATE_MODE_OPTIONS: ESelectControlOption<ESceneUpdateMode>[] = [
-  { label: "Every Frame", value: ESceneUpdateMode.EVERY_FRAME },
-  { label: "Every 2nd Frame", value: ESceneUpdateMode.EVERY_SECOND_FRAME },
-  { label: "On Props Change", value: ESceneUpdateMode.ON_PROPERTIES_CHANGE },
-  { label: "On Dim Change", value: ESceneUpdateMode.ON_DIMENSIONS_CHANGE },
-  { label: "Manual", value: ESceneUpdateMode.MANUAL },
-];
+import { makeRow } from "../../../utils/rows";
+import { UPDATE_MODE_OPTIONS } from "./ESceneElementCard.Internal";
 
 export class ESceneElementCard {
   private readonly colorControl: EColorControl;
@@ -27,63 +20,44 @@ export class ESceneElementCard {
 
   constructor(
     private readonly container: HTMLElement,
-    private readonly uuid: EElementUUID,
+    private readonly uuid: EElementUuid,
   ) {
     const root = document.createElement("div");
     root.className = "element-card";
 
-    const colorRow = makeRow(root, "Color");
-    this.colorControl = new EColorControl(colorRow);
+    this.colorControl = new EColorControl(makeRow(root, "Color"));
+    this.colorControl.signalValueChanged.on(this.onColorChanged);
 
-    const updateModeRow = makeRow(root, "Update Mode");
-    this.updateModeControl = new ESelectControl<ESceneUpdateMode>(updateModeRow, {
+    this.updateModeControl = new ESelectControl<ESceneUpdateMode>(makeRow(root, "Update Mode"), {
       options: UPDATE_MODE_OPTIONS,
       value: ESceneUpdateMode.EVERY_FRAME,
     });
+    this.updateModeControl.signalValueChanged.on(this.onUpdateModeChanged);
 
-    const resFactorRow = makeRow(root, "Res Factor");
-    this.resolutionFactorControl = new ENumberControl(resFactorRow, {
+    this.resolutionFactorControl = new ENumberControl(makeRow(root, "Resolution Factor"), {
       value: 1,
       min: 0.1,
       max: 4,
       step: 0.1,
       precision: 2,
     });
+    this.resolutionFactorControl.signalValueChanged.on(this.onResolutionFactorChanged);
 
-    const clearColorRow = makeRow(root, "Clear Color");
-    this.clearColorControl = new EColorControl(clearColorRow);
+    this.clearColorControl = new EColorControl(makeRow(root, "Clear Color"));
+    this.clearColorControl.signalValueChanged.on(this.onClearColorChanged);
 
-    const depthRow = makeRow(root, "Depth Buffer");
-    this.enableDepthBufferControl = new EBoolControl(depthRow);
+    this.enableDepthBufferControl = new EBoolControl(makeRow(root, "Depth Buffer"));
+    this.enableDepthBufferControl.signalValueChanged.on(this.onEnableDepthBufferChanged);
 
     this.container.appendChild(root);
 
-    this.colorControl.signalValueChanged.on((next) => {
-      STORE.commands.elements.writeScene({ uuid: this.uuid, color: next });
-    });
-    this.updateModeControl.signalValueChanged.on((next) => {
-      STORE.commands.elements.writeScene({ uuid: this.uuid, updateMode: next });
-    });
-    this.resolutionFactorControl.signalValueChanged.on((next) => {
-      STORE.commands.elements.writeScene({ uuid: this.uuid, resolutionFactor: next });
-    });
-    this.clearColorControl.signalValueChanged.on((next) => {
-      STORE.commands.elements.writeScene({ uuid: this.uuid, clearColor: next });
-    });
-    this.enableDepthBufferControl.signalValueChanged.on((next) => {
-      STORE.commands.elements.writeScene({ uuid: this.uuid, enableDepthBuffer: next });
-    });
-
     const initial = STORE.selectors.elements.select(uuid);
-    if (initial?.type === EElementType.SCENE) {
-      this.refresh(initial);
+    if (initial?.type !== EElementType.SCENE) {
+      throw new Error("ESceneElementCard: initial element is not a scene element");
     }
 
-    STORE.signals.elements.item.on((delta) => {
-      if (delta.element.uuid === this.uuid && delta.element.type === EElementType.SCENE) {
-        this.refresh(delta.element);
-      }
-    });
+    this.refresh(initial);
+    STORE.signals.elements.item.on(this.onElementItemChanged);
   }
 
   private refresh(element: ESceneElement): void {
@@ -93,4 +67,30 @@ export class ESceneElementCard {
     this.clearColorControl.value = element.clearColor;
     this.enableDepthBufferControl.value = element.enableDepthBuffer;
   }
+
+  private readonly onColorChanged = (color: string): void => {
+    STORE.commands.elements.writeScene({ uuid: this.uuid, color });
+  };
+
+  private readonly onUpdateModeChanged = (updateMode: ESceneUpdateMode): void => {
+    STORE.commands.elements.writeScene({ uuid: this.uuid, updateMode });
+  };
+
+  private readonly onResolutionFactorChanged = (resolutionFactor: number): void => {
+    STORE.commands.elements.writeScene({ uuid: this.uuid, resolutionFactor });
+  };
+
+  private readonly onClearColorChanged = (clearColor: EColor): void => {
+    STORE.commands.elements.writeScene({ uuid: this.uuid, clearColor });
+  };
+
+  private readonly onEnableDepthBufferChanged = (enableDepthBuffer: boolean): void => {
+    STORE.commands.elements.writeScene({ uuid: this.uuid, enableDepthBuffer });
+  };
+
+  private readonly onElementItemChanged = (delta: EStoreDeltaElement): void => {
+    if (delta.element.uuid === this.uuid && delta.element.type === EElementType.SCENE) {
+      this.refresh(delta.element);
+    }
+  };
 }

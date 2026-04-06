@@ -1,0 +1,214 @@
+@import "./src/controls/EStringControl/style.css";
+@import "./src/controls/ESelectControl/style.css";
+@import "./src/controls/ENumberControl/style.css";
+@import "./src/controls/EColorControl/style.css";
+@import "./src/controls/EBoolControl/style.css";
+@import "./src/controls/EAssetControl/style.css";
+@import "./src/controls/EArrayControl/style.css";
+@import "./src/controls/EVec2Control/style.css";
+@import "./src/utils/style.css";
+@import "./src/components/cards/assets/style.css";
+@import "./src/components/cards/layers/style.css";
+@import "./src/components/cards/elements/style.css";
+@import "./src/components/builders/style.css";
+
+:root {
+  /* Backgrounds */
+  --bg-app: #f0f0f0;
+  --bg-toolbar: #e8e8e8;
+  --bg-panel: #fafafa;
+  --bg-card-1: #fafafa;
+  --bg-card-2: #f0f0f0;
+
+  /* Borders */
+  --border: #e0e0e0;
+  --border-strong: #ccc;
+  --border-hover: #999;
+
+  /* Accent */
+  --accent: #0066cc;
+  --accent-hover: #0052a3;
+  --accent-light: #e8f0ff;
+
+  /* Text */
+  --text: #222;
+  --text-label: #666;
+  --text-secondary: #999;
+
+  /* Overlays */
+  --overlay-hover: rgba(0, 0, 0, 0.05);
+  --overlay-active: rgba(0, 0, 0, 0.09);
+
+  /* Misc */
+  --radius-sm: 4px;
+  --error: #e05252;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  height: 100vh;
+  overflow: hidden;
+}
+
+#app {
+  display: flex;
+  height: 100vh;
+}
+
+/* Viewport (left side, 60%) */
+#viewport {
+  flex: 0 0 60%;
+  background: var(--bg-app);
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--border-strong);
+}
+
+#viewport-toolbar {
+  height: 40px;
+  background: var(--bg-toolbar);
+  border-bottom: 1px solid var(--border-strong);
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+}
+
+#viewport-content {
+  flex: 1;
+  overflow: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#preview-frame {
+  border: none;
+  width: 100%;
+  height: 100%;
+}
+
+/* Panel (right side, 40%) */
+#panel {
+  flex: 0 0 40%;
+  background: var(--bg-panel);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Tab bar */
+#tabs {
+  display: flex;
+  background: var(--bg-app);
+  border-bottom: 1px solid var(--border-strong);
+  height: 44px;
+}
+
+.tab-button {
+  flex: 1;
+  padding: 0;
+  border: none;
+  background: var(--bg-app);
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-label);
+  transition: all 0.2s;
+}
+
+.tab-button:hover {
+  background: var(--bg-toolbar);
+}
+
+.tab-button.active {
+  color: var(--text);
+  border-bottom-color: var(--accent);
+  background: var(--bg-panel);
+}
+
+/* Tab content */
+#tab-content {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.tab-panel {
+  display: none;
+  flex: 1;
+  overflow: auto;
+  flex-direction: column;
+}
+
+.tab-panel.active {
+  display: flex;
+}
+
+.tab-scroll-area {
+  flex: 1;
+  overflow: auto;
+  padding: 12px;
+}
+
+.tab-footer {
+  padding: 12px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 8px;
+}
+
+.button-primary {
+  flex: 1;
+  padding: 8px 12px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.button-primary:hover {
+  background: var(--accent-hover);
+}
+
+/* Layer rows */
+.layer-row {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  gap: 8px;
+}
+
+.layer-row:hover {
+  background: var(--bg-app);
+}
+
+.layer-row--active {
+  background: var(--accent-light);
+  border-color: var(--accent);
+}
+
+.layer-row__name {
+  font-size: 13px;
+  color: var(--text);
+  flex: 1;
+}
+
+/* List for assets */
+#assets-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}

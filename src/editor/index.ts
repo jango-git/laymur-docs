@@ -20,7 +20,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-
   const assetsContainerElementId = "tab-assets";
   const layersContainerElementId = "tab-layers";
   const elementsContainerElementId = "tab-elements";

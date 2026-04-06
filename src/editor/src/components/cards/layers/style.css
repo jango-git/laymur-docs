@@ -4,8 +4,8 @@
   gap: 6px;
   padding: 8px;
   background: #fff;
-  border: 1px solid #e0e0e0;
-  border-radius: 4px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
 }
 
 .layer-card__row {
@@ -20,7 +20,7 @@
 
 .layer-card__label {
   font-size: 12px;
-  color: #666;
+  color: var(--text-label);
   flex-shrink: 0;
   min-width: 16px;
 }

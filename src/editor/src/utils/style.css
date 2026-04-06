@@ -1,0 +1,31 @@
+.element-card__row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.element-card__label {
+  font-size: 12px;
+  color: var(--text-label);
+  flex-shrink: 0;
+  width: 20%;
+}
+
+.element-card__row .string-control,
+.element-card__row .number-control,
+.element-card__row .select-control,
+.element-card__row .asset-control,
+.element-card__row .color-control,
+.element-card__row .vec2-control {
+  flex: 1;
+  min-width: 0;
+}
+
+.element-card__section-header {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding-top: 4px;
+}

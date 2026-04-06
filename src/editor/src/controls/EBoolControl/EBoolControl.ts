@@ -1,7 +1,7 @@
 import type { FerrsignView2 } from "ferrsign";
 import { Ferrsign2 } from "ferrsign";
 
-interface EBoolControlOptions {
+export interface EBoolControlOptions {
   value: boolean;
 }
 

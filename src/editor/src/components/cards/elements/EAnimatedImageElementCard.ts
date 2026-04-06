@@ -1,46 +1,20 @@
-import type {
-  EArrayControlItem,
-  EArrayControlTemplate,
-} from "../../../controls/EArrayControl/EArrayControl";
 import { EArrayControl } from "../../../controls/EArrayControl/EArrayControl";
-import { EAssetControl } from "../../../controls/EAssetControl/EAssetControl";
 import { EBoolControl } from "../../../controls/EBoolControl/EBoolControl";
 import { EColorControl } from "../../../controls/EColorControl/EColorControl";
 import { ENumberControl } from "../../../controls/ENumberControl/ENumberControl";
-import type { ESelectControlOption } from "../../../controls/ESelectControl/ESelectControl";
 import { ESelectControl } from "../../../controls/ESelectControl/ESelectControl";
+import type { EStoreDeltaElement } from "../../../document/signals";
 import { STORE } from "../../../document/store";
-import type { EImageAsset } from "../../../document/types.assets";
 import type { EAnimatedImageElement } from "../../../document/types.elements";
 import { EElementType } from "../../../document/types.elements";
-import type { EAssetUUID, EElementUUID } from "../../../document/types.misc";
+import type { EAssetUuid, EColor, EElementUuid } from "../../../document/types.misc";
 import { EAnimatedImageLoopMode } from "../../../document/types.misc";
-import { makeRow } from "./helpers";
-
-const LOOP_MODE_OPTIONS: ESelectControlOption<EAnimatedImageLoopMode>[] = [
-  { label: "None", value: EAnimatedImageLoopMode.NONE },
-  { label: "Loop", value: EAnimatedImageLoopMode.LOOP },
-  { label: "Ping-Pong", value: EAnimatedImageLoopMode.PING_PONG },
-];
-
-const sequenceTemplate: EArrayControlTemplate<EAssetUUID> = {
-  createDefault: () => "",
-  buildItem(container, value, onChange): EArrayControlItem<EAssetUUID> {
-    const ctrl = new EAssetControl<EImageAsset>(container, STORE.selectors.assets.selectAllImages, {
-      value: STORE.selectors.assets.selectImage(value),
-      nullable: false,
-    });
-    ctrl.signalValueChanged.on(() => onChange());
-    return {
-      getValue: () => ctrl.value?.uuid ?? "",
-      destroy: () => ctrl.destroy(),
-    };
-  },
-};
+import { makeRow } from "../../../utils/rows";
+import { LOOP_MODE_OPTIONS, sequenceTemplate } from "./EAnimatedImageElementCard.Internal";
 
 export class EAnimatedImageElementCard {
   private readonly colorControl: EColorControl;
-  private readonly sequenceControl: EArrayControl<EAssetUUID>;
+  private readonly sequenceControl: EArrayControl<EAssetUuid>;
   private readonly frameRateControl: ENumberControl;
   private readonly timeScaleControl: ENumberControl;
   private readonly loopModeControl: ESelectControl<EAnimatedImageLoopMode>;
@@ -48,83 +22,96 @@ export class EAnimatedImageElementCard {
 
   constructor(
     private readonly container: HTMLElement,
-    private readonly uuid: EElementUUID,
+    private readonly uuid: EElementUuid,
   ) {
     const root = document.createElement("div");
     root.className = "element-card";
 
-    const colorRow = makeRow(root, "Color");
-    this.colorControl = new EColorControl(colorRow);
+    this.colorControl = new EColorControl(makeRow(root, "Color"));
+    this.colorControl.signalValueChanged.on(this.onColorChanged);
 
-    const sequenceRow = makeRow(root, "Sequence");
-    this.sequenceControl = new EArrayControl<EAssetUUID>(sequenceRow, sequenceTemplate);
-
-    const frameRateRow = makeRow(root, "Frame Rate");
-    this.frameRateControl = new ENumberControl(frameRateRow, {
+    this.frameRateControl = new ENumberControl(makeRow(root, "Frame Rate"), {
       value: 24,
       min: 1,
       max: 240,
       step: 1,
       precision: 0,
     });
+    this.frameRateControl.signalValueChanged.on(this.onFrameRateChanged);
 
-    const timeScaleRow = makeRow(root, "Time Scale");
-    this.timeScaleControl = new ENumberControl(timeScaleRow, {
+    this.timeScaleControl = new ENumberControl(makeRow(root, "Time Scale"), {
       value: 1,
       min: 0,
       max: 10,
       step: 0.01,
       precision: 2,
     });
+    this.timeScaleControl.signalValueChanged.on(this.onTimeScaleChanged);
 
-    const loopModeRow = makeRow(root, "Loop Mode");
-    this.loopModeControl = new ESelectControl<EAnimatedImageLoopMode>(loopModeRow, {
+    this.loopModeControl = new ESelectControl<EAnimatedImageLoopMode>(makeRow(root, "Loop Mode"), {
       options: LOOP_MODE_OPTIONS,
       value: EAnimatedImageLoopMode.LOOP,
     });
+    this.loopModeControl.signalValueChanged.on(this.onLoopModeChanged);
 
-    const playRow = makeRow(root, "Auto Play");
-    this.playByDefaultControl = new EBoolControl(playRow, { value: true });
+    this.playByDefaultControl = new EBoolControl(makeRow(root, "Auto Play"), { value: true });
+    this.playByDefaultControl.signalValueChanged.on(this.onPlayByDefaultChanged);
+
+    this.sequenceControl = new EArrayControl<EAssetUuid>(
+      makeRow(root, "Sequence"),
+      sequenceTemplate,
+    );
+    this.sequenceControl.signalValueChanged.on(this.onSequenceChanged);
 
     this.container.appendChild(root);
 
-    this.colorControl.signalValueChanged.on((next) => {
-      STORE.commands.elements.writeAnimatedImage({ uuid: this.uuid, color: next });
-    });
-    this.sequenceControl.signalValueChanged.on((next) => {
-      STORE.commands.elements.writeAnimatedImage({ uuid: this.uuid, sequence: next });
-    });
-    this.frameRateControl.signalValueChanged.on((next) => {
-      STORE.commands.elements.writeAnimatedImage({ uuid: this.uuid, frameRate: next });
-    });
-    this.timeScaleControl.signalValueChanged.on((next) => {
-      STORE.commands.elements.writeAnimatedImage({ uuid: this.uuid, timeScale: next });
-    });
-    this.loopModeControl.signalValueChanged.on((next) => {
-      STORE.commands.elements.writeAnimatedImage({ uuid: this.uuid, loopMode: next });
-    });
-    this.playByDefaultControl.signalValueChanged.on((next) => {
-      STORE.commands.elements.writeAnimatedImage({ uuid: this.uuid, playByDefault: next });
-    });
-
     const initial = STORE.selectors.elements.select(uuid);
-    if (initial?.type === EElementType.ANIMATED_IMAGE) {
-      this.refresh(initial);
+    if (initial?.type !== EElementType.ANIMATED_IMAGE) {
+      throw new Error(
+        "EAnimatedImageElementCard: initial element is not an animated image element",
+      );
     }
 
-    STORE.signals.elements.item.on((delta) => {
-      if (delta.element.uuid === this.uuid && delta.element.type === EElementType.ANIMATED_IMAGE) {
-        this.refresh(delta.element);
-      }
-    });
+    this.refresh(initial);
+    STORE.signals.elements.item.on(this.onElementItemChanged);
   }
 
   private refresh(element: EAnimatedImageElement): void {
     this.colorControl.value = element.color;
-    this.sequenceControl.value = element.sequence;
     this.frameRateControl.value = element.frameRate;
     this.timeScaleControl.value = element.timeScale;
     this.loopModeControl.value = element.loopMode;
     this.playByDefaultControl.value = element.playByDefault;
+    this.sequenceControl.value = element.sequence;
   }
+
+  private readonly onColorChanged = (color: EColor): void => {
+    STORE.commands.elements.writeAnimatedImage({ uuid: this.uuid, color });
+  };
+
+  private readonly onFrameRateChanged = (frameRate: number): void => {
+    STORE.commands.elements.writeAnimatedImage({ uuid: this.uuid, frameRate });
+  };
+
+  private readonly onTimeScaleChanged = (timeScale: number): void => {
+    STORE.commands.elements.writeAnimatedImage({ uuid: this.uuid, timeScale });
+  };
+
+  private readonly onLoopModeChanged = (loopMode: EAnimatedImageLoopMode): void => {
+    STORE.commands.elements.writeAnimatedImage({ uuid: this.uuid, loopMode });
+  };
+
+  private readonly onPlayByDefaultChanged = (playByDefault: boolean): void => {
+    STORE.commands.elements.writeAnimatedImage({ uuid: this.uuid, playByDefault });
+  };
+
+  private readonly onSequenceChanged = (sequence: EAssetUuid[]): void => {
+    STORE.commands.elements.writeAnimatedImage({ uuid: this.uuid, sequence });
+  };
+
+  private readonly onElementItemChanged = (delta: EStoreDeltaElement): void => {
+    if (delta.element.uuid === this.uuid && delta.element.type === EElementType.ANIMATED_IMAGE) {
+      this.refresh(delta.element);
+    }
+  };
 }

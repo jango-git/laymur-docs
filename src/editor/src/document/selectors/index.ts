@@ -1,6 +1,6 @@
 import type { EDocument, ELayerContext } from "../types";
 import { clone } from "../types";
-import type { EChildUUID } from "../types.misc";
+import type { EChildUuid } from "../types.misc";
 import { EStoreSelectorsAssets } from "./assets";
 import { EStoreSelectorsConstraints } from "./constraints";
 import { EStoreSelectorsElements } from "./elements";
@@ -19,7 +19,7 @@ export class EStoreSelectors {
     this.constraints = new EStoreSelectorsConstraints(data);
   }
 
-  public ownerLayerContext(childUuid: EChildUUID): ELayerContext | undefined {
+  public ownerLayerContext(childUuid: EChildUuid): ELayerContext | undefined {
     const result = this.data.layerContexts.find(
       (layerContext) =>
         layerContext.elements.some((element) => element.uuid === childUuid) ||

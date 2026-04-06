@@ -1,0 +1,16 @@
+.vec2-control {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.vec2-control__label {
+  font-size: 12px;
+  color: var(--text-label);
+  flex-shrink: 0;
+}
+
+.vec2-control .number-control {
+  flex: 1;
+  min-width: 0;
+}

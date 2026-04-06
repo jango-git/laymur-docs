@@ -6,7 +6,7 @@ export interface EAssetControlItem {
   dataURL: string; // data URL
 }
 
-interface EAssetControlOptions<T extends EAssetControlItem> {
+export interface EAssetControlOptions<T extends EAssetControlItem> {
   value: T | undefined;
   nullable: boolean;
   placeholder: string;
@@ -87,6 +87,13 @@ export class EAssetControl<T extends EAssetControlItem> {
 
   public get signalValueChanged(): FerrsignView2<T | undefined, T | undefined> {
     return this.signalValueChangedInternal;
+  }
+
+  public get forceValue(): T {
+    if (this.currentValue === undefined) {
+      throw new Error("[EAssetControl] forceValue called with no value set");
+    }
+    return this.currentValue;
   }
 
   public get value(): T | undefined {

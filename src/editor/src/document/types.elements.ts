@@ -1,9 +1,9 @@
 import type {
   EAnimatedImageLoopMode,
-  EAssetUUID,
+  EAnyGraphicsDrawCommand,
+  EAssetUuid,
   EColor,
-  EElementUUID,
-  EGraphicsDrawCommand,
+  EElementUuid,
   ENineSliceRegionMode,
   EProgressMaskFunction,
   ESceneUpdateMode,
@@ -22,7 +22,7 @@ export enum EElementType {
 }
 
 interface EElement {
-  uuid: EElementUUID;
+  uuid: EElementUuid;
   type: EElementType;
   name: string;
   color: EColor;
@@ -30,7 +30,7 @@ interface EElement {
 
 export interface EAnimatedImageElement extends EElement {
   type: EElementType.ANIMATED_IMAGE;
-  sequence: EAssetUUID[];
+  sequence: EAssetUuid[];
   frameRate: number;
   timeScale: number;
   loopMode: EAnimatedImageLoopMode;
@@ -40,17 +40,17 @@ export interface EAnimatedImageElement extends EElement {
 export interface EGraphicsElement extends EElement {
   type: EElementType.GRAPHICS;
   resolution: [number, number];
-  drawSequence: EGraphicsDrawCommand[];
+  drawSequence: EAnyGraphicsDrawCommand[];
 }
 
 export interface EImageElement extends EElement {
   type: EElementType.IMAGE;
-  texture: EAssetUUID;
+  texture: EAssetUuid;
 }
 
 export interface ENineSliceElement extends EElement {
   type: EElementType.NINE_SLICE;
-  texture: EAssetUUID;
+  texture: EAssetUuid;
   sliceBorders: [number, number, number, number];
   sliceRegions: [number, number, number, number];
   regionMode: ENineSliceRegionMode;
@@ -58,7 +58,7 @@ export interface ENineSliceElement extends EElement {
 
 export interface EProgressElement extends EElement {
   type: EElementType.PROGRESS;
-  texture: EAssetUUID;
+  texture: EAssetUuid;
   maskFunction: EProgressMaskFunction;
   progress: number;
 }

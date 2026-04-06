@@ -12,7 +12,7 @@ import type {
   EVerticalSizeConstraint,
 } from "../types.constraints";
 import { EConstraintType } from "../types.constraints";
-import type { EConstraintUUID, ELayerUUID } from "../types.misc";
+import type { EConstraintUuid, ELayerUuid } from "../types.misc";
 
 export class EStoreCommandsConstraints {
   constructor(
@@ -20,12 +20,12 @@ export class EStoreCommandsConstraints {
     private readonly signals: EStoreSignalsConstraints,
   ) {}
 
-  public add(layerUuid: ELayerUUID, constraint: EAnyConstraint): void {
+  public add(layerUuid: ELayerUuid, constraint: EAnyConstraint): void {
     this.getContext(layerUuid).constraints.push(constraint);
     this.signals["emitList"]({ operation: EStoreDeltaOperation.ADD, layerUuid, constraint });
   }
 
-  public remove(layerUuid: ELayerUUID, uuid: EConstraintUUID): void {
+  public remove(layerUuid: ELayerUuid, uuid: EConstraintUuid): void {
     const layerContext = this.getContext(layerUuid);
     const index = layerContext.constraints.findIndex((c) => c.uuid === uuid);
     if (index === -1) {
@@ -35,7 +35,7 @@ export class EStoreCommandsConstraints {
     this.signals["emitList"]({ operation: EStoreDeltaOperation.REMOVE, layerUuid, uuid });
   }
 
-  public reorder(layerUuid: ELayerUUID, uuids: EConstraintUUID[]): void {
+  public reorder(layerUuid: ELayerUuid, uuids: EConstraintUuid[]): void {
     const layerContext = this.getContext(layerUuid);
     layerContext.constraints.sort((a, b) => uuids.indexOf(a.uuid) - uuids.indexOf(b.uuid));
     this.signals["emitList"]({ operation: EStoreDeltaOperation.REORDER, layerUuid, uuids });
@@ -178,7 +178,7 @@ export class EStoreCommandsConstraints {
     this.signals["emitItem"]({ constraint });
   }
 
-  private getContext(layerUuid: ELayerUUID): ELayerContext {
+  private getContext(layerUuid: ELayerUuid): ELayerContext {
     const layerContext = this.data.layerContexts.find((c) => c.layer.uuid === layerUuid);
     if (!layerContext) {
       throw new Error(`[EStoreCommandsConstraints] Layer not found: (uuid: ${layerUuid})`);
@@ -186,7 +186,7 @@ export class EStoreCommandsConstraints {
     return layerContext;
   }
 
-  private get<T extends EAnyConstraint>(uuid: EConstraintUUID, type: EConstraintType): T {
+  private get<T extends EAnyConstraint>(uuid: EConstraintUuid, type: EConstraintType): T {
     for (const { constraints } of this.data.layerContexts) {
       for (const constraint of constraints) {
         if (constraint.type === type && constraint.uuid === uuid) {

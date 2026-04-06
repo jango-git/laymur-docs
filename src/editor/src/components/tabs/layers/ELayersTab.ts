@@ -1,79 +1,118 @@
+import { ESelectControl } from "../../../controls/ESelectControl/ESelectControl";
+import type { EStoreDeltaLayers } from "../../../document/signals";
 import { EStoreDeltaOperation } from "../../../document/signals";
 import { STORE } from "../../../document/store";
 import type { ELayerContext } from "../../../document/types";
-import type { ELayerUUID } from "../../../document/types.misc";
+import { ELayerType } from "../../../document/types.layers";
+import type { ELayerUuid } from "../../../document/types.misc";
+import { UI_STATE } from "../../../ui-state/ui-state";
 import { EFullscreenLayerBuilder } from "../../builders/layers/EFullscreenLayerBuilder";
 
 export class ELayersTab {
   private readonly layersContent: HTMLElement;
-  private readonly rowMap = new Map<ELayerUUID, HTMLElement>();
+  private readonly uuidToCardMap = new Map<ELayerUuid, HTMLElement>();
 
   constructor(private readonly container: HTMLElement) {
-    const layersContentSelector = "#layers-content";
-    const layersContent = this.container.querySelector<HTMLElement>(layersContentSelector);
-    if (!layersContent) {
-      throw new Error(`[ELayersTab] ${layersContentSelector} not found`);
+    {
+      const scrollArea = document.createElement("div");
+      scrollArea.className = "tab-scroll-area";
+      container.appendChild(scrollArea);
+
+      const layersContent = document.createElement("div");
+      layersContent.id = "layers-content";
+      scrollArea.appendChild(layersContent);
+      this.layersContent = layersContent;
     }
-    this.layersContent = layersContent;
 
     const builderSection = document.createElement("div");
     builderSection.className = "tab-builder";
     this.container.appendChild(builderSection);
-    new EFullscreenLayerBuilder(builderSection);
 
-    STORE.signals.layers.list.on((delta) => {
-      if (delta.operation === EStoreDeltaOperation.ADD) {
-        this.addRow(delta.layerContext);
-      } else if (delta.operation === EStoreDeltaOperation.REMOVE) {
-        this.removeRow(delta.uuid);
-      }
+    const builderBody = document.createElement("div");
+    builderSection.appendChild(builderBody);
+    const builder = new EFullscreenLayerBuilder(builderBody);
+
+    const controlRow = document.createElement("div");
+    controlRow.className = "tab-builder__control-row";
+    builderSection.appendChild(controlRow);
+
+    new ESelectControl<ELayerType>(controlRow, {
+      options: [{ label: "Fullscreen", value: ELayerType.FULLSCREEN }],
+      value: ELayerType.FULLSCREEN,
     });
 
-    STORE.currentLayerChanged.on((uuid) => {
-      this.updateActiveRow(uuid);
+    const addButton = document.createElement("button");
+    addButton.className = "button-primary";
+    addButton.textContent = "ADD";
+    addButton.addEventListener("click", () => builder.build());
+    controlRow.appendChild(addButton);
+
+    builder.buildAvailabilitySignal.on((available) => {
+      addButton.disabled = !available;
     });
 
-    const existing = STORE.selectors.layers.selectAllContexts();
-    if (existing) {
-      for (const ctx of existing) {
-        this.addRow(ctx);
-      }
+    STORE.signals.layers.list.on(this.onLayerListChanged);
+    UI_STATE.signalActiveLayerChanged.on(this.onActiveLayerChanged);
+
+    for (const layerContext of STORE.selectors.layers.selectAllContexts()) {
+      this.addRow(layerContext);
     }
   }
 
-  private addRow(ctx: ELayerContext): void {
+  private addRow(layerContext: ELayerContext): void {
     const row = document.createElement("div");
     row.className = "layer-row";
-    row.dataset.uuid = ctx.layer.uuid;
+    row.dataset.uuid = layerContext.layer.uuid;
 
     const nameSpan = document.createElement("span");
     nameSpan.className = "layer-row__name";
-    nameSpan.textContent = ctx.layer.name;
+    nameSpan.textContent = layerContext.layer.name;
     row.appendChild(nameSpan);
-
-    row.addEventListener("click", () => {
-      STORE.setCurrentLayer(ctx.layer.uuid);
-    });
+    row.addEventListener("click", () => UI_STATE.setActiveLayer(layerContext.layer.uuid));
 
     this.layersContent.appendChild(row);
-    this.rowMap.set(ctx.layer.uuid, row);
+    this.uuidToCardMap.set(layerContext.layer.uuid, row);
 
-    if (STORE.currentLayerUuid === ctx.layer.uuid) {
+    if (UI_STATE.activeLayerUuid === layerContext.layer.uuid) {
       row.classList.add("layer-row--active");
     }
   }
 
-  private removeRow(uuid: ELayerUUID): void {
-    this.rowMap.get(uuid)?.remove();
-    this.rowMap.delete(uuid);
-    if (STORE.currentLayerUuid === uuid) {
-      STORE.setCurrentLayer(null);
+  private removeRow(uuid: ELayerUuid): void {
+    this.uuidToCardMap.get(uuid)?.remove();
+    this.uuidToCardMap.delete(uuid);
+
+    if (UI_STATE.activeLayerUuid === uuid) {
+      UI_STATE.setActiveLayer(undefined);
     }
   }
 
-  private updateActiveRow(uuid: ELayerUUID | null): void {
-    for (const [rowUuid, row] of this.rowMap) {
-      row.classList.toggle("layer-row--active", rowUuid === uuid);
+  private reorderRows(uuids: ELayerUuid[]): void {
+    for (const uuid of uuids) {
+      const row = this.uuidToCardMap.get(uuid);
+      if (row) {
+        this.layersContent.appendChild(row);
+      }
     }
   }
+
+  private readonly onLayerListChanged = (delta: EStoreDeltaLayers): void => {
+    switch (delta.operation) {
+      case EStoreDeltaOperation.ADD:
+        this.addRow(delta.layerContext);
+        break;
+      case EStoreDeltaOperation.REMOVE:
+        this.removeRow(delta.uuid);
+        break;
+      case EStoreDeltaOperation.REORDER:
+        this.reorderRows(delta.uuids);
+        break;
+    }
+  };
+
+  private readonly onActiveLayerChanged = (uuid: ELayerUuid | undefined): void => {
+    for (const [rowUuid, row] of this.uuidToCardMap) {
+      row.classList.toggle("layer-row--active", rowUuid === uuid);
+    }
+  };
 }

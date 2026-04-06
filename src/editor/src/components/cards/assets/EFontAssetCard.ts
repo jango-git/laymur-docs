@@ -1,15 +1,19 @@
+import type { EStoreDeltaAsset } from "../../../document/signals";
 import { STORE } from "../../../document/store";
 import { EAssetType, type EFontAsset } from "../../../document/types.assets";
-import type { EAssetUUID } from "../../../document/types.misc";
+import type { EAssetUuid } from "../../../document/types.misc";
 
 export class EFontAssetCard {
   private readonly root: HTMLDivElement;
   private readonly nameLabel: HTMLSpanElement;
-  private readonly downloadLink: HTMLAnchorElement;
+  private readonly downloadButton: HTMLButtonElement;
+  private readonly deleteButton: HTMLButtonElement;
+
+  private asset: EFontAsset;
 
   constructor(
     private readonly container: HTMLElement,
-    private readonly uuid: EAssetUUID,
+    private readonly uuid: EAssetUuid,
   ) {
     this.root = document.createElement("div");
     this.root.className = "asset-card";
@@ -21,40 +25,53 @@ export class EFontAssetCard {
     this.nameLabel = document.createElement("span");
     this.nameLabel.className = "asset-card__name";
 
-    this.downloadLink = document.createElement("a");
-    this.downloadLink.className = "asset-card__download";
-    this.downloadLink.textContent = "↓";
-    this.downloadLink.title = "Download";
+    this.downloadButton = document.createElement("button");
+    this.downloadButton.className = "asset-card__action-btn";
+    this.downloadButton.textContent = "Download";
+    this.downloadButton.title = "Download";
+    this.downloadButton.addEventListener("click", this.onDownloadButtonClicked);
 
-    const deleteButton = document.createElement("button");
-    deleteButton.className = "asset-card__delete";
-    deleteButton.textContent = "✕";
-    deleteButton.title = "Delete";
-    deleteButton.addEventListener("click", () => {
-      STORE.commands.assets.remove(this.uuid);
-    });
+    this.deleteButton = document.createElement("button");
+    this.deleteButton.className = "asset-card__action-btn";
+    this.deleteButton.textContent = "Delete";
+    this.deleteButton.title = "Delete";
+    this.deleteButton.addEventListener("click", this.onDeleteButtonClicked);
 
     this.root.appendChild(thumbnail);
     this.root.appendChild(this.nameLabel);
-    this.root.appendChild(this.downloadLink);
-    this.root.appendChild(deleteButton);
+    this.root.appendChild(this.downloadButton);
+    this.root.appendChild(this.deleteButton);
     this.container.appendChild(this.root);
 
-    const initial = STORE.selectors.assets.selectFont(uuid);
-    if (initial !== undefined) {
-      this.refresh(initial);
+    const initialAssetData = STORE.selectors.assets.selectFont(uuid);
+    if (!initialAssetData) {
+      throw new Error(`[EFontAssetCard] asset with uuid ${uuid} not found`);
     }
 
-    STORE.signals.assets.item.on((delta) => {
-      if (delta.asset.uuid === this.uuid && delta.asset.type === EAssetType.FONT) {
-        this.refresh(delta.asset);
-      }
-    });
+    this.asset = initialAssetData;
+    this.refresh(initialAssetData);
+    STORE.signals.assets.item.on(this.onAssetChanged);
   }
 
   private refresh(asset: EFontAsset): void {
     this.nameLabel.textContent = asset.name;
-    this.downloadLink.href = asset.dataURL;
-    this.downloadLink.download = asset.name;
+    this.asset = asset;
   }
+
+  private readonly onAssetChanged = (delta: EStoreDeltaAsset): void => {
+    if (delta.asset.uuid === this.uuid && delta.asset.type === EAssetType.FONT) {
+      this.refresh(delta.asset);
+    }
+  };
+
+  private readonly onDownloadButtonClicked = (): void => {
+    const link = document.createElement("a");
+    link.href = this.asset.dataURL;
+    link.download = this.asset.name;
+    link.click();
+  };
+
+  private readonly onDeleteButtonClicked = (): void => {
+    STORE.commands.assets.remove(this.uuid);
+  };
 }

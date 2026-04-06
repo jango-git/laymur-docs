@@ -1,10 +1,10 @@
 export function makeRow(container: HTMLElement, label: string): HTMLElement {
   const row = document.createElement("div");
   row.className = "element-card__row";
-  const lbl = document.createElement("span");
-  lbl.className = "element-card__label";
-  lbl.textContent = label;
-  row.appendChild(lbl);
+  const span = document.createElement("span");
+  span.className = "element-card__label";
+  span.textContent = label;
+  row.appendChild(span);
   container.appendChild(row);
   return row;
 }

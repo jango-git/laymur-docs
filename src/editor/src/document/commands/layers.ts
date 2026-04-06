@@ -4,7 +4,7 @@ import type { EDocument, ELayerContext, PartialExceptUUID } from "../types";
 import { clone } from "../types";
 import type { ELayerFullscreen } from "../types.layers";
 import { ELayerType } from "../types.layers";
-import type { ELayerUUID } from "../types.misc";
+import type { ELayerUuid } from "../types.misc";
 
 export class EStoreCommandsLayers {
   constructor(
@@ -17,7 +17,7 @@ export class EStoreCommandsLayers {
     this.signals["emitList"]({ operation: EStoreDeltaOperation.ADD, layerContext });
   }
 
-  public remove(uuid: ELayerUUID): void {
+  public remove(uuid: ELayerUuid): void {
     const index = this.data.layerContexts.findIndex((c) => c.layer.uuid === uuid);
     if (index === -1) {
       throw new Error(`[EStoreCommandsLayers] Layer not found: (uuid: ${uuid})`);
@@ -26,7 +26,7 @@ export class EStoreCommandsLayers {
     this.signals["emitList"]({ operation: EStoreDeltaOperation.REMOVE, uuid });
   }
 
-  public reorder(uuids: ELayerUUID[]): void {
+  public reorder(uuids: ELayerUuid[]): void {
     this.data.layerContexts.sort(
       (a, b) => uuids.indexOf(a.layer.uuid) - uuids.indexOf(b.layer.uuid),
     );
@@ -52,7 +52,7 @@ export class EStoreCommandsLayers {
     this.signals["emitItem"]({ layer });
   }
 
-  private getContext(uuid: ELayerUUID): ELayerContext {
+  private getContext(uuid: ELayerUuid): ELayerContext {
     const layerContext = this.data.layerContexts.find((c) => c.layer.uuid === uuid);
     if (!layerContext) {
       throw new Error(`[EStoreCommandsLayers] Layer not found: (uuid: ${uuid})`);

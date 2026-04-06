@@ -1,7 +1,7 @@
 import type { EStoreSignalsDebug } from "../signals";
 import type { EDocument } from "../types";
 import type { ELayerDebug } from "../types.debug";
-import type { ELayerUUID } from "../types.misc";
+import type { ELayerUuid } from "../types.misc";
 
 export class EStoreCommandsDebug {
   constructor(
@@ -9,7 +9,7 @@ export class EStoreCommandsDebug {
     private readonly signals: EStoreSignalsDebug,
   ) {}
 
-  public write(layerUuid: ELayerUUID, debug: ELayerDebug): void {
+  public write(layerUuid: ELayerUuid, debug: ELayerDebug): void {
     const layerContext = this.data.layerContexts.find((c) => c.layer.uuid === layerUuid);
     if (!layerContext) {
       throw new Error(`[EStoreCommandsDebug] Layer not found: (uuid: ${layerUuid})`);

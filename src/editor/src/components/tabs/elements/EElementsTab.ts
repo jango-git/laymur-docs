@@ -1,155 +1,131 @@
 import { ESelectControl } from "../../../controls/ESelectControl/ESelectControl";
+import type { EStoreDeltaElements } from "../../../document/signals";
 import { EStoreDeltaOperation } from "../../../document/signals";
 import { STORE } from "../../../document/store";
-import type { EAnyElement } from "../../../document/types.elements";
-import { EElementType } from "../../../document/types.elements";
-import type { EElementUUID, ELayerUUID } from "../../../document/types.misc";
-import { EAnimatedImageElementBuilder } from "../../builders/elements/EAnimatedImageElementBuilder";
-import { EGraphicsElementBuilder } from "../../builders/elements/EGraphicsElementBuilder";
-import { EImageElementBuilder } from "../../builders/elements/EImageElementBuilder";
-import { ENineSliceElementBuilder } from "../../builders/elements/ENineSliceElementBuilder";
-import { EProgressElementBuilder } from "../../builders/elements/EProgressElementBuilder";
-import { ESceneElementBuilder } from "../../builders/elements/ESceneElementBuilder";
-import { ETextElementBuilder } from "../../builders/elements/ETextElementBuilder";
-import { EAnimatedImageElementCard } from "../../cards/elements/EAnimatedImageElementCard";
-import { EGraphicsElementCard } from "../../cards/elements/EGraphicsElementCard";
-import { EImageElementCard } from "../../cards/elements/EImageElementCard";
-import { ENineSliceElementCard } from "../../cards/elements/ENineSliceElementCard";
-import { EProgressElementCard } from "../../cards/elements/EProgressElementCard";
-import { ESceneElementCard } from "../../cards/elements/ESceneElementCard";
-import { ETextElementCard } from "../../cards/elements/ETextElementCard";
-
-const ELEMENT_TYPE_OPTIONS = [
-  { label: "Image", value: EElementType.IMAGE },
-  { label: "Animated Image", value: EElementType.ANIMATED_IMAGE },
-  { label: "Graphics", value: EElementType.GRAPHICS },
-  { label: "Nine Slice", value: EElementType.NINE_SLICE },
-  { label: "Progress", value: EElementType.PROGRESS },
-  { label: "Scene", value: EElementType.SCENE },
-  { label: "Text", value: EElementType.TEXT },
-];
+import type { EAnyElement, EElementType } from "../../../document/types.elements";
+import type { EElementUuid, ELayerUuid } from "../../../document/types.misc";
+import { UI_STATE } from "../../../ui-state/ui-state";
+import type { EAnyElementBuilder } from "../../builders/elements/types";
+import type { ElementEntry } from "./registry";
+import { DEFAULT_BUILDER_TYPE, ELEMENT_REGISTRY } from "./registry";
 
 export class EElementsTab {
-  private readonly cardList: HTMLElement;
-  private readonly cardMap = new Map<EElementUUID, HTMLElement>();
+  private readonly cardsContentDiv: HTMLDivElement;
+  private readonly cardUuidToCardContainer = new Map<EElementUuid, HTMLElement>();
 
-  constructor(container: HTMLElement) {
-    const cardList = container.querySelector<HTMLElement>("#elements-content");
-    if (!cardList) {
-      throw new Error("[EElementsTab] #elements-content not found");
+  private readonly builderContainers = new Map<EElementType, HTMLElement>();
+  private readonly builders = new Map<EElementType, EAnyElementBuilder>();
+  private readonly cardFactories = new Map<EElementType, ElementEntry["createCard"]>();
+
+  private activeBuilder?: EAnyElementBuilder;
+  private readonly addButton: HTMLButtonElement;
+
+  constructor(private readonly container: HTMLElement) {
+    {
+      const scrollArea = document.createElement("div");
+      scrollArea.className = "tab-scroll-area";
+      this.container.appendChild(scrollArea);
+
+      this.cardsContentDiv = document.createElement("div");
+      this.cardsContentDiv.id = "elements-content";
+      scrollArea.appendChild(this.cardsContentDiv);
     }
-    this.cardList = cardList;
 
-    // ── Builder section ──────────────────────────────────────────────────────
     const builderSection = document.createElement("div");
     builderSection.className = "tab-builder";
-    container.appendChild(builderSection);
+    this.container.appendChild(builderSection);
 
-    const typeRow = document.createElement("div");
-    typeRow.className = "tab-builder__type-row";
-    const typeLabel = document.createElement("span");
-    typeLabel.className = "tab-builder__type-label";
-    typeLabel.textContent = "Type";
-    typeRow.appendChild(typeLabel);
-    builderSection.appendChild(typeRow);
-
-    const typeSelect = new ESelectControl<EElementType>(typeRow, {
-      options: ELEMENT_TYPE_OPTIONS,
-      value: EElementType.IMAGE,
-    });
-
-    const builderDivs = new Map<EElementType, HTMLElement>();
-    for (const { value: type } of ELEMENT_TYPE_OPTIONS) {
+    for (const entry of ELEMENT_REGISTRY) {
       const div = document.createElement("div");
-      div.style.display = type === EElementType.IMAGE ? "" : "none";
+      div.style.display = entry.type === DEFAULT_BUILDER_TYPE ? "" : "none";
       builderSection.appendChild(div);
-      builderDivs.set(type, div);
+
+      this.builderContainers.set(entry.type, div);
+      this.builders.set(entry.type, entry.createBuilder(div));
+      this.cardFactories.set(entry.type, entry.createCard);
     }
 
-    new EImageElementBuilder(builderDivs.get(EElementType.IMAGE)!);
-    new EAnimatedImageElementBuilder(builderDivs.get(EElementType.ANIMATED_IMAGE)!);
-    new EGraphicsElementBuilder(builderDivs.get(EElementType.GRAPHICS)!);
-    new ENineSliceElementBuilder(builderDivs.get(EElementType.NINE_SLICE)!);
-    new EProgressElementBuilder(builderDivs.get(EElementType.PROGRESS)!);
-    new ESceneElementBuilder(builderDivs.get(EElementType.SCENE)!);
-    new ETextElementBuilder(builderDivs.get(EElementType.TEXT)!);
+    this.setActiveBuilder(DEFAULT_BUILDER_TYPE);
 
-    typeSelect.signalValueChanged.on((newType) => {
-      for (const [type, div] of builderDivs) {
-        div.style.display = type === newType ? "" : "none";
-      }
+    const controlRow = document.createElement("div");
+    controlRow.className = "tab-builder__control-row";
+    builderSection.appendChild(controlRow);
+
+    const builderTypeSelect = new ESelectControl<EElementType>(controlRow, {
+      options: ELEMENT_REGISTRY.map(({ label, type }) => ({ label, value: type })),
+      value: DEFAULT_BUILDER_TYPE,
     });
 
-    // ── Signals ──────────────────────────────────────────────────────────────
-    STORE.signals.elements.list.on((delta) => {
-      if (delta.operation === EStoreDeltaOperation.ADD) {
-        if (delta.layerUuid === STORE.currentLayerUuid) {
-          this.addCard(delta.element);
-        }
-      } else if (delta.operation === EStoreDeltaOperation.REMOVE) {
-        if (delta.layerUuid === STORE.currentLayerUuid) {
-          this.removeCard(delta.uuid);
-        }
-      }
-    });
+    this.addButton = document.createElement("button");
+    this.addButton.className = "button-primary";
+    this.addButton.textContent = "ADD";
+    this.addButton.addEventListener("click", this.onAddButtonClicked);
+    controlRow.appendChild(this.addButton);
 
-    STORE.currentLayerChanged.on((uuid) => {
-      this.reloadForLayer(uuid);
-    });
+    builderTypeSelect.signalValueChanged.on(this.onBuilderTypeChanged);
+    STORE.signals.elements.list.on(this.onCardListChanged);
+    UI_STATE.signalActiveLayerChanged.on(this.onActiveLayerChanged);
+  }
+
+  private setActiveBuilder(type: EElementType): void {
+    this.activeBuilder?.buildAvailabilitySignal.off(this.onButtonAvailabilityChanged);
+    this.activeBuilder = this.builders.get(type) as EAnyElementBuilder;
+    this.activeBuilder.buildAvailabilitySignal.on(this.onButtonAvailabilityChanged);
   }
 
   private addCard(element: EAnyElement): void {
-    const wrapper = document.createElement("div");
-    wrapper.dataset.uuid = element.uuid;
-    this.cardList.appendChild(wrapper);
+    const container = document.createElement("div");
+    container.dataset.uuid = element.uuid;
+    this.cardsContentDiv.appendChild(container);
 
-    switch (element.type) {
-      case EElementType.IMAGE:
-        new EImageElementCard(wrapper, element.uuid);
-        break;
-      case EElementType.ANIMATED_IMAGE:
-        new EAnimatedImageElementCard(wrapper, element.uuid);
-        break;
-      case EElementType.GRAPHICS:
-        new EGraphicsElementCard(wrapper, element.uuid);
-        break;
-      case EElementType.NINE_SLICE:
-        new ENineSliceElementCard(wrapper, element.uuid);
-        break;
-      case EElementType.PROGRESS:
-        new EProgressElementCard(wrapper, element.uuid);
-        break;
-      case EElementType.SCENE:
-        new ESceneElementCard(wrapper, element.uuid);
-        break;
-      case EElementType.TEXT:
-        new ETextElementCard(wrapper, element.uuid);
-        break;
-    }
-
-    this.cardMap.set(element.uuid, wrapper);
+    this.cardFactories.get(element.type)?.(container, element.uuid);
+    this.cardUuidToCardContainer.set(element.uuid, container);
   }
 
-  private removeCard(uuid: EElementUUID): void {
-    this.cardMap.get(uuid)?.remove();
-    this.cardMap.delete(uuid);
+  private removeCard(uuid: EElementUuid): void {
+    this.cardUuidToCardContainer.get(uuid)?.remove();
+    this.cardUuidToCardContainer.delete(uuid);
   }
 
-  private reloadForLayer(layerUuid: ELayerUUID | null): void {
-    for (const wrapper of this.cardMap.values()) {
-      wrapper.remove();
-    }
-    this.cardMap.clear();
-
-    if (layerUuid === null) {
+  private readonly onCardListChanged = (delta: EStoreDeltaElements): void => {
+    if (delta.layerUuid !== UI_STATE.activeLayerUuid) {
       return;
     }
 
-    const elements = STORE.selectors.elements.selectAll(layerUuid);
-    if (elements) {
-      for (const element of elements) {
-        this.addCard(element);
-      }
+    if (delta.operation === EStoreDeltaOperation.ADD) {
+      this.addCard(delta.element);
+    } else if (delta.operation === EStoreDeltaOperation.REMOVE) {
+      this.removeCard(delta.uuid);
     }
-  }
+  };
+
+  private readonly onActiveLayerChanged = (uuid?: ELayerUuid): void => {
+    for (const cardContainer of this.cardUuidToCardContainer.values()) {
+      cardContainer.remove();
+    }
+    this.cardUuidToCardContainer.clear();
+
+    if (uuid === undefined) {
+      return;
+    }
+
+    for (const element of STORE.selectors.elements.selectAll(uuid)) {
+      this.addCard(element);
+    }
+  };
+
+  private readonly onBuilderTypeChanged = (elementType: EElementType): void => {
+    for (const [builderType, builderDiv] of this.builderContainers) {
+      builderDiv.style.display = builderType === elementType ? "" : "none";
+    }
+    this.setActiveBuilder(elementType);
+  };
+
+  private readonly onButtonAvailabilityChanged = (available: boolean): void => {
+    this.addButton.disabled = !available;
+  };
+
+  private readonly onAddButtonClicked = (): void => {
+    this.activeBuilder?.build();
+  };
 }

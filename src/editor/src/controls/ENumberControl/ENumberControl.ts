@@ -9,7 +9,7 @@ enum ENumberControlState {
   EDIT = "edit",
 }
 
-interface ENumberControlOptions {
+export interface ENumberControlOptions {
   value: number;
   min: number;
   max: number;
