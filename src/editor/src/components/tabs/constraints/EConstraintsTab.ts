@@ -80,12 +80,17 @@ export class EConstraintsTab {
       uuids.splice(toIndex, 0, moved);
       STORE.commands.constraints.reorder(this.currentLayerUuid, uuids);
     });
+
+    const activeLayerUuid = UI_STATE.activeLayerUuid;
+    if (activeLayerUuid !== undefined) {
+      for (const constraint of STORE.selectors.constraints.selectAll(activeLayerUuid)) {
+        this.addCard(constraint);
+      }
+    }
   }
 
   private setActiveBuilder(type: EConstraintType): void {
-    this.activeBuilder?.buildAvailabilitySignal.off(this.onButtonAvailabilityChanged);
     this.activeBuilder = this.builders.get(type) as EAnyConstraintBuilder;
-    this.activeBuilder.buildAvailabilitySignal.on(this.onButtonAvailabilityChanged);
   }
 
   private addCard(constraint: EAnyConstraint): void {
@@ -146,7 +151,7 @@ export class EConstraintsTab {
       return;
     }
 
-    for (const constraint of STORE.selectors.constraints.selectAll(uuid) ?? []) {
+    for (const constraint of STORE.selectors.constraints.selectAll(uuid)) {
       this.addCard(constraint);
     }
   };
@@ -156,10 +161,6 @@ export class EConstraintsTab {
       builderDiv.style.display = builderType === constraintType ? "" : "none";
     }
     this.setActiveBuilder(constraintType);
-  };
-
-  private readonly onButtonAvailabilityChanged = (available: boolean): void => {
-    this.addButton.disabled = !available;
   };
 
   private readonly onAddButtonClicked = (): void => {

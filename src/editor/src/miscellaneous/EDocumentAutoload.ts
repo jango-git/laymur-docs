@@ -9,9 +9,9 @@ const DOCUMENT_KEY = "document";
 export class EDocumentAutoload {
   public static async load(): Promise<void> {
     try {
-      const db = await openDatabase();
+      const database = await openDatabase();
       const editorDocument = await new Promise<EDocument | undefined>((resolve, reject) => {
-        const request = db
+        const request = database
           .transaction(STORE_NAME, "readonly")
           .objectStore(STORE_NAME)
           .get(DOCUMENT_KEY);
@@ -29,7 +29,11 @@ export class EDocumentAutoload {
     if (STORE.selectors.layers.selectAllContexts().length === 0) {
       const defaultLayer = createDefaultLayerContext();
       STORE.commands.layers.add(defaultLayer);
-      UI_STATE.setActiveLayer(defaultLayer.layer.uuid);
+    }
+
+    const layers = STORE.selectors.layers.selectAll();
+    if (layers.length > 0) {
+      UI_STATE.setActiveLayer(layers[0].uuid);
     }
   }
 }

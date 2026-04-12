@@ -7,13 +7,11 @@ import type { UUID } from "../types.misc";
 export class EStoreSelectorsConstraints {
   constructor(private readonly data: EDocument) {}
 
-  public selectAll(layerUuid: UUID): EAnyConstraint[] | undefined {
+  public selectAll(layerUuid: UUID): EAnyConstraint[] {
     const layerContext = this.data.layerContexts.find(
       (context) => context.layer.uuid === layerUuid,
     );
-    return layerContext && layerContext.constraints.length > 0
-      ? clone(layerContext.constraints)
-      : undefined;
+    return layerContext ? clone(layerContext.constraints) : [];
   }
 
   public select(uuid: UUID): EAnyConstraint | undefined {

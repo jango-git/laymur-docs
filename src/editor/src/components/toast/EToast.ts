@@ -11,22 +11,23 @@ export class EToast {
 
   private static parseMessage(message: string): Node[] {
     const nodes: Node[] = [];
-    const re = /(\*\*(.+?)\*\*|\*(.+?)\*)/g;
+    const expression = /(\*\*(.+?)\*\*|\*(.+?)\*)/g;
+
     let last = 0;
     let match: RegExpExecArray | null;
 
-    while ((match = re.exec(message)) !== null) {
+    while ((match = expression.exec(message)) !== null) {
       if (match.index > last) {
         nodes.push(document.createTextNode(message.slice(last, match.index)));
       }
-      if (match[2] !== undefined) {
-        const el = document.createElement("strong");
-        el.textContent = match[2];
-        nodes.push(el);
-      } else if (match[3] !== undefined) {
-        const el = document.createElement("em");
-        el.textContent = match[3];
-        nodes.push(el);
+      if (match[2]) {
+        const element = document.createElement("strong");
+        element.textContent = match[2];
+        nodes.push(element);
+      } else if (match[3]) {
+        const element = document.createElement("em");
+        element.textContent = match[3];
+        nodes.push(element);
       }
       last = match.index + match[0].length;
     }

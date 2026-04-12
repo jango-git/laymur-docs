@@ -1,17 +1,13 @@
-import type { FerrsignView1 } from "ferrsign";
-import { Ferrsign1 } from "ferrsign";
 import { EStringControl } from "../../../controls/EStringControl/EStringControl";
 import { STORE } from "../../../document/store";
 import type { ELayerContext } from "../../../document/types";
 import { ELayerType } from "../../../document/types.layers";
 import { EResizePolicyType } from "../../../document/types.misc";
-import type { EFullscreenLayerError } from "../../../document/validators/layers";
 import { UI_STATE } from "../../../ui-state/ui-state";
 import { TOAST } from "../../toast/EToast";
 
 export class EFullscreenLayerBuilder {
   private readonly nameControl: EStringControl;
-  private readonly signalBuildAvailabilityInternal = new Ferrsign1<boolean>();
 
   constructor(private readonly container: HTMLElement) {
     {
@@ -27,14 +23,6 @@ export class EFullscreenLayerBuilder {
 
       this.nameControl = new EStringControl(nameRow, { placeholder: "name" });
     }
-
-    this.nameControl.signalValueChanged.on(this.handleDataUpdate);
-
-    this.handleAvailability();
-  }
-
-  public get buildAvailabilitySignal(): FerrsignView1<boolean> {
-    return this.signalBuildAvailabilityInternal;
   }
 
   public build(): void {
@@ -45,7 +33,7 @@ export class EFullscreenLayerBuilder {
         type: ELayerType.FULLSCREEN,
         name: this.nameControl.value,
         resizePolicy: EResizePolicyType.NONE,
-        resizePolicyParameters: [0, 0],
+        resizePolicyParameters: [1920, 1920],
       },
       debug: {
         showAspect: false,
@@ -59,16 +47,13 @@ export class EFullscreenLayerBuilder {
       elements: [],
       constraints: [],
     };
-    STORE.commands.layers.add(layerContext);
-    UI_STATE.setActiveLayer(uuid);
 
-    this.nameControl.value = "";
-    this.handleAvailability();
-  }
-
-  private readonly handleDataUpdate = (): void => {
-    const error = this.handleAvailability();
+    const error = STORE.validators.layers.fullscreen(layerContext.layer);
     if (error === undefined) {
+      STORE.commands.layers.add(layerContext);
+      UI_STATE.setActiveLayer(uuid);
+
+      this.nameControl.value = "";
       return;
     }
 
@@ -77,11 +62,5 @@ export class EFullscreenLayerBuilder {
     if (error.field === "name") {
       this.nameControl.flash();
     }
-  };
-
-  private handleAvailability(): EFullscreenLayerError | undefined {
-    const error = STORE.validators.layers.fullscreen({ name: this.nameControl.value }, true);
-    this.signalBuildAvailabilityInternal.emit(error === undefined);
-    return error;
   }
 }

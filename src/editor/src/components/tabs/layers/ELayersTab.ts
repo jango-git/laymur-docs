@@ -48,10 +48,6 @@ export class ELayersTab {
     addButton.addEventListener("click", () => builder.build());
     controlRow.appendChild(addButton);
 
-    builder.buildAvailabilitySignal.on((available) => {
-      addButton.disabled = !available;
-    });
-
     STORE.signals.setup.on(this.onSetup);
     STORE.signals.layers.list.on(this.onLayerListChanged);
 

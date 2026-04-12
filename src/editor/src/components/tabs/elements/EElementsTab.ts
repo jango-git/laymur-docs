@@ -80,12 +80,17 @@ export class EElementsTab {
       uuids.splice(toIndex, 0, moved);
       STORE.commands.elements.reorder(this.currentLayerUuid, uuids);
     });
+
+    const activeLayerUuid = UI_STATE.activeLayerUuid;
+    if (activeLayerUuid !== undefined) {
+      for (const element of STORE.selectors.elements.selectAll(activeLayerUuid)) {
+        this.addCard(element);
+      }
+    }
   }
 
   private setActiveBuilder(type: EElementType): void {
-    this.activeBuilder?.buildAvailabilitySignal.off(this.onButtonAvailabilityChanged);
     this.activeBuilder = this.builders.get(type) as EAnyElementBuilder;
-    this.activeBuilder.buildAvailabilitySignal.on(this.onButtonAvailabilityChanged);
   }
 
   private addCard(element: EAnyElement): void {
@@ -156,10 +161,6 @@ export class EElementsTab {
       builderDiv.style.display = builderType === elementType ? "" : "none";
     }
     this.setActiveBuilder(elementType);
-  };
-
-  private readonly onButtonAvailabilityChanged = (available: boolean): void => {
-    this.addButton.disabled = !available;
   };
 
   private readonly onAddButtonClicked = (): void => {

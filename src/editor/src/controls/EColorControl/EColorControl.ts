@@ -23,7 +23,7 @@ export class EColorControl {
     this.container = container;
     this.currentValue = {
       color: options.value?.color ?? "#ffffff",
-      alpha: options.value?.alpha ?? 255,
+      alpha: options.value?.alpha ?? 1,
     };
 
     this.root = document.createElement("div");
@@ -38,11 +38,11 @@ export class EColorControl {
     this.alphaContainer.className = "color-control__alpha";
 
     this.alphaControl = new ENumberControl(this.alphaContainer, {
-      value: 255,
+      value: 1,
       min: 0,
-      max: 255,
-      step: 1,
-      precision: 0,
+      max: 1,
+      step: 1 / 255,
+      precision: 3,
     });
 
     this.root.appendChild(this.colorInput);
@@ -97,7 +97,7 @@ export class EColorControl {
 
   private emitCombined(): void {
     const color = this.colorInput.value; // #RRGGBB
-    const alpha = Math.round(this.alphaControl.value);
+    const alpha = this.alphaControl.value;
     if (color === this.currentValue.color && alpha === this.currentValue.alpha) {
       return;
     }

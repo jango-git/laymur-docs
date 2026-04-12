@@ -56,9 +56,9 @@ document.addEventListener("DOMContentLoaded", () => {
     await EDocumentAutoload.load();
 
     new EDocumentAutosave();
-    new EProjectTab(projectContainer);
     new ELayersTab(layersContainer);
     new EElementsTab(elementsContainer);
     new EConstraintsTab(constraintsContainer);
+    new EProjectTab(projectContainer);
   })();
 });

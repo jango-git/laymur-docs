@@ -61,8 +61,7 @@ export abstract class ELayerCard {
   }
 
   private readonly onActiveToggleClicked = (): void => {
-    const isActive = UI_STATE.activeLayerUuid === this.uuid;
-    UI_STATE.setActiveLayer(isActive ? undefined : this.uuid);
+    UI_STATE.setActiveLayer(this.uuid);
   };
 
   private readonly onDeleteClicked = (): void => {

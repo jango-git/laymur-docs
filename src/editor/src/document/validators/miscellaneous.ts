@@ -25,5 +25,5 @@ export function isValidNormalizedNumber(value: number): boolean {
 }
 
 export function isValidHexColor(value: string): boolean {
-  return /^[0-9A-Fa-f]{6}$/.test(value);
+  return /^#[0-9A-Fa-f]{6}$/.test(value);
 }

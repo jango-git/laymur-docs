@@ -1,5 +1,3 @@
-import type { FerrsignView1 } from "ferrsign";
-import { Ferrsign1 } from "ferrsign";
 import type {
   EArrayControlItem,
   EArrayControlTemplate,
@@ -13,7 +11,6 @@ import type { EAnimatedImageElement } from "../../../document/types.elements";
 import { EElementType } from "../../../document/types.elements";
 import type { UUID } from "../../../document/types.misc";
 import { EAnimatedImageLoopMode } from "../../../document/types.misc";
-import type { EAnimatedImageElementError } from "../../../document/validators/elements";
 import { UI_STATE } from "../../../ui-state/ui-state";
 import { makeRow } from "../../../utils/rows";
 import { TOAST } from "../../toast/EToast";
@@ -37,61 +34,18 @@ const sequenceTemplate: EArrayControlTemplate<UUID> = {
 export class EAnimatedImageElementBuilder {
   private readonly nameControl: EStringControl;
   private readonly sequenceControl: EArrayControl<UUID>;
-  private readonly signalBuildAvailabilityInternal = new Ferrsign1<boolean>();
 
   constructor(container: HTMLElement) {
     this.nameControl = new EStringControl(makeRow(container, "Name"), { placeholder: "name" });
-    this.nameControl.signalValueChanged.on(this.handleDataUpdate);
 
     this.sequenceControl = new EArrayControl<UUID>(
       makeRow(container, "Sequence"),
       sequenceTemplate,
     );
-    this.sequenceControl.signalValueChanged.on(this.handleDataUpdate);
-
-    UI_STATE.signalActiveLayerChanged.on(this.handleDataUpdate);
-    this.handleAvailability();
-  }
-
-  public get buildAvailabilitySignal(): FerrsignView1<boolean> {
-    return this.signalBuildAvailabilityInternal;
   }
 
   public build(): void {
-    STORE.commands.elements.add(UI_STATE.forceActiveLayerUuid, this.buildData());
-    this.nameControl.value = "";
-    this.sequenceControl.value = [];
-    this.handleAvailability();
-  }
-
-  private readonly handleDataUpdate = (): void => {
-    const error = this.handleAvailability();
-    if (error === undefined) {
-      return;
-    }
-
-    TOAST.warning(`**[EAnimatedImageElementBuilder]** ${error.message}`);
-
-    if (error.field === "name") {
-      this.nameControl.flash();
-    } else if (error.field === "sequence") {
-      this.sequenceControl.flash();
-    }
-  };
-
-  private handleAvailability(): EAnimatedImageElementError | undefined {
-    const error = STORE.validators.elements.animatedImage(
-      UI_STATE.activeLayerUuid,
-      this.buildData(),
-      true,
-    );
-
-    this.signalBuildAvailabilityInternal.emit(error === undefined);
-    return error;
-  }
-
-  private buildData(): EAnimatedImageElement {
-    return {
+    const data: EAnimatedImageElement = {
       uuid: crypto.randomUUID(),
       type: EElementType.ANIMATED_IMAGE,
       name: this.nameControl.value,
@@ -102,5 +56,21 @@ export class EAnimatedImageElementBuilder {
       loopMode: EAnimatedImageLoopMode.LOOP,
       playByDefault: true,
     };
+
+    const error = STORE.validators.elements.animatedImage(UI_STATE.activeLayerUuid, data);
+    if (error === undefined) {
+      STORE.commands.elements.add(UI_STATE.forceActiveLayerUuid, data);
+      this.nameControl.value = "";
+      this.sequenceControl.value = [];
+      return;
+    }
+
+    TOAST.warning(`**[EAnimatedImageElementBuilder]** ${error.message}`);
+
+    if (error.field === "name") {
+      this.nameControl.flash();
+    } else if (error.field === "sequence") {
+      this.sequenceControl.flash();
+    }
   }
 }

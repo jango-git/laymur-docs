@@ -18,7 +18,7 @@ export class EExportTSAction {
 
     const layer = layerContext.layer;
     const elements = STORE.selectors.elements.selectAll(layerUuid);
-    const constraints = STORE.selectors.constraints.selectAll(layerUuid) ?? [];
+    const constraints = STORE.selectors.constraints.selectAll(layerUuid);
 
     const assetMap = new Map<string, string>();
     for (const asset of STORE.selectors.assets.selectAll()) {
