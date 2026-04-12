@@ -65,6 +65,7 @@ export class EElementsTab {
     controlRow.appendChild(this.addButton);
 
     builderTypeSelect.signalValueChanged.on(this.onBuilderTypeChanged);
+    STORE.signals.setup.on(this.onSetup);
     STORE.signals.elements.list.on(this.onCardListChanged);
     UI_STATE.signalActiveLayerChanged.on(this.onActiveLayerChanged);
 
@@ -111,6 +112,10 @@ export class EElementsTab {
       }
     }
   }
+
+  private readonly onSetup = (): void => {
+    this.onActiveLayerChanged(undefined);
+  };
 
   private readonly onCardListChanged = (delta: EStoreDeltaElements): void => {
     if (delta.layerUuid !== UI_STATE.activeLayerUuid) {

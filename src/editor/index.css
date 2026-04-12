@@ -13,6 +13,7 @@
 @import "./src/components/cards/elements/style.css";
 @import "./src/components/cards/constraints/style.css";
 @import "./src/components/builders/style.css";
+@import "./src/components/tabs/project/style.css";
 
 :root {
   /* Backgrounds */

@@ -1,0 +1,23 @@
+.project-header {
+  display: flex;
+  gap: 6px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+.button-secondary {
+  padding: 6px 10px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: 12px;
+  cursor: pointer;
+  font-family: var(--font);
+}
+
+.button-secondary:hover {
+  background: var(--card-hover);
+  border-color: var(--accent);
+}

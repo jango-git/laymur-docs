@@ -19,6 +19,10 @@ export class EStoreSelectors {
     this.constraints = new EStoreSelectorsConstraints(data);
   }
 
+  public all(): EDocument {
+    return clone(this.data);
+  }
+
   public ownerLayerContext(childUuid: EChildUuid): ELayerContext | undefined {
     const result = this.data.layerContexts.find(
       (layerContext) =>

@@ -1,5 +1,5 @@
 import type { EStoreSignals } from "../signals";
-import type { EDocument } from "../types";
+import { clone, type EDocument } from "../types";
 import { EStoreCommandsAssets } from "./assets";
 import { EStoreCommandsConstraints } from "./constraints";
 import { EStoreCommandsDebug } from "./debug";
@@ -13,11 +13,20 @@ export class EStoreCommands {
   public readonly constraints: EStoreCommandsConstraints;
   public readonly debug: EStoreCommandsDebug;
 
-  constructor(data: EDocument, signals: EStoreSignals) {
+  constructor(
+    private readonly data: EDocument,
+    private readonly signals: EStoreSignals,
+  ) {
     this.assets = new EStoreCommandsAssets(data, signals.assets);
     this.layers = new EStoreCommandsLayers(data, signals.layers);
     this.elements = new EStoreCommandsElements(data, signals.elements);
     this.constraints = new EStoreCommandsConstraints(data, signals.constraints);
     this.debug = new EStoreCommandsDebug(data, signals.debug);
+  }
+
+  public setup(document: EDocument): void {
+    this.data.assets = clone(document.assets);
+    this.data.layerContexts = clone(document.layerContexts);
+    this.signals["emitSetup"](clone(document));
   }
 }

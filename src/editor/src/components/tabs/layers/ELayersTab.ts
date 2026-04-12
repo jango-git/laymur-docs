@@ -52,6 +52,7 @@ export class ELayersTab {
       addButton.disabled = !available;
     });
 
+    STORE.signals.setup.on(this.onSetup);
     STORE.signals.layers.list.on(this.onLayerListChanged);
 
     for (const layerContext of STORE.selectors.layers.selectAllContexts()) {
@@ -94,6 +95,17 @@ export class ELayersTab {
       }
     }
   }
+
+  private readonly onSetup = (): void => {
+    for (const container of this.uuidToCardMap.values()) {
+      container.remove();
+    }
+    this.uuidToCardMap.clear();
+
+    for (const layerContext of STORE.selectors.layers.selectAllContexts()) {
+      this.addCard(layerContext);
+    }
+  };
 
   private readonly onLayerListChanged = (delta: EStoreDeltaLayers): void => {
     switch (delta.operation) {

@@ -1,8 +1,9 @@
-import { EAssetsTab } from "./src/components/tabs/assets/EAssetsTab";
 import { EConstraintsTab } from "./src/components/tabs/constraints/EConstraintsTab";
 import { EElementsTab } from "./src/components/tabs/elements/EElementsTab";
-import { EExportTab } from "./src/components/tabs/export/EExportTab";
 import { ELayersTab } from "./src/components/tabs/layers/ELayersTab";
+import { EProjectTab } from "./src/components/tabs/project/EProjectTab";
+import { EDocumentAutoload } from "./src/miscellaneous/EDocumentAutoload";
+import { EDocumentAutosave } from "./src/miscellaneous/EDocumentAutosave";
 
 document.addEventListener("DOMContentLoaded", () => {
   const tabButtons = document.querySelectorAll<HTMLButtonElement>(".tab-button");
@@ -11,8 +12,8 @@ document.addEventListener("DOMContentLoaded", () => {
   for (const button of tabButtons) {
     button.addEventListener("click", () => {
       const target = button.dataset.tab;
-      for (const b of tabButtons) {
-        b.classList.toggle("active", b === button);
+      for (const tabButton of tabButtons) {
+        tabButton.classList.toggle("active", tabButton === button);
       }
       for (const panel of tabPanels) {
         panel.classList.toggle("active", panel.id === `tab-${target}`);
@@ -20,21 +21,19 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  const assetsContainerElementId = "tab-assets";
+  const projectContainerElementId = "tab-project";
   const layersContainerElementId = "tab-layers";
   const elementsContainerElementId = "tab-elements";
   const constraintsContainerElementId = "tab-constraints";
-  const exportContainerElementId = "tab-export";
 
-  const assetsContainer = document.getElementById(assetsContainerElementId);
+  const projectContainer = document.getElementById(projectContainerElementId);
   const layersContainer = document.getElementById(layersContainerElementId);
   const elementsContainer = document.getElementById(elementsContainerElementId);
   const constraintsContainer = document.getElementById(constraintsContainerElementId);
-  const exportContainer = document.getElementById(exportContainerElementId);
 
-  if (!assetsContainer) {
+  if (!projectContainer) {
     throw new Error(
-      `[DOMContentLoaded] assetsContainer is not defined with id "${assetsContainerElementId}"`,
+      `[DOMContentLoaded] projectContainer is not defined with id "${projectContainerElementId}"`,
     );
   }
   if (!layersContainer) {
@@ -52,15 +51,14 @@ document.addEventListener("DOMContentLoaded", () => {
       `[DOMContentLoaded] constraintsContainer is not defined with id "${constraintsContainerElementId}"`,
     );
   }
-  if (!exportContainer) {
-    throw new Error(
-      `[DOMContentLoaded] exportContainer is not defined with id "${exportContainerElementId}"`,
-    );
-  }
 
-  new EAssetsTab(assetsContainer);
-  new ELayersTab(layersContainer);
-  new EElementsTab(elementsContainer);
-  new EConstraintsTab(constraintsContainer);
-  new EExportTab(exportContainer);
+  void (async (): Promise<void> => {
+    await EDocumentAutoload.load();
+
+    new EDocumentAutosave();
+    new EProjectTab(projectContainer);
+    new ELayersTab(layersContainer);
+    new EElementsTab(elementsContainer);
+    new EConstraintsTab(constraintsContainer);
+  })();
 });
