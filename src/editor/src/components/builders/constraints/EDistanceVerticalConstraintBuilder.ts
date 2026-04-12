@@ -2,6 +2,7 @@ import type { FerrsignView1 } from "ferrsign";
 import { Ferrsign1 } from "ferrsign";
 import { EAssetControl } from "../../../controls/EAssetControl/EAssetControl";
 import { STORE } from "../../../document/store";
+import type { EVerticalDistanceConstraint } from "../../../document/types.constraints";
 import { EConstraintType } from "../../../document/types.constraints";
 import type { EDistanceConstraintError } from "../../../document/validators/constraints";
 import { UI_STATE } from "../../../ui-state/ui-state";
@@ -29,7 +30,7 @@ export class EDistanceVerticalConstraintBuilder {
     this.elementBControl.signalValueChanged.on(this.handleDataUpdate);
 
     UI_STATE.signalActiveLayerChanged.on(this.handleDataUpdate);
-    this.tryUpdateData();
+    this.handleAvailability();
   }
 
   public get buildAvailabilitySignal(): FerrsignView1<boolean> {
@@ -37,29 +38,19 @@ export class EDistanceVerticalConstraintBuilder {
   }
 
   public build(): void {
-    STORE.commands.constraints.add(UI_STATE.forceActiveLayerUuid, {
-      uuid: crypto.randomUUID(),
-      type: EConstraintType.DISTANCE_VERTICAL,
-      name: "",
-      elementA: this.elementAControl.forceValue.uuid,
-      elementB: this.elementBControl.forceValue.uuid,
-      anchorA: 0,
-      anchorB: 0,
-      distance: 0,
-    });
-
+    STORE.commands.constraints.add(UI_STATE.forceActiveLayerUuid, this.buildData());
     this.elementAControl.value = undefined;
     this.elementBControl.value = undefined;
-    this.tryUpdateData();
+    this.handleAvailability();
   }
 
   private readonly handleDataUpdate = (): void => {
-    const error = this.tryUpdateData();
+    const error = this.handleAvailability();
     if (error === undefined) {
       return;
     }
 
-    TOAST.warning(`[EDistanceVerticalConstraintBuilder] ${error.message}`);
+    TOAST.warning(`**[EDistanceVerticalConstraintBuilder]** ${error.message}`);
 
     if (error.field === "elementA") {
       this.elementAControl.flash();
@@ -68,16 +59,26 @@ export class EDistanceVerticalConstraintBuilder {
     }
   };
 
-  private tryUpdateData(): EDistanceConstraintError | undefined {
+  private handleAvailability(): EDistanceConstraintError | undefined {
     const error = STORE.validators.constraints.distanceVertical(
       UI_STATE.activeLayerUuid,
-      {
-        elementA: this.elementAControl.value?.uuid,
-        elementB: this.elementBControl.value?.uuid,
-      },
-      false,
+      this.buildData(),
+      true,
     );
     this.signalBuildAvailabilityInternal.emit(error === undefined);
     return error;
+  }
+
+  private buildData(): EVerticalDistanceConstraint {
+    return {
+      uuid: crypto.randomUUID(),
+      type: EConstraintType.DISTANCE_VERTICAL,
+      name: "",
+      elementA: this.elementAControl.value?.uuid ?? "",
+      elementB: this.elementBControl.value?.uuid ?? "",
+      anchorA: 0,
+      anchorB: 0,
+      distance: 0,
+    };
   }
 }

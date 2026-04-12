@@ -2,6 +2,7 @@ import type { FerrsignView1 } from "ferrsign";
 import { Ferrsign1 } from "ferrsign";
 import { EAssetControl } from "../../../controls/EAssetControl/EAssetControl";
 import { STORE } from "../../../document/store";
+import type { EHorizontalProportionConstraint } from "../../../document/types.constraints";
 import { EConstraintType } from "../../../document/types.constraints";
 import type { EProportionConstraintError } from "../../../document/validators/constraints";
 import { UI_STATE } from "../../../ui-state/ui-state";
@@ -29,7 +30,7 @@ export class EProportionHorizontalConstraintBuilder {
     this.elementBControl.signalValueChanged.on(this.handleDataUpdate);
 
     UI_STATE.signalActiveLayerChanged.on(this.handleDataUpdate);
-    this.tryUpdateData();
+    this.handleAvailability();
   }
 
   public get buildAvailabilitySignal(): FerrsignView1<boolean> {
@@ -37,27 +38,19 @@ export class EProportionHorizontalConstraintBuilder {
   }
 
   public build(): void {
-    STORE.commands.constraints.add(UI_STATE.forceActiveLayerUuid, {
-      uuid: crypto.randomUUID(),
-      type: EConstraintType.PROPORTION_HORIZONTAL,
-      name: "",
-      elementA: this.elementAControl.forceValue.uuid,
-      elementB: this.elementBControl.forceValue.uuid,
-      proportion: 1,
-    });
-
+    STORE.commands.constraints.add(UI_STATE.forceActiveLayerUuid, this.buildData());
     this.elementAControl.value = undefined;
     this.elementBControl.value = undefined;
-    this.tryUpdateData();
+    this.handleAvailability();
   }
 
   private readonly handleDataUpdate = (): void => {
-    const error = this.tryUpdateData();
+    const error = this.handleAvailability();
     if (error === undefined) {
       return;
     }
 
-    TOAST.warning(`[EProportionHorizontalConstraintBuilder] ${error.message}`);
+    TOAST.warning(`**[EProportionHorizontalConstraintBuilder]** ${error.message}`);
 
     if (error.field === "elementA") {
       this.elementAControl.flash();
@@ -66,16 +59,24 @@ export class EProportionHorizontalConstraintBuilder {
     }
   };
 
-  private tryUpdateData(): EProportionConstraintError | undefined {
+  private handleAvailability(): EProportionConstraintError | undefined {
     const error = STORE.validators.constraints.proportionHorizontal(
       UI_STATE.activeLayerUuid,
-      {
-        elementA: this.elementAControl.value?.uuid,
-        elementB: this.elementBControl.value?.uuid,
-      },
-      false,
+      this.buildData(),
+      true,
     );
     this.signalBuildAvailabilityInternal.emit(error === undefined);
     return error;
+  }
+
+  private buildData(): EHorizontalProportionConstraint {
+    return {
+      uuid: crypto.randomUUID(),
+      type: EConstraintType.PROPORTION_HORIZONTAL,
+      name: "",
+      elementA: this.elementAControl.value?.uuid ?? "",
+      elementB: this.elementBControl.value?.uuid ?? "",
+      proportion: 1,
+    };
   }
 }

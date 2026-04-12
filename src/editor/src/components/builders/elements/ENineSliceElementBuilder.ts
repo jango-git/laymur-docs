@@ -4,6 +4,7 @@ import { EAssetControl } from "../../../controls/EAssetControl/EAssetControl";
 import { EStringControl } from "../../../controls/EStringControl/EStringControl";
 import { STORE } from "../../../document/store";
 import type { EImageAsset } from "../../../document/types.assets";
+import type { ENineSliceElement } from "../../../document/types.elements";
 import { EElementType } from "../../../document/types.elements";
 import { ENineSliceRegionMode } from "../../../document/types.misc";
 import type { ENineSliceElementError } from "../../../document/validators/elements";
@@ -28,7 +29,7 @@ export class ENineSliceElementBuilder {
     this.textureControl.signalValueChanged.on(this.handleDataUpdate);
 
     UI_STATE.signalActiveLayerChanged.on(this.handleDataUpdate);
-    this.tryUpdateData();
+    this.handleAvailability();
   }
 
   public get buildAvailabilitySignal(): FerrsignView1<boolean> {
@@ -36,30 +37,19 @@ export class ENineSliceElementBuilder {
   }
 
   public build(): void {
-    STORE.commands.elements.add(UI_STATE.forceActiveLayerUuid, {
-      uuid: crypto.randomUUID(),
-      type: EElementType.NINE_SLICE,
-      name: this.nameControl.value,
-      color: { color: "#ffffff", alpha: 255 },
-      texture: this.textureControl.forceValue.uuid,
-      sliceBorders: [0, 0, 0, 0],
-      sliceRegions: [0, 0, 0, 0],
-      regionMode: ENineSliceRegionMode.NORMALIZED,
-    });
-
+    STORE.commands.elements.add(UI_STATE.forceActiveLayerUuid, this.buildData());
     this.nameControl.value = "";
     this.textureControl.value = undefined;
-
-    this.tryUpdateData();
+    this.handleAvailability();
   }
 
   private readonly handleDataUpdate = (): void => {
-    const error = this.tryUpdateData();
+    const error = this.handleAvailability();
     if (error === undefined) {
       return;
     }
 
-    TOAST.warning(`[ENineSliceElementBuilder] ${error.message}`);
+    TOAST.warning(`**[ENineSliceElementBuilder]** ${error.message}`);
 
     if (error.field === "name") {
       this.nameControl.flash();
@@ -68,13 +58,26 @@ export class ENineSliceElementBuilder {
     }
   };
 
-  private tryUpdateData(): ENineSliceElementError | undefined {
+  private handleAvailability(): ENineSliceElementError | undefined {
     const error = STORE.validators.elements.nineSlice(
       UI_STATE.activeLayerUuid,
-      { name: this.nameControl.value, texture: this.textureControl.value?.uuid },
-      false,
+      this.buildData(),
+      true,
     );
     this.signalBuildAvailabilityInternal.emit(error === undefined);
     return error;
+  }
+
+  private buildData(): ENineSliceElement {
+    return {
+      uuid: crypto.randomUUID(),
+      type: EElementType.NINE_SLICE,
+      name: this.nameControl.value,
+      color: { color: "#ffffff", alpha: 1 },
+      texture: this.textureControl.value?.uuid ?? "",
+      sliceBorders: [0, 0, 0, 0],
+      sliceRegions: [0, 0, 0, 0],
+      regionMode: ENineSliceRegionMode.NORMALIZED,
+    };
   }
 }

@@ -2,6 +2,7 @@ import type { FerrsignView1 } from "ferrsign";
 import { Ferrsign1 } from "ferrsign";
 import { EStringControl } from "../../../controls/EStringControl/EStringControl";
 import { STORE } from "../../../document/store";
+import type { ESceneElement } from "../../../document/types.elements";
 import { EElementType } from "../../../document/types.elements";
 import { ESceneUpdateMode } from "../../../document/types.misc";
 import type { ESceneElementError } from "../../../document/validators/elements";
@@ -18,7 +19,7 @@ export class ESceneElementBuilder {
     this.nameControl.signalValueChanged.on(this.handleDataUpdate);
 
     UI_STATE.signalActiveLayerChanged.on(this.handleDataUpdate);
-    this.tryUpdateData();
+    this.handleAvailability();
   }
 
   public get buildAvailabilitySignal(): FerrsignView1<boolean> {
@@ -26,41 +27,40 @@ export class ESceneElementBuilder {
   }
 
   public build(): void {
-    STORE.commands.elements.add(UI_STATE.forceActiveLayerUuid, {
-      uuid: crypto.randomUUID(),
-      type: EElementType.SCENE,
-      name: this.nameControl.value,
-      color: { color: "#ffffff", alpha: 255 },
-      updateMode: ESceneUpdateMode.EVERY_FRAME,
-      resolutionFactor: 1,
-      clearColor: { color: "#000000", alpha: 255 },
-      enableDepthBuffer: true,
-    });
-
+    STORE.commands.elements.add(UI_STATE.forceActiveLayerUuid, this.buildData());
     this.nameControl.value = "";
-    this.tryUpdateData();
+    this.handleAvailability();
   }
 
   private readonly handleDataUpdate = (): void => {
-    const error = this.tryUpdateData();
+    const error = this.handleAvailability();
     if (error === undefined) {
       return;
     }
 
-    TOAST.warning(`[ESceneElementBuilder] ${error.message}`);
+    TOAST.warning(`**[ESceneElementBuilder]** ${error.message}`);
 
     if (error.field === "name") {
       this.nameControl.flash();
     }
   };
 
-  private tryUpdateData(): ESceneElementError | undefined {
-    const error = STORE.validators.elements.scene(
-      UI_STATE.activeLayerUuid,
-      { name: this.nameControl.value },
-      false,
-    );
+  private handleAvailability(): ESceneElementError | undefined {
+    const error = STORE.validators.elements.scene(UI_STATE.activeLayerUuid, this.buildData(), true);
     this.signalBuildAvailabilityInternal.emit(error === undefined);
     return error;
+  }
+
+  private buildData(): ESceneElement {
+    return {
+      uuid: crypto.randomUUID(),
+      type: EElementType.SCENE,
+      name: this.nameControl.value,
+      color: { color: "#ffffff", alpha: 1 },
+      updateMode: ESceneUpdateMode.EVERY_FRAME,
+      resolutionFactor: 1,
+      clearColor: { color: "#000000", alpha: 1 },
+      enableDepthBuffer: true,
+    };
   }
 }

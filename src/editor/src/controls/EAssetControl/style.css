@@ -55,9 +55,7 @@
 
 .asset-control__popup {
   display: none;
-  position: absolute;
-  left: 0;
-  right: 0;
+  position: fixed;
   z-index: 100;
   max-height: 200px;
   background-color: var(--bg-card-1);
@@ -67,16 +65,8 @@
   flex-direction: column;
 }
 
-.asset-control[data-state="open"] .asset-control__popup {
+.asset-control__popup--open {
   display: flex;
-}
-
-.asset-control[data-direction="down"] .asset-control__popup {
-  top: calc(100% + 2px);
-}
-
-.asset-control[data-direction="up"] .asset-control__popup {
-  bottom: calc(100% + 2px);
 }
 
 /* Search */

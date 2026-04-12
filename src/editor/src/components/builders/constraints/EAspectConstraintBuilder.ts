@@ -2,6 +2,7 @@ import type { FerrsignView1 } from "ferrsign";
 import { Ferrsign1 } from "ferrsign";
 import { EAssetControl } from "../../../controls/EAssetControl/EAssetControl";
 import { STORE } from "../../../document/store";
+import type { EAspectConstraint } from "../../../document/types.constraints";
 import { EConstraintType } from "../../../document/types.constraints";
 import type { EAspectConstraintError } from "../../../document/validators/constraints";
 import { UI_STATE } from "../../../ui-state/ui-state";
@@ -22,7 +23,7 @@ export class EAspectConstraintBuilder {
     this.elementControl.signalValueChanged.on(this.handleDataUpdate);
 
     UI_STATE.signalActiveLayerChanged.on(this.handleDataUpdate);
-    this.tryUpdateData();
+    this.handleAvailability();
   }
 
   public get buildAvailabilitySignal(): FerrsignView1<boolean> {
@@ -30,38 +31,41 @@ export class EAspectConstraintBuilder {
   }
 
   public build(): void {
-    STORE.commands.constraints.add(UI_STATE.forceActiveLayerUuid, {
-      uuid: crypto.randomUUID(),
-      type: EConstraintType.ASPECT,
-      name: "",
-      element: this.elementControl.forceValue.uuid,
-      aspect: 1,
-    });
-
+    STORE.commands.constraints.add(UI_STATE.forceActiveLayerUuid, this.buildData());
     this.elementControl.value = undefined;
-    this.tryUpdateData();
+    this.handleAvailability();
   }
 
   private readonly handleDataUpdate = (): void => {
-    const error = this.tryUpdateData();
+    const error = this.handleAvailability();
     if (error === undefined) {
       return;
     }
 
-    TOAST.warning(`[EAspectConstraintBuilder] ${error.message}`);
+    TOAST.warning(`**[EAspectConstraintBuilder]** ${error.message}`);
 
     if (error.field === "element") {
       this.elementControl.flash();
     }
   };
 
-  private tryUpdateData(): EAspectConstraintError | undefined {
+  private handleAvailability(): EAspectConstraintError | undefined {
     const error = STORE.validators.constraints.aspect(
       UI_STATE.activeLayerUuid,
-      { element: this.elementControl.value?.uuid },
-      false,
+      this.buildData(),
+      true,
     );
     this.signalBuildAvailabilityInternal.emit(error === undefined);
     return error;
+  }
+
+  private buildData(): EAspectConstraint {
+    return {
+      uuid: crypto.randomUUID(),
+      type: EConstraintType.ASPECT,
+      name: "",
+      element: this.elementControl.value?.uuid ?? "",
+      aspect: 1,
+    };
   }
 }

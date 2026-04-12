@@ -76,8 +76,8 @@ export class EAssetControl<T extends EAssetControlItem> {
     this.popup.appendChild(this.list);
 
     this.root.appendChild(this.display);
-    this.root.appendChild(this.popup);
     this.container.appendChild(this.root);
+    document.body.appendChild(this.popup);
 
     this.display.addEventListener("click", this.handleDisplayClick);
     this.searchInput.addEventListener("input", this.handleSearchInput);
@@ -121,6 +121,7 @@ export class EAssetControl<T extends EAssetControlItem> {
     this.display.removeEventListener("click", this.handleDisplayClick);
     this.searchInput.removeEventListener("input", this.handleSearchInput);
     document.removeEventListener("mousedown", this.handleDocumentMouseDown);
+    this.popup.remove();
     this.root.remove();
   }
 
@@ -137,7 +138,7 @@ export class EAssetControl<T extends EAssetControlItem> {
   };
 
   private readonly handleDocumentMouseDown = (event: MouseEvent): void => {
-    if (!this.root.contains(event.target as Node)) {
+    if (!this.root.contains(event.target as Node) && !this.popup.contains(event.target as Node)) {
       this.close();
     }
   };
@@ -147,9 +148,21 @@ export class EAssetControl<T extends EAssetControlItem> {
     this.searchInput.value = "";
     this.renderList(assets);
 
-    const rect = this.root.getBoundingClientRect();
+    const rect = this.display.getBoundingClientRect();
     const spaceBelow = window.innerHeight - rect.bottom;
-    this.root.dataset.direction = spaceBelow >= POPUP_MAX_HEIGHT ? "down" : "up";
+    const openDown = spaceBelow >= POPUP_MAX_HEIGHT;
+
+    this.popup.style.left = `${rect.left}px`;
+    this.popup.style.width = `${rect.width}px`;
+    if (openDown) {
+      this.popup.style.top = `${rect.bottom + 2}px`;
+      this.popup.style.bottom = "";
+    } else {
+      this.popup.style.top = "";
+      this.popup.style.bottom = `${window.innerHeight - rect.top + 2}px`;
+    }
+
+    this.popup.classList.add("asset-control__popup--open");
     this.root.dataset.state = "open";
 
     requestAnimationFrame(() => {
@@ -160,6 +173,7 @@ export class EAssetControl<T extends EAssetControlItem> {
   }
 
   private close(): void {
+    this.popup.classList.remove("asset-control__popup--open");
     this.root.dataset.state = "closed";
     document.removeEventListener("mousedown", this.handleDocumentMouseDown);
   }

@@ -2,6 +2,7 @@ import type { FerrsignView1 } from "ferrsign";
 import { Ferrsign1 } from "ferrsign";
 import { EAssetControl } from "../../../controls/EAssetControl/EAssetControl";
 import { STORE } from "../../../document/store";
+import type { EHorizontalSizeConstraint } from "../../../document/types.constraints";
 import { EConstraintType } from "../../../document/types.constraints";
 import type { ESizeConstraintError } from "../../../document/validators/constraints";
 import { UI_STATE } from "../../../ui-state/ui-state";
@@ -22,7 +23,7 @@ export class ESizeHorizontalConstraintBuilder {
     this.elementControl.signalValueChanged.on(this.handleDataUpdate);
 
     UI_STATE.signalActiveLayerChanged.on(this.handleDataUpdate);
-    this.tryUpdateData();
+    this.handleAvailability();
   }
 
   public get buildAvailabilitySignal(): FerrsignView1<boolean> {
@@ -30,38 +31,41 @@ export class ESizeHorizontalConstraintBuilder {
   }
 
   public build(): void {
-    STORE.commands.constraints.add(UI_STATE.forceActiveLayerUuid, {
-      uuid: crypto.randomUUID(),
-      type: EConstraintType.SIZE_HORIZONTAL,
-      name: "",
-      element: this.elementControl.forceValue.uuid,
-      size: 100,
-    });
-
+    STORE.commands.constraints.add(UI_STATE.forceActiveLayerUuid, this.buildData());
     this.elementControl.value = undefined;
-    this.tryUpdateData();
+    this.handleAvailability();
   }
 
   private readonly handleDataUpdate = (): void => {
-    const error = this.tryUpdateData();
+    const error = this.handleAvailability();
     if (error === undefined) {
       return;
     }
 
-    TOAST.warning(`[ESizeHorizontalConstraintBuilder] ${error.message}`);
+    TOAST.warning(`**[ESizeHorizontalConstraintBuilder]** ${error.message}`);
 
     if (error.field === "element") {
       this.elementControl.flash();
     }
   };
 
-  private tryUpdateData(): ESizeConstraintError | undefined {
+  private handleAvailability(): ESizeConstraintError | undefined {
     const error = STORE.validators.constraints.sizeHorizontal(
       UI_STATE.activeLayerUuid,
-      { element: this.elementControl.value?.uuid },
-      false,
+      this.buildData(),
+      true,
     );
     this.signalBuildAvailabilityInternal.emit(error === undefined);
     return error;
+  }
+
+  private buildData(): EHorizontalSizeConstraint {
+    return {
+      uuid: crypto.randomUUID(),
+      type: EConstraintType.SIZE_HORIZONTAL,
+      name: "",
+      element: this.elementControl.value?.uuid ?? "",
+      size: 100,
+    };
   }
 }
