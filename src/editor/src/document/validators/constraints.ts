@@ -1,71 +1,286 @@
 import type { EDocument, ELayerContext } from "../types";
-import type { EElementUuid, ELayerUuid } from "../types.misc";
+import type {
+  EAspectConstraint,
+  EHorizontalDistanceConstraint,
+  EHorizontalProportionConstraint,
+  EHorizontalSizeConstraint,
+  EVerticalDistanceConstraint,
+  EVerticalProportionConstraint,
+  EVerticalSizeConstraint,
+} from "../types.constraints";
+import type { UUID } from "../types.misc";
+import { isValidName, isValidPositiveNumber } from "./miscellaneous";
 
-interface EValidateSingleElementConstraintBuilderError {
+export interface EAspectConstraintError {
   message: string;
-  field: "layer" | "element";
+  field: "layer" | "element" | "name" | "aspect";
 }
 
-interface EValidateDualElementConstraintBuilderError {
+export interface ESizeConstraintError {
   message: string;
-  field: "layer" | "elementA" | "elementB";
+  field: "layer" | "element" | "name" | "size";
 }
+
+export interface EDistanceConstraintError {
+  message: string;
+  field: "layer" | "elementA" | "elementB" | "name" | "anchorA" | "anchorB" | "distance";
+}
+
+export interface EProportionConstraintError {
+  message: string;
+  field: "layer" | "elementA" | "elementB" | "name" | "proportion";
+}
+
+// Backward-compatible alias
+export type EValidateConstraintAspectError = EAspectConstraintError;
 
 export class EStoreValidatorsConstraints {
   constructor(private readonly data: EDocument) {}
 
-  public validateSingleElementConstraintBuilder(
-    layer?: ELayerUuid,
-    element?: EElementUuid,
-  ): EValidateSingleElementConstraintBuilderError | undefined {
+  public aspect(
+    layer: UUID | undefined,
+    constraint: Partial<Omit<EAspectConstraint, "type">>,
+    fullValidation: boolean,
+  ): EAspectConstraintError | undefined {
     if (layer === undefined) {
-      return { message: "Layer is required", field: "layer" };
+      return { message: "layer is required", field: "layer" };
+    }
+    const layerContext = this.getLayerContext(layer);
+    if (layerContext === undefined) {
+      return { message: `layer with UUID ${layer} must exist`, field: "layer" };
     }
 
-    if (!this.isLayerContextExists(layer)) {
-      return { message: `Layer with UUID ${layer} must exist`, field: "layer" };
+    const elementError = this.validateSingleElement(layer, layerContext, constraint.element);
+    if (elementError !== undefined) {
+      return elementError;
     }
 
+    if (fullValidation) {
+      return undefined;
+    }
+
+    const nameError = this.validateName(layerContext, constraint.name);
+    if (nameError !== undefined) {
+      return nameError;
+    }
+
+    if (constraint.aspect === undefined) {
+      return { message: "aspect is required", field: "aspect" };
+    }
+    if (!isValidPositiveNumber(constraint.aspect)) {
+      return { message: "aspect must be a positive number", field: "aspect" };
+    }
+  }
+
+  public sizeHorizontal(
+    layer: UUID | undefined,
+    constraint: Partial<Omit<EHorizontalSizeConstraint, "type">>,
+    fullValidation: boolean,
+  ): ESizeConstraintError | undefined {
+    if (layer === undefined) {
+      return { message: "layer is required", field: "layer" };
+    }
+    const layerContext = this.getLayerContext(layer);
+    if (layerContext === undefined) {
+      return { message: `layer with UUID ${layer} must exist`, field: "layer" };
+    }
+
+    const elementError = this.validateSingleElement(layer, layerContext, constraint.element);
+    if (elementError !== undefined) {
+      return elementError;
+    }
+
+    if (fullValidation) {
+      return undefined;
+    }
+
+    const nameError = this.validateName(layerContext, constraint.name);
+    if (nameError !== undefined) {
+      return nameError;
+    }
+
+    if (constraint.size === undefined) {
+      return { message: "size is required", field: "size" };
+    }
+    if (!isValidPositiveNumber(constraint.size)) {
+      return { message: "size must be a positive number", field: "size" };
+    }
+  }
+
+  public sizeVertical(
+    layer: UUID | undefined,
+    constraint: Partial<Omit<EVerticalSizeConstraint, "type">>,
+    fullValidation: boolean,
+  ): ESizeConstraintError | undefined {
+    return this.sizeHorizontal(layer, constraint, fullValidation);
+  }
+
+  public distanceHorizontal(
+    layer: UUID | undefined,
+    constraint: Partial<Omit<EHorizontalDistanceConstraint, "type">>,
+    fullValidation: boolean,
+  ): EDistanceConstraintError | undefined {
+    if (layer === undefined) {
+      return { message: "layer is required", field: "layer" };
+    }
+    const layerContext = this.getLayerContext(layer);
+    if (layerContext === undefined) {
+      return { message: `layer with UUID ${layer} must exist`, field: "layer" };
+    }
+
+    const elementsError = this.validateTwoElements(
+      layerContext,
+      constraint.elementA,
+      constraint.elementB,
+    );
+    if (elementsError !== undefined) {
+      return elementsError;
+    }
+
+    if (fullValidation) {
+      return undefined;
+    }
+
+    const nameError = this.validateName(layerContext, constraint.name);
+    if (nameError !== undefined) {
+      return nameError;
+    }
+
+    if (constraint.anchorA === undefined) {
+      return { message: "anchorA is required", field: "anchorA" };
+    }
+    if (constraint.anchorB === undefined) {
+      return { message: "anchorB is required", field: "anchorB" };
+    }
+    if (constraint.distance === undefined) {
+      return { message: "distance is required", field: "distance" };
+    }
+  }
+
+  public distanceVertical(
+    layer: UUID | undefined,
+    constraint: Partial<Omit<EVerticalDistanceConstraint, "type">>,
+    fullValidation: boolean,
+  ): EDistanceConstraintError | undefined {
+    return this.distanceHorizontal(layer, constraint, fullValidation);
+  }
+
+  public proportionHorizontal(
+    layer: UUID | undefined,
+    constraint: Partial<Omit<EHorizontalProportionConstraint, "type">>,
+    fullValidation: boolean,
+  ): EProportionConstraintError | undefined {
+    if (layer === undefined) {
+      return { message: "layer is required", field: "layer" };
+    }
+    const layerContext = this.getLayerContext(layer);
+    if (layerContext === undefined) {
+      return { message: `layer with UUID ${layer} must exist`, field: "layer" };
+    }
+
+    const elementsError = this.validateTwoElements(
+      layerContext,
+      constraint.elementA,
+      constraint.elementB,
+    );
+    if (elementsError !== undefined) {
+      return elementsError;
+    }
+
+    if (fullValidation) {
+      return undefined;
+    }
+
+    const nameError = this.validateName(layerContext, constraint.name);
+    if (nameError !== undefined) {
+      return nameError;
+    }
+
+    if (constraint.proportion === undefined) {
+      return { message: "proportion is required", field: "proportion" };
+    }
+    if (!isValidPositiveNumber(constraint.proportion)) {
+      return { message: "proportion must be a positive number", field: "proportion" };
+    }
+  }
+
+  public proportionVertical(
+    layer: UUID | undefined,
+    constraint: Partial<Omit<EVerticalProportionConstraint, "type">>,
+    fullValidation: boolean,
+  ): EProportionConstraintError | undefined {
+    return this.proportionHorizontal(layer, constraint, fullValidation);
+  }
+
+  private validateSingleElement(
+    layer: UUID,
+    layerContext: ELayerContext,
+    element: UUID | undefined,
+  ): { message: string; field: "element" } | undefined {
     if (element === undefined) {
-      return { message: "Element is required", field: "element" };
+      return { message: "element is required", field: "element" };
     }
-
     if (element === layer) {
-      return { message: "Element cannot be a layer", field: "element" };
+      return { message: "element cannot be a layer", field: "element" };
+    }
+    if (!layerContext.elements.some((candidate) => candidate.uuid === element)) {
+      return { message: "element must be on the same layer", field: "element" };
     }
   }
 
-  public validateDualElementConstraintBuilder(
-    layer?: ELayerUuid,
-    elementA?: EElementUuid,
-    elementB?: EElementUuid,
-  ): EValidateDualElementConstraintBuilderError | undefined {
-    if (layer === undefined) {
-      return { message: "Layer is required", field: "layer" };
-    }
-
-    if (!this.isLayerContextExists(layer)) {
-      return { message: `Layer with UUID ${layer} must exist`, field: "layer" };
-    }
-
+  private validateTwoElements(
+    layerContext: ELayerContext,
+    elementA: UUID | undefined,
+    elementB: UUID | undefined,
+  ): { message: string; field: "elementA" | "elementB" } | undefined {
     if (elementA === undefined) {
-      return { message: "Element A is required", field: "elementA" };
+      return { message: "elementA is required", field: "elementA" };
     }
-
     if (elementB === undefined) {
-      return { message: "Element B is required", field: "elementB" };
+      return { message: "elementB is required", field: "elementB" };
     }
-
     if (elementA === elementB) {
-      return { message: "Elements must be different", field: "elementB" };
+      return { message: "elementA and elementB must be different", field: "elementB" };
     }
-
-    if (elementA === layer && elementB === layer) {
-      return { message: "Only one element can be the layer", field: "elementB" };
+    if (!this.isValidLayerOrElement(layerContext, elementA)) {
+      return { message: "elementA must be on the same layer", field: "elementA" };
+    }
+    if (!this.isValidLayerOrElement(layerContext, elementB)) {
+      return { message: "elementB must be on the same layer", field: "elementB" };
     }
   }
 
-  private isLayerContextExists(layer: ELayerUuid): ELayerContext | undefined {
+  private validateName(
+    layerContext: ELayerContext,
+    name: string | undefined,
+  ): { message: string; field: "name" } | undefined {
+    if (name === undefined || name === "") {
+      return undefined;
+    }
+
+    if (!isValidName(name)) {
+      return { message: `name "${name}" not valid`, field: "name" };
+    }
+    if (!this.isConstraintNameUnique(layerContext, name)) {
+      return { message: `name "${name}" is already in use in this layer.`, field: "name" };
+    }
+  }
+
+  private getLayerContext(layer: UUID): ELayerContext | undefined {
     return this.data.layerContexts.find((layerContext) => layerContext.layer.uuid === layer);
+  }
+
+  private isValidLayerOrElement(layerContext: ELayerContext, uuid: UUID): boolean {
+    return (
+      layerContext.elements.some((element) => element.uuid === uuid) ||
+      this.data.layerContexts.some((context) => context.layer.uuid === uuid)
+    );
+  }
+
+  private isConstraintNameUnique(layerContext: ELayerContext, name: string): boolean {
+    return (
+      layerContext.elements.every((element) => element.name !== name) &&
+      layerContext.constraints.every((constraint) => constraint.name !== name)
+    );
   }
 }

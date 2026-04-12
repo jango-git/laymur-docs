@@ -13,7 +13,7 @@ import type {
   ETextElement,
 } from "../types.elements";
 import { EElementType } from "../types.elements";
-import type { EElementUuid, ELayerUuid } from "../types.misc";
+import type { UUID } from "../types.misc";
 
 export class EStoreCommandsElements {
   constructor(
@@ -21,13 +21,17 @@ export class EStoreCommandsElements {
     private readonly signals: EStoreSignalsElements,
   ) {}
 
-  public add(layerUuid: ELayerUuid, element: EAnyElement): void {
+  public add(layerUuid: UUID, element: EAnyElement): void {
     const stored = clone(element);
     this.getContext(layerUuid).elements.push(stored);
-    this.signals["emitList"]({ operation: EStoreDeltaOperation.ADD, layerUuid, element: clone(stored) });
+    this.signals["emitList"]({
+      operation: EStoreDeltaOperation.ADD,
+      layerUuid,
+      element: clone(stored),
+    });
   }
 
-  public remove(layerUuid: ELayerUuid, uuid: EElementUuid): void {
+  public remove(layerUuid: UUID, uuid: UUID): void {
     const layerContext = this.getContext(layerUuid);
     const index = layerContext.elements.findIndex((element) => element.uuid === uuid);
     if (index === -1) {
@@ -37,11 +41,17 @@ export class EStoreCommandsElements {
     this.signals["emitList"]({ operation: EStoreDeltaOperation.REMOVE, layerUuid, uuid });
   }
 
-  public reorder(layerUuid: ELayerUuid, uuids: EElementUuid[]): void {
+  public reorder(layerUuid: UUID, uuids: UUID[]): void {
     const layerContext = this.getContext(layerUuid);
     const uuidsCopy = clone(uuids);
-    layerContext.elements.sort((first, second) => uuidsCopy.indexOf(first.uuid) - uuidsCopy.indexOf(second.uuid));
-    this.signals["emitList"]({ operation: EStoreDeltaOperation.REORDER, layerUuid, uuids: clone(uuidsCopy) });
+    layerContext.elements.sort(
+      (first, second) => uuidsCopy.indexOf(first.uuid) - uuidsCopy.indexOf(second.uuid),
+    );
+    this.signals["emitList"]({
+      operation: EStoreDeltaOperation.REORDER,
+      layerUuid,
+      uuids: clone(uuidsCopy),
+    });
   }
 
   public writeAnimatedImage(data: PartialExceptUUIDField<EAnimatedImageElement>): void {
@@ -194,15 +204,17 @@ export class EStoreCommandsElements {
     this.signals["emitItem"]({ element: clone(element) });
   }
 
-  private getContext(layerUuid: ELayerUuid): ELayerContext {
-    const layerContext = this.data.layerContexts.find((context) => context.layer.uuid === layerUuid);
+  private getContext(layerUuid: UUID): ELayerContext {
+    const layerContext = this.data.layerContexts.find(
+      (context) => context.layer.uuid === layerUuid,
+    );
     if (!layerContext) {
       throw new Error(`[EStoreCommandsElements] Layer not found: (uuid: ${layerUuid})`);
     }
     return layerContext;
   }
 
-  private get<T extends EAnyElement>(uuid: EElementUuid, type: EElementType): T {
+  private get<T extends EAnyElement>(uuid: UUID, type: EElementType): T {
     for (const { elements } of this.data.layerContexts) {
       for (const element of elements) {
         if (element.type === type && element.uuid === uuid) {

@@ -4,12 +4,7 @@ import type { EStoreDeltaElement } from "../../../document/signals";
 import { STORE } from "../../../document/store";
 import type { EGraphicsElement } from "../../../document/types.elements";
 import { EElementType } from "../../../document/types.elements";
-import type {
-  EAnyGraphicsDrawCommand,
-  EColor,
-  EElementUuid,
-  ELayerUuid,
-} from "../../../document/types.misc";
+import type { EAnyGraphicsDrawCommand, EColor, UUID } from "../../../document/types.misc";
 import { makeRow, makeSectionHeader } from "../../../utils/rows";
 import { EElementCard } from "./EElementCard";
 import { drawCommandTemplate } from "./subcards/EDrawCommandSubcard.Internal";
@@ -18,7 +13,7 @@ export class EGraphicsElementCard extends EElementCard {
   private readonly resolutionControl: EVec2Control;
   private readonly drawSequenceControl: EArrayControl<EAnyGraphicsDrawCommand>;
 
-  constructor(container: HTMLElement, uuid: EElementUuid, layerUuid: ELayerUuid) {
+  constructor(container: HTMLElement, uuid: UUID, layerUuid: UUID) {
     super(container, uuid, layerUuid, "Graphics");
 
     this.nameControl.signalValueChanged.on(this.onNameChanged);

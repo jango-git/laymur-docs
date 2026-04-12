@@ -6,7 +6,7 @@ import type { EStoreDeltaElement } from "../../../document/signals";
 import { STORE } from "../../../document/store";
 import type { ESceneElement } from "../../../document/types.elements";
 import { EElementType } from "../../../document/types.elements";
-import type { EColor, EElementUuid, ELayerUuid } from "../../../document/types.misc";
+import type { EColor, UUID } from "../../../document/types.misc";
 import { ESceneUpdateMode } from "../../../document/types.misc";
 import { makeRow } from "../../../utils/rows";
 import { EElementCard } from "./EElementCard";
@@ -18,7 +18,7 @@ export class ESceneElementCard extends EElementCard {
   private readonly clearColorControl: EColorControl;
   private readonly enableDepthBufferControl: EBoolControl;
 
-  constructor(container: HTMLElement, uuid: EElementUuid, layerUuid: ELayerUuid) {
+  constructor(container: HTMLElement, uuid: UUID, layerUuid: UUID) {
     super(container, uuid, layerUuid, "Scene");
 
     this.nameControl.signalValueChanged.on(this.onNameChanged);

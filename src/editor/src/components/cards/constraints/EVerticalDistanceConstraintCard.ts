@@ -5,7 +5,7 @@ import type { EStoreDeltaConstraint } from "../../../document/signals";
 import { STORE } from "../../../document/store";
 import type { EVerticalDistanceConstraint } from "../../../document/types.constraints";
 import { EConstraintType } from "../../../document/types.constraints";
-import type { EConstraintUuid, ELayerUuid } from "../../../document/types.misc";
+import type { UUID } from "../../../document/types.misc";
 import type { EConstraintTarget } from "../../../utils/constraint-targets";
 import { getConstraintTargets } from "../../../utils/constraint-targets";
 import { makeRow } from "../../../utils/rows";
@@ -17,7 +17,7 @@ export class EVerticalDistanceConstraintCard extends EConstraintCard {
   private readonly anchorsControl: EVec2Control;
   private readonly distanceControl: ENumberControl;
 
-  constructor(container: HTMLElement, uuid: EConstraintUuid, layerUuid: ELayerUuid) {
+  constructor(container: HTMLElement, uuid: UUID, layerUuid: UUID) {
     super(container, uuid, layerUuid, "Distance Vertical");
 
     this.nameControl.signalValueChanged.on(this.onNameChanged);

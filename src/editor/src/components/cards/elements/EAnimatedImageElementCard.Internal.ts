@@ -6,7 +6,7 @@ import { EAssetControl } from "../../../controls/EAssetControl/EAssetControl";
 import type { ESelectControlOption } from "../../../controls/ESelectControl/ESelectControl";
 import { STORE } from "../../../document/store";
 import type { EImageAsset } from "../../../document/types.assets";
-import type { EAssetUuid } from "../../../document/types.misc";
+import type { UUID } from "../../../document/types.misc";
 import { EAnimatedImageLoopMode } from "../../../document/types.misc";
 
 export const LOOP_MODE_OPTIONS: ESelectControlOption<EAnimatedImageLoopMode>[] = [
@@ -15,9 +15,9 @@ export const LOOP_MODE_OPTIONS: ESelectControlOption<EAnimatedImageLoopMode>[] =
   { label: "Ping-Pong", value: EAnimatedImageLoopMode.PING_PONG },
 ];
 
-export const sequenceTemplate: EArrayControlTemplate<EAssetUuid> = {
+export const sequenceTemplate: EArrayControlTemplate<UUID> = {
   createDefault: () => "",
-  buildItem(container, value, onChange): EArrayControlItem<EAssetUuid> {
+  buildItem(container, value, onChange): EArrayControlItem<UUID> {
     const assetControl = new EAssetControl<EImageAsset>(
       container,
       () => STORE.selectors.assets.selectAllImages(),

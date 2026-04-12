@@ -1,4 +1,4 @@
-import type { EAssetUuid } from "./types.misc";
+import type { UUID } from "./types.misc";
 
 export enum EAssetType {
   FONT = "FONT",
@@ -6,7 +6,7 @@ export enum EAssetType {
 }
 
 interface EAsset {
-  uuid: EAssetUuid;
+  uuid: UUID;
   type: EAssetType;
   name: string;
   dataURL: string;

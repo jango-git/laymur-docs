@@ -3,33 +3,33 @@ import { Ferrsign1 } from "ferrsign";
 import type { EStoreDeltaLayers } from "../document/signals";
 import { EStoreDeltaOperation } from "../document/signals";
 import { STORE } from "../document/store";
-import type { ELayerUuid } from "../document/types.misc";
+import type { UUID } from "../document/types.misc";
 import type { EUIStateData } from "./types";
 
 export class EUIState {
   private readonly data: EUIStateData = { activeLayer: undefined };
-  private readonly signalActiveLayerChangedInternal = new Ferrsign1<ELayerUuid | undefined>();
+  private readonly signalActiveLayerChangedInternal = new Ferrsign1<UUID | undefined>();
 
   constructor() {
     STORE.signals.layers.list.on(this.onLayersChanged);
   }
 
-  public get signalActiveLayerChanged(): FerrsignView1<ELayerUuid | undefined> {
+  public get signalActiveLayerChanged(): FerrsignView1<UUID | undefined> {
     return this.signalActiveLayerChangedInternal;
   }
 
-  public get forceActiveLayerUuid(): ELayerUuid {
+  public get forceActiveLayerUuid(): UUID {
     if (this.data.activeLayer === undefined) {
       throw new Error(`[EUIState.forceCurrentLayerUuid] Current layer uuid is undefined`);
     }
     return this.data.activeLayer;
   }
 
-  public get activeLayerUuid(): ELayerUuid | undefined {
+  public get activeLayerUuid(): UUID | undefined {
     return this.data.activeLayer;
   }
 
-  public setActiveLayer(uuid?: ELayerUuid): void {
+  public setActiveLayer(uuid?: UUID): void {
     if (uuid !== undefined && STORE.selectors.layers.select(uuid) === undefined) {
       console.error(`[EUIState.setCurrentLayer] Layer not found: ${uuid}`);
       return;

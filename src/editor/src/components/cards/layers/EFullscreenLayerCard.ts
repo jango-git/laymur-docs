@@ -4,7 +4,7 @@ import type { EStoreDeltaLayer } from "../../../document/signals";
 import { STORE } from "../../../document/store";
 import type { ELayerFullscreen } from "../../../document/types.layers";
 import { ELayerType } from "../../../document/types.layers";
-import type { ELayerUuid } from "../../../document/types.misc";
+import type { UUID } from "../../../document/types.misc";
 import { EResizePolicyType } from "../../../document/types.misc";
 import { makeRow } from "../../../utils/rows";
 import { RESIZE_POLICY_OPTIONS } from "./EFullscreenLayerCard.Internal";
@@ -17,7 +17,7 @@ export class EFullscreenLayerCard extends ELayerCard {
   private readonly horizontalRow: HTMLElement;
   private readonly verticalRow: HTMLElement;
 
-  constructor(container: HTMLElement, uuid: ELayerUuid) {
+  constructor(container: HTMLElement, uuid: UUID) {
     super(container, uuid, "Fullscreen");
 
     this.nameControl.signalValueChanged.on(this.onNameChanged);

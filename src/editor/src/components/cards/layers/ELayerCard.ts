@@ -1,6 +1,6 @@
 import { EStringControl } from "../../../controls/EStringControl/EStringControl";
 import { STORE } from "../../../document/store";
-import type { ELayerUuid } from "../../../document/types.misc";
+import type { UUID } from "../../../document/types.misc";
 import { UI_STATE } from "../../../ui-state/ui-state";
 
 export abstract class ELayerCard {
@@ -11,7 +11,7 @@ export abstract class ELayerCard {
 
   constructor(
     container: HTMLElement,
-    protected readonly uuid: ELayerUuid,
+    protected readonly uuid: UUID,
     typeLabel: string,
   ) {
     this.root = document.createElement("div");
@@ -69,7 +69,7 @@ export abstract class ELayerCard {
     STORE.commands.layers.remove(this.uuid);
   };
 
-  private readonly onActiveLayerChanged = (uuid: ELayerUuid | undefined): void => {
+  private readonly onActiveLayerChanged = (uuid: UUID | undefined): void => {
     this.updateActiveState(uuid === this.uuid);
   };
 }

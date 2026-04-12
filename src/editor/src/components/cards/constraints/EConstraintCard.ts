@@ -1,6 +1,6 @@
 import { EStringControl } from "../../../controls/EStringControl/EStringControl";
 import { STORE } from "../../../document/store";
-import type { EConstraintUuid, ELayerUuid } from "../../../document/types.misc";
+import type { UUID } from "../../../document/types.misc";
 
 export abstract class EConstraintCard {
   protected readonly bodyRoot: HTMLDivElement;
@@ -8,8 +8,8 @@ export abstract class EConstraintCard {
 
   constructor(
     container: HTMLElement,
-    protected readonly uuid: EConstraintUuid,
-    private readonly layerUuid: ELayerUuid,
+    protected readonly uuid: UUID,
+    private readonly layerUuid: UUID,
     typeLabel: string,
   ) {
     const root = document.createElement("div");

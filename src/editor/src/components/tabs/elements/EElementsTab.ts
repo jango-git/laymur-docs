@@ -3,7 +3,7 @@ import type { EStoreDeltaElements } from "../../../document/signals";
 import { EStoreDeltaOperation } from "../../../document/signals";
 import { STORE } from "../../../document/store";
 import type { EAnyElement, EElementType } from "../../../document/types.elements";
-import type { EElementUuid, ELayerUuid } from "../../../document/types.misc";
+import type { UUID } from "../../../document/types.misc";
 import { makeSortable } from "../../../miscellaneous/make-sortable";
 import { UI_STATE } from "../../../ui-state/ui-state";
 import type { EAnyElementBuilder } from "../../builders/elements/types";
@@ -12,8 +12,8 @@ import { DEFAULT_BUILDER_TYPE, ELEMENT_REGISTRY } from "./registry";
 
 export class EElementsTab {
   private readonly cardsContentDiv: HTMLDivElement;
-  private readonly cardUuidToCardContainer = new Map<EElementUuid, HTMLElement>();
-  private currentLayerUuid: ELayerUuid | undefined;
+  private readonly cardUuidToCardContainer = new Map<UUID, HTMLElement>();
+  private currentLayerUuid: UUID | undefined;
 
   private readonly builderContainers = new Map<EElementType, HTMLElement>();
   private readonly builders = new Map<EElementType, EAnyElementBuilder>();
@@ -99,12 +99,12 @@ export class EElementsTab {
     this.cardUuidToCardContainer.set(element.uuid, container);
   }
 
-  private removeCard(uuid: EElementUuid): void {
+  private removeCard(uuid: UUID): void {
     this.cardUuidToCardContainer.get(uuid)?.remove();
     this.cardUuidToCardContainer.delete(uuid);
   }
 
-  private reorderCards(uuids: EElementUuid[]): void {
+  private reorderCards(uuids: UUID[]): void {
     for (const uuid of uuids) {
       const card = this.cardUuidToCardContainer.get(uuid);
       if (card !== undefined) {
@@ -135,7 +135,7 @@ export class EElementsTab {
     }
   };
 
-  private readonly onActiveLayerChanged = (uuid?: ELayerUuid): void => {
+  private readonly onActiveLayerChanged = (uuid?: UUID): void => {
     for (const cardContainer of this.cardUuidToCardContainer.values()) {
       cardContainer.remove();
     }

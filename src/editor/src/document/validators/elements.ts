@@ -1,165 +1,513 @@
 import type { EDocument, ELayerContext } from "../types";
-import type { EImageAsset } from "../types.assets";
+import type { EFontAsset, EImageAsset } from "../types.assets";
 import { EAssetType } from "../types.assets";
-import type { EAssetUuid, ELayerUuid } from "../types.misc";
+import type {
+  EAnimatedImageElement,
+  EGraphicsElement,
+  EImageElement,
+  ENineSliceElement,
+  EProgressElement,
+  ESceneElement,
+  ETextElement,
+} from "../types.elements";
+import type { EAnyGraphicsDrawCommand, EColor, ETextChunk, UUID } from "../types.misc";
+import { EGraphicsDrawCommandType } from "../types.misc";
+import {
+  isValidHexColor,
+  isValidName,
+  isValidNonNegativeNumber,
+  isValidNormalizedNumber,
+  isValidNumber,
+  isValidPositiveNumber,
+} from "./miscellaneous";
 
-interface EValidateAnimatedImageBuilderError {
+export interface EAnimatedImageElementError {
   message: string;
-  field: "layer" | "name" | "sequence";
+  field:
+    | "layer"
+    | "name"
+    | "sequence"
+    | "color"
+    | "frameRate"
+    | "timeScale"
+    | "loopMode"
+    | "playByDefault";
 }
 
-interface EValidateSingleTextureBuilderError {
+export interface EGraphicsElementError {
   message: string;
-  field: "layer" | "name" | "texture";
+  field: "layer" | "name" | "color" | "resolution" | "drawSequence";
 }
 
-interface EValidateBasicBuilderError {
+export interface EImageElementError {
   message: string;
-  field: "layer" | "name";
+  field: "layer" | "name" | "texture" | "color";
+}
+
+export interface ENineSliceElementError {
+  message: string;
+  field: "layer" | "name" | "texture" | "color" | "sliceBorders" | "sliceRegions" | "regionMode";
+}
+
+export interface EProgressElementError {
+  message: string;
+  field: "layer" | "name" | "texture" | "color" | "maskFunction" | "progress";
+}
+
+export interface ESceneElementError {
+  message: string;
+  field:
+    | "layer"
+    | "name"
+    | "color"
+    | "updateMode"
+    | "resolutionFactor"
+    | "clearColor"
+    | "enableDepthBuffer";
+}
+
+export interface ETextElementError {
+  message: string;
+  field: "layer" | "name" | "color" | "content" | "resizeMode" | "maxLineWidth";
 }
 
 export class EStoreValidatorsElements {
   constructor(private readonly data: EDocument) {}
 
-  public validateAnimatedImageBuilder(
-    layer?: ELayerUuid,
-    name?: string,
-    sequence?: EAssetUuid[],
-  ): EValidateAnimatedImageBuilderError | undefined {
+  public animatedImage(
+    layer: UUID | undefined,
+    element: Partial<Omit<EAnimatedImageElement, "type">>,
+    fullValidation: boolean,
+  ): EAnimatedImageElementError | undefined {
     if (layer === undefined) {
-      return { message: "Layer is required", field: "layer" };
+      return { message: "layer is required", field: "layer" };
+    }
+    const layerContext = this.getLayerContext(layer);
+    if (layerContext === undefined) {
+      return { message: `layer with UUID ${layer} must exist`, field: "layer" };
     }
 
-    const layerContext = this.isLayerContextExists(layer);
-    if (!layerContext) {
-      return { message: `Layer with UUID ${layer} must exist`, field: "layer" };
+    const nameError = this.validateElementName(layerContext, element.name);
+    if (nameError !== undefined) {
+      return nameError;
     }
 
-    if (name === undefined || name === "") {
-      return { message: "Name is required", field: "name" };
+    if (element.sequence === undefined) {
+      return { message: "sequence is required", field: "sequence" };
+    }
+    for (const textureUuid of element.sequence) {
+      if (!this.isImageAssetExists(textureUuid)) {
+        return { message: `texture with UUID ${textureUuid} must exist`, field: "sequence" };
+      }
     }
 
-    if (!this.isElementNameUnique(layerContext, name)) {
-      return { message: `Name "${name}" is already in use in this layer.`, field: "name" };
+    if (fullValidation) {
+      return undefined;
     }
 
-    if (sequence === undefined) {
-      return { message: "Textures are required", field: "sequence" };
+    if (element.color === undefined) {
+      return { message: "color is required", field: "color" };
+    }
+    if (!this.isValidColor(element.color)) {
+      return { message: "color is not valid", field: "color" };
     }
 
-    for (const texture of sequence) {
-      if (!this.isImageAssetExists(texture)) {
-        return { message: `Texture with UUID ${texture} must exist`, field: "sequence" };
+    if (element.frameRate === undefined) {
+      return { message: "frameRate is required", field: "frameRate" };
+    }
+    if (!isValidPositiveNumber(element.frameRate)) {
+      return { message: "frameRate must be a positive number", field: "frameRate" };
+    }
+
+    if (element.timeScale === undefined) {
+      return { message: "timeScale is required", field: "timeScale" };
+    }
+    if (!isValidPositiveNumber(element.timeScale)) {
+      return { message: "timeScale must be a positive number", field: "timeScale" };
+    }
+
+    if (element.loopMode === undefined) {
+      return { message: "loopMode is required", field: "loopMode" };
+    }
+
+    if (element.playByDefault === undefined) {
+      return { message: "playByDefault is required", field: "playByDefault" };
+    }
+  }
+
+  public graphics(
+    layer: UUID | undefined,
+    element: Partial<Omit<EGraphicsElement, "type">>,
+    fullValidation: boolean,
+  ): EGraphicsElementError | undefined {
+    if (layer === undefined) {
+      return { message: "layer is required", field: "layer" };
+    }
+    const layerContext = this.getLayerContext(layer);
+    if (layerContext === undefined) {
+      return { message: `layer with UUID ${layer} must exist`, field: "layer" };
+    }
+
+    const nameError = this.validateElementName(layerContext, element.name);
+    if (nameError !== undefined) {
+      return nameError;
+    }
+
+    if (fullValidation) {
+      return undefined;
+    }
+
+    if (element.color === undefined) {
+      return { message: "color is required", field: "color" };
+    }
+    if (!this.isValidColor(element.color)) {
+      return { message: "color is not valid", field: "color" };
+    }
+
+    if (element.resolution === undefined) {
+      return { message: "resolution is required", field: "resolution" };
+    }
+    const [resolutionWidth, resolutionHeight] = element.resolution;
+    if (!isValidPositiveNumber(resolutionWidth) || !isValidPositiveNumber(resolutionHeight)) {
+      return { message: "resolution dimensions must be positive numbers", field: "resolution" };
+    }
+
+    if (element.drawSequence === undefined) {
+      return { message: "drawSequence is required", field: "drawSequence" };
+    }
+    for (const command of element.drawSequence) {
+      if (!this.isValidDrawCommand(command)) {
+        return { message: "drawSequence contains an invalid command", field: "drawSequence" };
       }
     }
   }
 
-  public validateGraphicsBuilder(
-    layer?: ELayerUuid,
-    name?: string,
-  ): EValidateBasicBuilderError | undefined {
-    return this.validateBasicBuilder(layer, name);
-  }
-
-  public validateImageBuilder(
-    layer?: ELayerUuid,
-    name?: string,
-    texture?: EAssetUuid,
-  ): EValidateSingleTextureBuilderError | undefined {
-    return this.validateSingleTextureBuilder(layer, name, texture);
-  }
-
-  public validateNineSliceBuilder(
-    layer?: ELayerUuid,
-    name?: string,
-    texture?: EAssetUuid,
-  ): EValidateSingleTextureBuilderError | undefined {
-    return this.validateSingleTextureBuilder(layer, name, texture);
-  }
-
-  public validateProgressBuilder(
-    layer?: ELayerUuid,
-    name?: string,
-    texture?: EAssetUuid,
-  ): EValidateSingleTextureBuilderError | undefined {
-    return this.validateSingleTextureBuilder(layer, name, texture);
-  }
-
-  public validateSceneBuilder(
-    layer?: ELayerUuid,
-    name?: string,
-  ): EValidateBasicBuilderError | undefined {
-    return this.validateBasicBuilder(layer, name);
-  }
-
-  public validateTextBuilder(
-    layer?: ELayerUuid,
-    name?: string,
-  ): EValidateBasicBuilderError | undefined {
-    return this.validateBasicBuilder(layer, name);
-  }
-
-  public validateSingleTextureBuilder(
-    layer?: ELayerUuid,
-    name?: string,
-    texture?: EAssetUuid,
-  ): EValidateSingleTextureBuilderError | undefined {
+  public image(
+    layer: UUID | undefined,
+    element: Partial<Omit<EImageElement, "type">>,
+    fullValidation: boolean,
+  ): EImageElementError | undefined {
     if (layer === undefined) {
-      return { message: "Layer is required", field: "layer" };
+      return { message: "layer is required", field: "layer" };
+    }
+    const layerContext = this.getLayerContext(layer);
+    if (layerContext === undefined) {
+      return { message: `layer with UUID ${layer} must exist`, field: "layer" };
     }
 
-    const layerContext = this.isLayerContextExists(layer);
-    if (!layerContext) {
-      return { message: `Layer with UUID ${layer} must exist`, field: "layer" };
+    const nameError = this.validateElementName(layerContext, element.name);
+    if (nameError !== undefined) {
+      return nameError;
     }
 
-    if (name === undefined || name === "") {
-      return { message: "Name is required", field: "name" };
+    if (element.texture === undefined) {
+      return { message: "texture is required", field: "texture" };
+    }
+    if (!this.isImageAssetExists(element.texture)) {
+      return { message: `texture with UUID ${element.texture} must exist`, field: "texture" };
     }
 
-    if (!this.isElementNameUnique(layerContext, name)) {
-      return { message: `Name "${name}" is already in use in this layer.`, field: "name" };
+    if (fullValidation) {
+      return undefined;
     }
 
-    if (texture === undefined) {
-      return { message: "Texture is required", field: "texture" };
+    if (element.color === undefined) {
+      return { message: "color is required", field: "color" };
     }
-
-    if (!this.isImageAssetExists(texture)) {
-      return { message: `Texture with UUID ${texture} must exist`, field: "texture" };
+    if (!this.isValidColor(element.color)) {
+      return { message: "color is not valid", field: "color" };
     }
   }
 
-  private validateBasicBuilder(
-    layer?: ELayerUuid,
-    name?: string,
-  ): EValidateBasicBuilderError | undefined {
+  public nineSlice(
+    layer: UUID | undefined,
+    element: Partial<Omit<ENineSliceElement, "type">>,
+    fullValidation: boolean,
+  ): ENineSliceElementError | undefined {
     if (layer === undefined) {
-      return { message: "Layer is required", field: "layer" };
+      return { message: "layer is required", field: "layer" };
+    }
+    const layerContext = this.getLayerContext(layer);
+    if (layerContext === undefined) {
+      return { message: `layer with UUID ${layer} must exist`, field: "layer" };
     }
 
-    const layerContext = this.isLayerContextExists(layer);
-    if (!layerContext) {
-      return { message: `Layer with UUID ${layer} must exist`, field: "layer" };
+    const nameError = this.validateElementName(layerContext, element.name);
+    if (nameError !== undefined) {
+      return nameError;
     }
 
-    if (name === undefined || name === "") {
-      return { message: "Name is required", field: "name" };
+    if (element.texture === undefined) {
+      return { message: "texture is required", field: "texture" };
+    }
+    if (!this.isImageAssetExists(element.texture)) {
+      return { message: `texture with UUID ${element.texture} must exist`, field: "texture" };
     }
 
-    if (!this.isElementNameUnique(layerContext, name)) {
-      return { message: `Name "${name}" is already in use in this layer.`, field: "name" };
+    if (fullValidation) {
+      return undefined;
+    }
+
+    if (element.color === undefined) {
+      return { message: "color is required", field: "color" };
+    }
+    if (!this.isValidColor(element.color)) {
+      return { message: "color is not valid", field: "color" };
+    }
+
+    if (element.sliceBorders === undefined) {
+      return { message: "sliceBorders is required", field: "sliceBorders" };
+    }
+    if (element.sliceBorders.some((border) => !isValidPositiveNumber(border))) {
+      return { message: "sliceBorders values must be positive numbers", field: "sliceBorders" };
+    }
+
+    if (element.sliceRegions === undefined) {
+      return { message: "sliceRegions is required", field: "sliceRegions" };
+    }
+    if (element.sliceRegions.some((region) => !isValidPositiveNumber(region))) {
+      return { message: "sliceRegions values must be positive numbers", field: "sliceRegions" };
+    }
+
+    if (element.regionMode === undefined) {
+      return { message: "regionMode is required", field: "regionMode" };
     }
   }
 
-  private isLayerContextExists(layer: ELayerUuid): ELayerContext | undefined {
+  public progress(
+    layer: UUID | undefined,
+    element: Partial<Omit<EProgressElement, "type">>,
+    fullValidation: boolean,
+  ): EProgressElementError | undefined {
+    if (layer === undefined) {
+      return { message: "layer is required", field: "layer" };
+    }
+    const layerContext = this.getLayerContext(layer);
+    if (layerContext === undefined) {
+      return { message: `layer with UUID ${layer} must exist`, field: "layer" };
+    }
+
+    const nameError = this.validateElementName(layerContext, element.name);
+    if (nameError !== undefined) {
+      return nameError;
+    }
+
+    if (element.texture === undefined) {
+      return { message: "texture is required", field: "texture" };
+    }
+    if (!this.isImageAssetExists(element.texture)) {
+      return { message: `texture with UUID ${element.texture} must exist`, field: "texture" };
+    }
+
+    if (fullValidation) {
+      return undefined;
+    }
+
+    if (element.color === undefined) {
+      return { message: "color is required", field: "color" };
+    }
+    if (!this.isValidColor(element.color)) {
+      return { message: "color is not valid", field: "color" };
+    }
+
+    if (element.maskFunction === undefined) {
+      return { message: "maskFunction is required", field: "maskFunction" };
+    }
+
+    if (element.progress === undefined) {
+      return { message: "progress is required", field: "progress" };
+    }
+    if (!isValidNormalizedNumber(element.progress)) {
+      return { message: "progress must be a number between 0 and 1", field: "progress" };
+    }
+  }
+
+  public scene(
+    layer: UUID | undefined,
+    element: Partial<Omit<ESceneElement, "type">>,
+    fullValidation: boolean,
+  ): ESceneElementError | undefined {
+    if (layer === undefined) {
+      return { message: "layer is required", field: "layer" };
+    }
+    const layerContext = this.getLayerContext(layer);
+    if (layerContext === undefined) {
+      return { message: `layer with UUID ${layer} must exist`, field: "layer" };
+    }
+
+    const nameError = this.validateElementName(layerContext, element.name);
+    if (nameError !== undefined) {
+      return nameError;
+    }
+
+    if (fullValidation) {
+      return undefined;
+    }
+
+    if (element.color === undefined) {
+      return { message: "color is required", field: "color" };
+    }
+    if (!this.isValidColor(element.color)) {
+      return { message: "color is not valid", field: "color" };
+    }
+
+    if (element.updateMode === undefined) {
+      return { message: "updateMode is required", field: "updateMode" };
+    }
+
+    if (element.resolutionFactor === undefined) {
+      return { message: "resolutionFactor is required", field: "resolutionFactor" };
+    }
+    if (!isValidPositiveNumber(element.resolutionFactor)) {
+      return { message: "resolutionFactor must be a positive number", field: "resolutionFactor" };
+    }
+
+    if (element.clearColor === undefined) {
+      return { message: "clearColor is required", field: "clearColor" };
+    }
+    if (!this.isValidColor(element.clearColor)) {
+      return { message: "clearColor is not valid", field: "clearColor" };
+    }
+
+    if (element.enableDepthBuffer === undefined) {
+      return { message: "enableDepthBuffer is required", field: "enableDepthBuffer" };
+    }
+  }
+
+  public text(
+    layer: UUID | undefined,
+    element: Partial<Omit<ETextElement, "type">>,
+    fullValidation: boolean,
+  ): ETextElementError | undefined {
+    if (layer === undefined) {
+      return { message: "layer is required", field: "layer" };
+    }
+    const layerContext = this.getLayerContext(layer);
+    if (layerContext === undefined) {
+      return { message: `layer with UUID ${layer} must exist`, field: "layer" };
+    }
+
+    const nameError = this.validateElementName(layerContext, element.name);
+    if (nameError !== undefined) {
+      return nameError;
+    }
+
+    if (fullValidation) {
+      return undefined;
+    }
+
+    if (element.color === undefined) {
+      return { message: "color is required", field: "color" };
+    }
+    if (!this.isValidColor(element.color)) {
+      return { message: "color is not valid", field: "color" };
+    }
+
+    if (element.content === undefined) {
+      return { message: "content is required", field: "content" };
+    }
+    for (const chunk of element.content) {
+      if (!this.isValidTextChunk(chunk)) {
+        return { message: "content contains an invalid chunk", field: "content" };
+      }
+    }
+
+    if (element.resizeMode === undefined) {
+      return { message: "resizeMode is required", field: "resizeMode" };
+    }
+
+    if (element.maxLineWidth === undefined) {
+      return { message: "maxLineWidth is required", field: "maxLineWidth" };
+    }
+    if (!isValidPositiveNumber(element.maxLineWidth)) {
+      return { message: "maxLineWidth must be a positive number", field: "maxLineWidth" };
+    }
+  }
+
+  private validateElementName(
+    layerContext: ELayerContext,
+    name: string | undefined,
+  ): { message: string; field: "name" } | undefined {
+    if (name === undefined || name === "") {
+      return { message: "name is required", field: "name" };
+    }
+    if (!isValidName(name)) {
+      return { message: `name "${name}" not valid`, field: "name" };
+    }
+    if (!this.isElementNameUnique(layerContext, name)) {
+      return { message: `name "${name}" is already in use in this layer`, field: "name" };
+    }
+  }
+
+  private isValidColor(color: EColor): boolean {
+    return isValidHexColor(color.color) && isValidNormalizedNumber(color.alpha);
+  }
+
+  private isValidDrawCommand(command: EAnyGraphicsDrawCommand): boolean {
+    switch (command.type) {
+      case EGraphicsDrawCommandType.ARC:
+        return (
+          isValidNumber(command.x) &&
+          isValidNumber(command.y) &&
+          isValidPositiveNumber(command.radius) &&
+          isValidNumber(command.startAngle) &&
+          isValidNumber(command.endAngle) &&
+          this.isValidColor(command.color)
+        );
+      case EGraphicsDrawCommandType.CIRCLE:
+        return (
+          isValidNumber(command.x) &&
+          isValidNumber(command.y) &&
+          isValidPositiveNumber(command.radius) &&
+          this.isValidColor(command.color)
+        );
+      case EGraphicsDrawCommandType.POLYLINE:
+        return (
+          command.points.every(([x, y]) => isValidNumber(x) && isValidNumber(y)) &&
+          this.isValidColor(command.color) &&
+          isValidPositiveNumber(command.lineWidth)
+        );
+      case EGraphicsDrawCommandType.RECT:
+        return (
+          isValidNumber(command.x) &&
+          isValidNumber(command.y) &&
+          isValidPositiveNumber(command.width) &&
+          isValidPositiveNumber(command.height) &&
+          this.isValidColor(command.color)
+        );
+    }
+  }
+
+  private isValidTextChunk(chunk: ETextChunk): boolean {
+    const style = chunk.style;
+    return (
+      this.isValidColor(style.color) &&
+      this.isFontAssetExists(style.font) &&
+      isValidPositiveNumber(style.fontSize) &&
+      isValidPositiveNumber(style.lineHeight) &&
+      isValidNumber(style.shadowOffsetX) &&
+      isValidNumber(style.shadowOffsetY) &&
+      isValidNonNegativeNumber(style.shadowBlur) &&
+      this.isValidColor(style.shadowColor) &&
+      this.isValidColor(style.strokeColor) &&
+      isValidPositiveNumber(style.strokeThickness)
+    );
+  }
+
+  private getLayerContext(layer: UUID): ELayerContext | undefined {
     return this.data.layerContexts.find((layerContext) => layerContext.layer.uuid === layer);
   }
 
-  private isImageAssetExists(texture: EAssetUuid): EImageAsset | undefined {
-    return this.data.assets.find(
-      (asset) => asset.uuid === texture && asset.type === EAssetType.IMAGE,
-    ) as EImageAsset | undefined;
+  private isImageAssetExists(uuid: UUID): boolean {
+    return this.data.assets.some(
+      (asset): asset is EImageAsset => asset.uuid === uuid && asset.type === EAssetType.IMAGE,
+    );
+  }
+
+  private isFontAssetExists(uuid: UUID): boolean {
+    return this.data.assets.some(
+      (asset): asset is EFontAsset => asset.uuid === uuid && asset.type === EAssetType.FONT,
+    );
   }
 
   private isElementNameUnique(layerContext: ELayerContext, name: string): boolean {

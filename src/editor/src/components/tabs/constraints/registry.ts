@@ -1,5 +1,5 @@
 import { EConstraintType } from "../../../document/types.constraints";
-import type { EConstraintUuid, ELayerUuid } from "../../../document/types.misc";
+import type { UUID } from "../../../document/types.misc";
 import { EAspectConstraintBuilder } from "../../builders/constraints/EAspectConstraintBuilder";
 import { EDistanceHorizontalConstraintBuilder } from "../../builders/constraints/EDistanceHorizontalConstraintBuilder";
 import { EDistanceVerticalConstraintBuilder } from "../../builders/constraints/EDistanceVerticalConstraintBuilder";
@@ -20,7 +20,7 @@ export interface ConstraintEntry {
   label: string;
   type: EConstraintType;
   createBuilder: (container: HTMLDivElement) => EAnyConstraintBuilder;
-  createCard: (container: HTMLElement, uuid: EConstraintUuid, layerUuid: ELayerUuid) => void;
+  createCard: (container: HTMLElement, uuid: UUID, layerUuid: UUID) => void;
 }
 
 export const CONSTRAINT_REGISTRY: readonly ConstraintEntry[] = [
@@ -28,43 +28,50 @@ export const CONSTRAINT_REGISTRY: readonly ConstraintEntry[] = [
     label: "Aspect",
     type: EConstraintType.ASPECT,
     createBuilder: (container) => new EAspectConstraintBuilder(container),
-    createCard: (container, uuid, layerUuid) => new EAspectConstraintCard(container, uuid, layerUuid),
+    createCard: (container, uuid, layerUuid) =>
+      new EAspectConstraintCard(container, uuid, layerUuid),
   },
   {
     label: "Distance Horizontal",
     type: EConstraintType.DISTANCE_HORIZONTAL,
     createBuilder: (container) => new EDistanceHorizontalConstraintBuilder(container),
-    createCard: (container, uuid, layerUuid) => new EHorizontalDistanceConstraintCard(container, uuid, layerUuid),
+    createCard: (container, uuid, layerUuid) =>
+      new EHorizontalDistanceConstraintCard(container, uuid, layerUuid),
   },
   {
     label: "Distance Vertical",
     type: EConstraintType.DISTANCE_VERTICAL,
     createBuilder: (container) => new EDistanceVerticalConstraintBuilder(container),
-    createCard: (container, uuid, layerUuid) => new EVerticalDistanceConstraintCard(container, uuid, layerUuid),
+    createCard: (container, uuid, layerUuid) =>
+      new EVerticalDistanceConstraintCard(container, uuid, layerUuid),
   },
   {
     label: "Proportion Horizontal",
     type: EConstraintType.PROPORTION_HORIZONTAL,
     createBuilder: (container) => new EProportionHorizontalConstraintBuilder(container),
-    createCard: (container, uuid, layerUuid) => new EHorizontalProportionConstraintCard(container, uuid, layerUuid),
+    createCard: (container, uuid, layerUuid) =>
+      new EHorizontalProportionConstraintCard(container, uuid, layerUuid),
   },
   {
     label: "Proportion Vertical",
     type: EConstraintType.PROPORTION_VERTICAL,
     createBuilder: (container) => new EProportionVerticalConstraintBuilder(container),
-    createCard: (container, uuid, layerUuid) => new EVerticalProportionConstraintCard(container, uuid, layerUuid),
+    createCard: (container, uuid, layerUuid) =>
+      new EVerticalProportionConstraintCard(container, uuid, layerUuid),
   },
   {
     label: "Size Horizontal",
     type: EConstraintType.SIZE_HORIZONTAL,
     createBuilder: (container) => new ESizeHorizontalConstraintBuilder(container),
-    createCard: (container, uuid, layerUuid) => new EHorizontalSizeConstraintCard(container, uuid, layerUuid),
+    createCard: (container, uuid, layerUuid) =>
+      new EHorizontalSizeConstraintCard(container, uuid, layerUuid),
   },
   {
     label: "Size Vertical",
     type: EConstraintType.SIZE_VERTICAL,
     createBuilder: (container) => new ESizeVerticalConstraintBuilder(container),
-    createCard: (container, uuid, layerUuid) => new EVerticalSizeConstraintCard(container, uuid, layerUuid),
+    createCard: (container, uuid, layerUuid) =>
+      new EVerticalSizeConstraintCard(container, uuid, layerUuid),
   },
 ];
 

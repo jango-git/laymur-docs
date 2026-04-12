@@ -4,7 +4,7 @@ import type { EStoreDeltaConstraint } from "../../../document/signals";
 import { STORE } from "../../../document/store";
 import type { EHorizontalProportionConstraint } from "../../../document/types.constraints";
 import { EConstraintType } from "../../../document/types.constraints";
-import type { EConstraintUuid, ELayerUuid } from "../../../document/types.misc";
+import type { UUID } from "../../../document/types.misc";
 import type { EConstraintTarget } from "../../../utils/constraint-targets";
 import { getConstraintTargets } from "../../../utils/constraint-targets";
 import { makeRow } from "../../../utils/rows";
@@ -15,7 +15,7 @@ export class EHorizontalProportionConstraintCard extends EConstraintCard {
   private readonly elementBControl: EAssetControl<EConstraintTarget>;
   private readonly proportionControl: ENumberControl;
 
-  constructor(container: HTMLElement, uuid: EConstraintUuid, layerUuid: ELayerUuid) {
+  constructor(container: HTMLElement, uuid: UUID, layerUuid: UUID) {
     super(container, uuid, layerUuid, "Proportion Horizontal");
 
     this.nameControl.signalValueChanged.on(this.onNameChanged);
@@ -68,13 +68,19 @@ export class EHorizontalProportionConstraintCard extends EConstraintCard {
 
   private readonly onElementAChanged = (next: EConstraintTarget | undefined): void => {
     if (next !== undefined) {
-      STORE.commands.constraints.writeHorizontalProportion({ uuid: this.uuid, elementA: next.uuid });
+      STORE.commands.constraints.writeHorizontalProportion({
+        uuid: this.uuid,
+        elementA: next.uuid,
+      });
     }
   };
 
   private readonly onElementBChanged = (next: EConstraintTarget | undefined): void => {
     if (next !== undefined) {
-      STORE.commands.constraints.writeHorizontalProportion({ uuid: this.uuid, elementB: next.uuid });
+      STORE.commands.constraints.writeHorizontalProportion({
+        uuid: this.uuid,
+        elementB: next.uuid,
+      });
     }
   };
 

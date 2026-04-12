@@ -13,7 +13,7 @@ import type {
   EVerticalSizeConstraint,
 } from "../types.constraints";
 import { EConstraintType } from "../types.constraints";
-import type { EConstraintUuid, ELayerUuid } from "../types.misc";
+import type { UUID } from "../types.misc";
 
 export class EStoreCommandsConstraints {
   constructor(
@@ -21,13 +21,17 @@ export class EStoreCommandsConstraints {
     private readonly signals: EStoreSignalsConstraints,
   ) {}
 
-  public add(layerUuid: ELayerUuid, constraint: EAnyConstraint): void {
+  public add(layerUuid: UUID, constraint: EAnyConstraint): void {
     const stored = clone(constraint);
     this.getContext(layerUuid).constraints.push(stored);
-    this.signals["emitList"]({ operation: EStoreDeltaOperation.ADD, layerUuid, constraint: clone(stored) });
+    this.signals["emitList"]({
+      operation: EStoreDeltaOperation.ADD,
+      layerUuid,
+      constraint: clone(stored),
+    });
   }
 
-  public remove(layerUuid: ELayerUuid, uuid: EConstraintUuid): void {
+  public remove(layerUuid: UUID, uuid: UUID): void {
     const layerContext = this.getContext(layerUuid);
     const index = layerContext.constraints.findIndex((constraint) => constraint.uuid === uuid);
     if (index === -1) {
@@ -37,11 +41,17 @@ export class EStoreCommandsConstraints {
     this.signals["emitList"]({ operation: EStoreDeltaOperation.REMOVE, layerUuid, uuid });
   }
 
-  public reorder(layerUuid: ELayerUuid, uuids: EConstraintUuid[]): void {
+  public reorder(layerUuid: UUID, uuids: UUID[]): void {
     const layerContext = this.getContext(layerUuid);
     const uuidsCopy = clone(uuids);
-    layerContext.constraints.sort((first, second) => uuidsCopy.indexOf(first.uuid) - uuidsCopy.indexOf(second.uuid));
-    this.signals["emitList"]({ operation: EStoreDeltaOperation.REORDER, layerUuid, uuids: clone(uuidsCopy) });
+    layerContext.constraints.sort(
+      (first, second) => uuidsCopy.indexOf(first.uuid) - uuidsCopy.indexOf(second.uuid),
+    );
+    this.signals["emitList"]({
+      operation: EStoreDeltaOperation.REORDER,
+      layerUuid,
+      uuids: clone(uuidsCopy),
+    });
   }
 
   public writeAspect(data: PartialExceptUUIDField<EAspectConstraint>): void {
@@ -194,15 +204,17 @@ export class EStoreCommandsConstraints {
     this.signals["emitItem"]({ constraint: clone(constraint) });
   }
 
-  private getContext(layerUuid: ELayerUuid): ELayerContext {
-    const layerContext = this.data.layerContexts.find((context) => context.layer.uuid === layerUuid);
+  private getContext(layerUuid: UUID): ELayerContext {
+    const layerContext = this.data.layerContexts.find(
+      (context) => context.layer.uuid === layerUuid,
+    );
     if (!layerContext) {
       throw new Error(`[EStoreCommandsConstraints] Layer not found: (uuid: ${layerUuid})`);
     }
     return layerContext;
   }
 
-  private get<T extends EAnyConstraint>(uuid: EConstraintUuid, type: EConstraintType): T {
+  private get<T extends EAnyConstraint>(uuid: UUID, type: EConstraintType): T {
     for (const { constraints } of this.data.layerContexts) {
       for (const constraint of constraints) {
         if (constraint.type === type && constraint.uuid === uuid) {

@@ -1,17 +1,9 @@
 export interface EColor {
   color: string; // RRGGBB
-  alpha: number;
+  alpha: number; // 0-255
 }
 
-export type EAssetUuid = string;
-
-export type ELayerUuid = string;
-
-export type EElementUuid = string;
-
-export type EConstraintUuid = string;
-
-export type EChildUuid = string;
+export type UUID = string;
 
 export enum EResizePolicyType {
   COVER = "COVER",
@@ -127,7 +119,7 @@ export interface ETextChunk {
   style: {
     color: EColor;
     align: ETextAlign;
-    font: EAssetUuid;
+    font: UUID;
     fontSize: number;
     fontStyle: ETextFontStyle;
     fontWeight: ETextFontWeight;

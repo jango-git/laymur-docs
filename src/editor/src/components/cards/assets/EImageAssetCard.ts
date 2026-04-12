@@ -1,7 +1,7 @@
 import type { EStoreDeltaAsset } from "../../../document/signals";
 import { STORE } from "../../../document/store";
 import { EAssetType, type EImageAsset } from "../../../document/types.assets";
-import type { EAssetUuid } from "../../../document/types.misc";
+import type { UUID } from "../../../document/types.misc";
 
 export class EImageAssetCard {
   private readonly root: HTMLDivElement;
@@ -14,7 +14,7 @@ export class EImageAssetCard {
 
   constructor(
     private readonly container: HTMLElement,
-    private readonly uuid: EAssetUuid,
+    private readonly uuid: UUID,
   ) {
     this.root = document.createElement("div");
     this.root.className = "asset-card";

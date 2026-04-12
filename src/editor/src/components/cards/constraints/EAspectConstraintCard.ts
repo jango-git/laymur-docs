@@ -4,7 +4,7 @@ import type { EStoreDeltaConstraint } from "../../../document/signals";
 import { STORE } from "../../../document/store";
 import type { EAspectConstraint } from "../../../document/types.constraints";
 import { EConstraintType } from "../../../document/types.constraints";
-import type { EConstraintUuid, ELayerUuid } from "../../../document/types.misc";
+import type { UUID } from "../../../document/types.misc";
 import type { EConstraintTarget } from "../../../utils/constraint-targets";
 import { getConstraintElements } from "../../../utils/constraint-targets";
 import { makeRow } from "../../../utils/rows";
@@ -14,7 +14,7 @@ export class EAspectConstraintCard extends EConstraintCard {
   private readonly elementControl: EAssetControl<EConstraintTarget>;
   private readonly aspectControl: ENumberControl;
 
-  constructor(container: HTMLElement, uuid: EConstraintUuid, layerUuid: ELayerUuid) {
+  constructor(container: HTMLElement, uuid: UUID, layerUuid: UUID) {
     super(container, uuid, layerUuid, "Aspect");
 
     this.nameControl.signalValueChanged.on(this.onNameChanged);

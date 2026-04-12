@@ -6,7 +6,7 @@ import { STORE } from "../../../document/store";
 import type { EImageAsset } from "../../../document/types.assets";
 import type { ENineSliceElement } from "../../../document/types.elements";
 import { EElementType } from "../../../document/types.elements";
-import type { EColor, EElementUuid, ELayerUuid } from "../../../document/types.misc";
+import type { EColor, UUID } from "../../../document/types.misc";
 import { ENineSliceRegionMode } from "../../../document/types.misc";
 import { makeRow } from "../../../utils/rows";
 import { EElementCard } from "./EElementCard";
@@ -18,7 +18,7 @@ export class ENineSliceElementCard extends EElementCard {
   private readonly regionsControl: EVec2Control;
   private readonly regionModeControl: ESelectControl<ENineSliceRegionMode>;
 
-  constructor(container: HTMLElement, uuid: EElementUuid, layerUuid: ELayerUuid) {
+  constructor(container: HTMLElement, uuid: UUID, layerUuid: UUID) {
     super(container, uuid, layerUuid, "Nine Slice");
 
     this.nameControl.signalValueChanged.on(this.onNameChanged);

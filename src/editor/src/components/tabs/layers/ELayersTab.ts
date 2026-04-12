@@ -4,14 +4,14 @@ import { EStoreDeltaOperation } from "../../../document/signals";
 import { STORE } from "../../../document/store";
 import type { ELayerContext } from "../../../document/types";
 import { ELayerType } from "../../../document/types.layers";
-import type { ELayerUuid } from "../../../document/types.misc";
+import type { UUID } from "../../../document/types.misc";
 import { makeSortable } from "../../../miscellaneous/make-sortable";
 import { EFullscreenLayerBuilder } from "../../builders/layers/EFullscreenLayerBuilder";
 import { EFullscreenLayerCard } from "../../cards/layers/EFullscreenLayerCard";
 
 export class ELayersTab {
   private readonly layersContent: HTMLElement;
-  private readonly uuidToCardMap = new Map<ELayerUuid, HTMLElement>();
+  private readonly uuidToCardMap = new Map<UUID, HTMLElement>();
 
   constructor(private readonly container: HTMLElement) {
     {
@@ -82,12 +82,12 @@ export class ELayersTab {
     this.uuidToCardMap.set(layerContext.layer.uuid, container);
   }
 
-  private removeCard(uuid: ELayerUuid): void {
+  private removeCard(uuid: UUID): void {
     this.uuidToCardMap.get(uuid)?.remove();
     this.uuidToCardMap.delete(uuid);
   }
 
-  private reorderCards(uuids: ELayerUuid[]): void {
+  private reorderCards(uuids: UUID[]): void {
     for (const uuid of uuids) {
       const card = this.uuidToCardMap.get(uuid);
       if (card) {

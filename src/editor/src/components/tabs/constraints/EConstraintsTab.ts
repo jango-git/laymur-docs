@@ -3,7 +3,7 @@ import type { EStoreDeltaConstraints } from "../../../document/signals";
 import { EStoreDeltaOperation } from "../../../document/signals";
 import { STORE } from "../../../document/store";
 import type { EAnyConstraint, EConstraintType } from "../../../document/types.constraints";
-import type { EConstraintUuid, ELayerUuid } from "../../../document/types.misc";
+import type { UUID } from "../../../document/types.misc";
 import { makeSortable } from "../../../miscellaneous/make-sortable";
 import { UI_STATE } from "../../../ui-state/ui-state";
 import type { EAnyConstraintBuilder } from "../../builders/constraints/types";
@@ -12,8 +12,8 @@ import { CONSTRAINT_REGISTRY, DEFAULT_BUILDER_TYPE } from "./registry";
 
 export class EConstraintsTab {
   private readonly cardsContentDiv: HTMLDivElement;
-  private readonly cardUuidToCardContainer = new Map<EConstraintUuid, HTMLElement>();
-  private currentLayerUuid: ELayerUuid | undefined;
+  private readonly cardUuidToCardContainer = new Map<UUID, HTMLElement>();
+  private currentLayerUuid: UUID | undefined;
 
   private readonly builderContainers = new Map<EConstraintType, HTMLElement>();
   private readonly builders = new Map<EConstraintType, EAnyConstraintBuilder>();
@@ -99,12 +99,12 @@ export class EConstraintsTab {
     this.cardUuidToCardContainer.set(constraint.uuid, container);
   }
 
-  private removeCard(uuid: EConstraintUuid): void {
+  private removeCard(uuid: UUID): void {
     this.cardUuidToCardContainer.get(uuid)?.remove();
     this.cardUuidToCardContainer.delete(uuid);
   }
 
-  private reorderCards(uuids: EConstraintUuid[]): void {
+  private reorderCards(uuids: UUID[]): void {
     for (const uuid of uuids) {
       const card = this.cardUuidToCardContainer.get(uuid);
       if (card !== undefined) {
@@ -135,7 +135,7 @@ export class EConstraintsTab {
     }
   };
 
-  private readonly onActiveLayerChanged = (uuid?: ELayerUuid): void => {
+  private readonly onActiveLayerChanged = (uuid?: UUID): void => {
     for (const cardContainer of this.cardUuidToCardContainer.values()) {
       cardContainer.remove();
     }

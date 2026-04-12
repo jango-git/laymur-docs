@@ -10,14 +10,14 @@ import { EStringControl } from "../../../controls/EStringControl/EStringControl"
 import { STORE } from "../../../document/store";
 import type { EImageAsset } from "../../../document/types.assets";
 import { EElementType } from "../../../document/types.elements";
-import type { EAssetUuid } from "../../../document/types.misc";
+import type { UUID } from "../../../document/types.misc";
 import { EAnimatedImageLoopMode } from "../../../document/types.misc";
 import { UI_STATE } from "../../../ui-state/ui-state";
 import { makeRow } from "../../../utils/rows";
 
-const sequenceTemplate: EArrayControlTemplate<EAssetUuid> = {
+const sequenceTemplate: EArrayControlTemplate<UUID> = {
   createDefault: () => "",
-  buildItem(container, value, onChange): EArrayControlItem<EAssetUuid> {
+  buildItem(container, value, onChange): EArrayControlItem<UUID> {
     const ctrl = new EAssetControl<EImageAsset>(
       container,
       () => STORE.selectors.assets.selectAllImages(),
@@ -33,7 +33,7 @@ const sequenceTemplate: EArrayControlTemplate<EAssetUuid> = {
 
 export class EAnimatedImageElementBuilder {
   private readonly nameControl: EStringControl;
-  private readonly sequenceControl: EArrayControl<EAssetUuid>;
+  private readonly sequenceControl: EArrayControl<UUID>;
   private readonly errorMessage: HTMLElement;
 
   private readonly signalBuildAvailabilityInternal = new Ferrsign1<boolean>();
@@ -42,7 +42,7 @@ export class EAnimatedImageElementBuilder {
     this.nameControl = new EStringControl(makeRow(container, "Name"), { placeholder: "name" });
     this.nameControl.signalValueChanged.on(this.handleDataUpdate);
 
-    this.sequenceControl = new EArrayControl<EAssetUuid>(
+    this.sequenceControl = new EArrayControl<UUID>(
       makeRow(container, "Sequence"),
       sequenceTemplate,
     );

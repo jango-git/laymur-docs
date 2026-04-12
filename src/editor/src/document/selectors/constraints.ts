@@ -2,19 +2,21 @@ import type { EDocument } from "../types";
 import { clone } from "../types";
 import type { EAnyConstraint } from "../types.constraints";
 import { EConstraintType } from "../types.constraints";
-import type { EConstraintUuid, EElementUuid, ELayerUuid } from "../types.misc";
+import type { UUID } from "../types.misc";
 
 export class EStoreSelectorsConstraints {
   constructor(private readonly data: EDocument) {}
 
-  public selectAll(layerUuid: ELayerUuid): EAnyConstraint[] | undefined {
-    const layerContext = this.data.layerContexts.find((context) => context.layer.uuid === layerUuid);
+  public selectAll(layerUuid: UUID): EAnyConstraint[] | undefined {
+    const layerContext = this.data.layerContexts.find(
+      (context) => context.layer.uuid === layerUuid,
+    );
     return layerContext && layerContext.constraints.length > 0
       ? clone(layerContext.constraints)
       : undefined;
   }
 
-  public select(uuid: EConstraintUuid): EAnyConstraint | undefined {
+  public select(uuid: UUID): EAnyConstraint | undefined {
     for (const { constraints } of this.data.layerContexts) {
       const result = constraints.find((constraint) => constraint.uuid === uuid);
       if (result) {
@@ -24,7 +26,7 @@ export class EStoreSelectorsConstraints {
     return undefined;
   }
 
-  public selectLinked(elementUuid: EElementUuid): EAnyConstraint[] {
+  public selectLinked(elementUuid: UUID): EAnyConstraint[] {
     const ownerLayerContext = this.data.layerContexts.find((context) =>
       context.elements.some((element) => element.uuid === elementUuid),
     );
@@ -53,8 +55,10 @@ export class EStoreSelectorsConstraints {
     return clone(result);
   }
 
-  public selectLayerInfo(layerUuid: ELayerUuid): { uuid: string; name: string } | undefined {
-    const layerContext = this.data.layerContexts.find((context) => context.layer.uuid === layerUuid);
+  public selectLayerInfo(layerUuid: UUID): { uuid: string; name: string } | undefined {
+    const layerContext = this.data.layerContexts.find(
+      (context) => context.layer.uuid === layerUuid,
+    );
     return layerContext
       ? { uuid: layerContext.layer.uuid, name: layerContext.layer.name }
       : undefined;

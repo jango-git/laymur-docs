@@ -4,14 +4,14 @@ import { STORE } from "../../../document/store";
 import type { EImageAsset } from "../../../document/types.assets";
 import type { EImageElement } from "../../../document/types.elements";
 import { EElementType } from "../../../document/types.elements";
-import type { EColor, EElementUuid, ELayerUuid } from "../../../document/types.misc";
+import type { EColor, UUID } from "../../../document/types.misc";
 import { makeRow } from "../../../utils/rows";
 import { EElementCard } from "./EElementCard";
 
 export class EImageElementCard extends EElementCard {
   private readonly textureControl: EAssetControl<EImageAsset>;
 
-  constructor(container: HTMLElement, uuid: EElementUuid, layerUuid: ELayerUuid) {
+  constructor(container: HTMLElement, uuid: UUID, layerUuid: UUID) {
     super(container, uuid, layerUuid, "Image");
 
     this.nameControl.signalValueChanged.on(this.onNameChanged);
