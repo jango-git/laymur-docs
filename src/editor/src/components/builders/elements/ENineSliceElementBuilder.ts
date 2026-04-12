@@ -44,7 +44,7 @@ export class ENineSliceElementBuilder {
       uuid: crypto.randomUUID(),
       type: EElementType.NINE_SLICE,
       name: this.nameControl.value,
-      color: "#ffffffff",
+      color: { color: "#ffffff", alpha: 255 },
       texture: this.textureControl.forceValue.uuid,
       sliceBorders: [0, 0, 0, 0],
       sliceRegions: [0, 0, 0, 0],

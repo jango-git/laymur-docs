@@ -1,36 +1,31 @@
 import { EArrayControl } from "../../../controls/EArrayControl/EArrayControl";
 import { EBoolControl } from "../../../controls/EBoolControl/EBoolControl";
-import { EColorControl } from "../../../controls/EColorControl/EColorControl";
 import { ENumberControl } from "../../../controls/ENumberControl/ENumberControl";
 import { ESelectControl } from "../../../controls/ESelectControl/ESelectControl";
 import type { EStoreDeltaElement } from "../../../document/signals";
 import { STORE } from "../../../document/store";
 import type { EAnimatedImageElement } from "../../../document/types.elements";
 import { EElementType } from "../../../document/types.elements";
-import type { EAssetUuid, EColor, EElementUuid } from "../../../document/types.misc";
+import type { EAssetUuid, EColor, EElementUuid, ELayerUuid } from "../../../document/types.misc";
 import { EAnimatedImageLoopMode } from "../../../document/types.misc";
 import { makeRow } from "../../../utils/rows";
 import { LOOP_MODE_OPTIONS, sequenceTemplate } from "./EAnimatedImageElementCard.Internal";
+import { EElementCard } from "./EElementCard";
 
-export class EAnimatedImageElementCard {
-  private readonly colorControl: EColorControl;
+export class EAnimatedImageElementCard extends EElementCard {
   private readonly sequenceControl: EArrayControl<EAssetUuid>;
   private readonly frameRateControl: ENumberControl;
   private readonly timeScaleControl: ENumberControl;
   private readonly loopModeControl: ESelectControl<EAnimatedImageLoopMode>;
   private readonly playByDefaultControl: EBoolControl;
 
-  constructor(
-    private readonly container: HTMLElement,
-    private readonly uuid: EElementUuid,
-  ) {
-    const root = document.createElement("div");
-    root.className = "element-card";
+  constructor(container: HTMLElement, uuid: EElementUuid, layerUuid: ELayerUuid) {
+    super(container, uuid, layerUuid, "Animated Image");
 
-    this.colorControl = new EColorControl(makeRow(root, "Color"));
+    this.nameControl.signalValueChanged.on(this.onNameChanged);
     this.colorControl.signalValueChanged.on(this.onColorChanged);
 
-    this.frameRateControl = new ENumberControl(makeRow(root, "Frame Rate"), {
+    this.frameRateControl = new ENumberControl(makeRow(this.bodyRoot, "Frame Rate"), {
       value: 24,
       min: 1,
       max: 240,
@@ -39,7 +34,7 @@ export class EAnimatedImageElementCard {
     });
     this.frameRateControl.signalValueChanged.on(this.onFrameRateChanged);
 
-    this.timeScaleControl = new ENumberControl(makeRow(root, "Time Scale"), {
+    this.timeScaleControl = new ENumberControl(makeRow(this.bodyRoot, "Time Scale"), {
       value: 1,
       min: 0,
       max: 10,
@@ -48,22 +43,25 @@ export class EAnimatedImageElementCard {
     });
     this.timeScaleControl.signalValueChanged.on(this.onTimeScaleChanged);
 
-    this.loopModeControl = new ESelectControl<EAnimatedImageLoopMode>(makeRow(root, "Loop Mode"), {
-      options: LOOP_MODE_OPTIONS,
-      value: EAnimatedImageLoopMode.LOOP,
-    });
+    this.loopModeControl = new ESelectControl<EAnimatedImageLoopMode>(
+      makeRow(this.bodyRoot, "Loop Mode"),
+      {
+        options: LOOP_MODE_OPTIONS,
+        value: EAnimatedImageLoopMode.LOOP,
+      },
+    );
     this.loopModeControl.signalValueChanged.on(this.onLoopModeChanged);
 
-    this.playByDefaultControl = new EBoolControl(makeRow(root, "Auto Play"), { value: true });
+    this.playByDefaultControl = new EBoolControl(makeRow(this.bodyRoot, "Auto Play"), {
+      value: true,
+    });
     this.playByDefaultControl.signalValueChanged.on(this.onPlayByDefaultChanged);
 
     this.sequenceControl = new EArrayControl<EAssetUuid>(
-      makeRow(root, "Sequence"),
+      makeRow(this.bodyRoot, "Sequence"),
       sequenceTemplate,
     );
     this.sequenceControl.signalValueChanged.on(this.onSequenceChanged);
-
-    this.container.appendChild(root);
 
     const initial = STORE.selectors.elements.select(uuid);
     if (initial?.type !== EElementType.ANIMATED_IMAGE) {
@@ -76,7 +74,12 @@ export class EAnimatedImageElementCard {
     STORE.signals.elements.item.on(this.onElementItemChanged);
   }
 
+  private readonly onNameChanged = (name: string): void => {
+    STORE.commands.elements.writeAnimatedImage({ uuid: this.uuid, name });
+  };
+
   private refresh(element: EAnimatedImageElement): void {
+    this.nameControl.value = element.name;
     this.colorControl.value = element.color;
     this.frameRateControl.value = element.frameRate;
     this.timeScaleControl.value = element.timeScale;

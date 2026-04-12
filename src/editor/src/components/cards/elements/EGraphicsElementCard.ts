@@ -1,30 +1,30 @@
 import { EArrayControl } from "../../../controls/EArrayControl/EArrayControl";
-import { EColorControl } from "../../../controls/EColorControl/EColorControl";
 import { EVec2Control } from "../../../controls/EVec2Control/EVec2Control";
 import type { EStoreDeltaElement } from "../../../document/signals";
 import { STORE } from "../../../document/store";
 import type { EGraphicsElement } from "../../../document/types.elements";
 import { EElementType } from "../../../document/types.elements";
-import type { EAnyGraphicsDrawCommand, EElementUuid } from "../../../document/types.misc";
+import type {
+  EAnyGraphicsDrawCommand,
+  EColor,
+  EElementUuid,
+  ELayerUuid,
+} from "../../../document/types.misc";
 import { makeRow, makeSectionHeader } from "../../../utils/rows";
-import { drawCommandTemplate } from "./EGraphicsElementCard.Internal";
+import { EElementCard } from "./EElementCard";
+import { drawCommandTemplate } from "./subcards/EDrawCommandSubcard.Internal";
 
-export class EGraphicsElementCard {
-  private readonly colorControl: EColorControl;
+export class EGraphicsElementCard extends EElementCard {
   private readonly resolutionControl: EVec2Control;
   private readonly drawSequenceControl: EArrayControl<EAnyGraphicsDrawCommand>;
 
-  constructor(
-    private readonly container: HTMLElement,
-    private readonly uuid: EElementUuid,
-  ) {
-    const root = document.createElement("div");
-    root.className = "element-card";
+  constructor(container: HTMLElement, uuid: EElementUuid, layerUuid: ELayerUuid) {
+    super(container, uuid, layerUuid, "Graphics");
 
-    this.colorControl = new EColorControl(makeRow(root, "Color"));
+    this.nameControl.signalValueChanged.on(this.onNameChanged);
     this.colorControl.signalValueChanged.on(this.onColorChanged);
 
-    this.resolutionControl = new EVec2Control(makeRow(root, "Resolution"), {
+    this.resolutionControl = new EVec2Control(makeRow(this.bodyRoot, "Resolution"), {
       labels: ["W", "H"],
       value: [512, 512],
       min: 1,
@@ -34,14 +34,12 @@ export class EGraphicsElementCard {
     });
     this.resolutionControl.signalValueChanged.on(this.onResolutionChanged);
 
-    makeSectionHeader(root, "Draw Sequence");
+    makeSectionHeader(this.bodyRoot, "Draw Sequence");
     this.drawSequenceControl = new EArrayControl<EAnyGraphicsDrawCommand>(
-      root,
+      this.bodyRoot,
       drawCommandTemplate,
     );
     this.drawSequenceControl.signalValueChanged.on(this.onDrawSequenceChanged);
-
-    this.container.appendChild(root);
 
     const initial = STORE.selectors.elements.select(uuid);
     if (initial?.type !== EElementType.GRAPHICS) {
@@ -53,12 +51,17 @@ export class EGraphicsElementCard {
   }
 
   private refresh(element: EGraphicsElement): void {
+    this.nameControl.value = element.name;
     this.colorControl.value = element.color;
     this.resolutionControl.value = [element.resolution[0], element.resolution[1]];
     this.drawSequenceControl.value = element.drawSequence;
   }
 
-  private readonly onColorChanged = (color: string): void => {
+  private readonly onNameChanged = (name: string): void => {
+    STORE.commands.elements.writeGraphics({ uuid: this.uuid, name });
+  };
+
+  private readonly onColorChanged = (color: EColor): void => {
     STORE.commands.elements.writeGraphics({ uuid: this.uuid, color });
   };
 

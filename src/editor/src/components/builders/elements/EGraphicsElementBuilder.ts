@@ -33,7 +33,7 @@ export class EGraphicsElementBuilder {
       uuid: crypto.randomUUID(),
       type: EElementType.GRAPHICS,
       name: this.nameControl.value,
-      color: "#ffffffff",
+      color: { color: "#ffffff", alpha: 255 },
       resolution: [512, 512],
       drawSequence: [],
     });

@@ -11,7 +11,7 @@ export class EStoreSelectorsLayers {
   }
 
   public selectContext(uuid: ELayerUuid): ELayerContext | undefined {
-    const result = this.data.layerContexts.find((c) => c.layer.uuid === uuid);
+    const result = this.data.layerContexts.find((context) => context.layer.uuid === uuid);
     return result ? clone(result) : undefined;
   }
 
@@ -20,7 +20,7 @@ export class EStoreSelectorsLayers {
   }
 
   public select(uuid: ELayerUuid): EAnyLayer | undefined {
-    const result = this.data.layerContexts.find((c) => c.layer.uuid === uuid)?.layer;
+    const result = this.data.layerContexts.find((context) => context.layer.uuid === uuid)?.layer;
     return result ? clone(result) : undefined;
   }
 

@@ -1,5 +1,4 @@
 import { EAssetControl } from "../../../controls/EAssetControl/EAssetControl";
-import { EColorControl } from "../../../controls/EColorControl/EColorControl";
 import { ENumberControl } from "../../../controls/ENumberControl/ENumberControl";
 import { ESelectControl } from "../../../controls/ESelectControl/ESelectControl";
 import type { EStoreDeltaElement } from "../../../document/signals";
@@ -7,36 +6,32 @@ import { STORE } from "../../../document/store";
 import type { EImageAsset } from "../../../document/types.assets";
 import type { EProgressElement } from "../../../document/types.elements";
 import { EElementType } from "../../../document/types.elements";
-import type { EColor, EElementUuid } from "../../../document/types.misc";
+import type { EColor, EElementUuid, ELayerUuid } from "../../../document/types.misc";
 import { EProgressMaskFunction } from "../../../document/types.misc";
 import { makeRow } from "../../../utils/rows";
+import { EElementCard } from "./EElementCard";
 import { MASK_FUNCTION_OPTIONS } from "./EProgressElementCard.Internal";
 
-export class EProgressElementCard {
-  private readonly colorControl: EColorControl;
+export class EProgressElementCard extends EElementCard {
   private readonly textureControl: EAssetControl<EImageAsset>;
   private readonly maskFunctionControl: ESelectControl<EProgressMaskFunction>;
   private readonly progressControl: ENumberControl;
 
-  constructor(
-    private readonly container: HTMLElement,
-    private readonly uuid: EElementUuid,
-  ) {
-    const root = document.createElement("div");
-    root.className = "element-card";
+  constructor(container: HTMLElement, uuid: EElementUuid, layerUuid: ELayerUuid) {
+    super(container, uuid, layerUuid, "Progress");
 
-    this.colorControl = new EColorControl(makeRow(root, "Color"));
+    this.nameControl.signalValueChanged.on(this.onNameChanged);
     this.colorControl.signalValueChanged.on(this.onColorChanged);
 
     this.textureControl = new EAssetControl<EImageAsset>(
-      makeRow(root, "Texture"),
+      makeRow(this.bodyRoot, "Texture"),
       () => STORE.selectors.assets.selectAllImages(),
       { nullable: false },
     );
     this.textureControl.signalValueChanged.on(this.onTextureChanged);
 
     this.maskFunctionControl = new ESelectControl<EProgressMaskFunction>(
-      makeRow(root, "Mask Function"),
+      makeRow(this.bodyRoot, "Mask Function"),
       {
         options: MASK_FUNCTION_OPTIONS,
         value: EProgressMaskFunction.CIRCULAR,
@@ -44,7 +39,7 @@ export class EProgressElementCard {
     );
     this.maskFunctionControl.signalValueChanged.on(this.onMaskFunctionChanged);
 
-    this.progressControl = new ENumberControl(makeRow(root, "Progress"), {
+    this.progressControl = new ENumberControl(makeRow(this.bodyRoot, "Progress"), {
       value: 0,
       min: 0,
       max: 1,
@@ -52,8 +47,6 @@ export class EProgressElementCard {
       precision: 2,
     });
     this.progressControl.signalValueChanged.on(this.onProgressChanged);
-
-    this.container.appendChild(root);
 
     const initial = STORE.selectors.elements.select(uuid);
     if (initial?.type !== EElementType.PROGRESS) {
@@ -65,11 +58,16 @@ export class EProgressElementCard {
   }
 
   private refresh(element: EProgressElement): void {
+    this.nameControl.value = element.name;
     this.colorControl.value = element.color;
     this.textureControl.value = STORE.selectors.assets.selectImage(element.texture);
     this.maskFunctionControl.value = element.maskFunction;
     this.progressControl.value = element.progress;
   }
+
+  private readonly onNameChanged = (name: string): void => {
+    STORE.commands.elements.writeProgress({ uuid: this.uuid, name });
+  };
 
   private readonly onColorChanged = (color: EColor): void => {
     STORE.commands.elements.writeProgress({ uuid: this.uuid, color });

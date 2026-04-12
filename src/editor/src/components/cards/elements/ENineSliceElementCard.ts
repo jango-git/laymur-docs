@@ -1,5 +1,4 @@
 import { EAssetControl } from "../../../controls/EAssetControl/EAssetControl";
-import { EColorControl } from "../../../controls/EColorControl/EColorControl";
 import { ESelectControl } from "../../../controls/ESelectControl/ESelectControl";
 import { EVec2Control } from "../../../controls/EVec2Control/EVec2Control";
 import type { EStoreDeltaElement } from "../../../document/signals";
@@ -7,36 +6,32 @@ import { STORE } from "../../../document/store";
 import type { EImageAsset } from "../../../document/types.assets";
 import type { ENineSliceElement } from "../../../document/types.elements";
 import { EElementType } from "../../../document/types.elements";
-import type { EElementUuid } from "../../../document/types.misc";
+import type { EColor, EElementUuid, ELayerUuid } from "../../../document/types.misc";
 import { ENineSliceRegionMode } from "../../../document/types.misc";
 import { makeRow } from "../../../utils/rows";
+import { EElementCard } from "./EElementCard";
 import { REGION_MODE_OPTIONS } from "./ENineSliceElementCard.Internal";
 
-export class ENineSliceElementCard {
-  private readonly colorControl: EColorControl;
+export class ENineSliceElementCard extends EElementCard {
   private readonly textureControl: EAssetControl<EImageAsset>;
   private readonly bordersControl: EVec2Control;
   private readonly regionsControl: EVec2Control;
   private readonly regionModeControl: ESelectControl<ENineSliceRegionMode>;
 
-  constructor(
-    private readonly container: HTMLElement,
-    private readonly uuid: EElementUuid,
-  ) {
-    const root = document.createElement("div");
-    root.className = "element-card";
+  constructor(container: HTMLElement, uuid: EElementUuid, layerUuid: ELayerUuid) {
+    super(container, uuid, layerUuid, "Nine Slice");
 
-    this.colorControl = new EColorControl(makeRow(root, "Color"));
+    this.nameControl.signalValueChanged.on(this.onNameChanged);
     this.colorControl.signalValueChanged.on(this.onColorChanged);
 
     this.textureControl = new EAssetControl<EImageAsset>(
-      makeRow(root, "Texture"),
+      makeRow(this.bodyRoot, "Texture"),
       () => STORE.selectors.assets.selectAllImages(),
       { nullable: false },
     );
     this.textureControl.signalValueChanged.on(this.onTextureChanged);
 
-    this.bordersControl = new EVec2Control(makeRow(root, "Borders"), {
+    this.bordersControl = new EVec2Control(makeRow(this.bodyRoot, "Borders"), {
       labels: ["H", "V"],
       min: 0,
       max: 9999,
@@ -45,7 +40,7 @@ export class ENineSliceElementCard {
     });
     this.bordersControl.signalValueChanged.on(this.onBordersChanged);
 
-    this.regionsControl = new EVec2Control(makeRow(root, "Regions"), {
+    this.regionsControl = new EVec2Control(makeRow(this.bodyRoot, "Regions"), {
       labels: ["H", "V"],
       min: 0,
       max: 9999,
@@ -55,15 +50,13 @@ export class ENineSliceElementCard {
     this.regionsControl.signalValueChanged.on(this.onRegionsChanged);
 
     this.regionModeControl = new ESelectControl<ENineSliceRegionMode>(
-      makeRow(root, "Region Mode"),
+      makeRow(this.bodyRoot, "Region Mode"),
       {
         options: REGION_MODE_OPTIONS,
         value: ENineSliceRegionMode.NORMALIZED,
       },
     );
     this.regionModeControl.signalValueChanged.on(this.onRegionModeChanged);
-
-    this.container.appendChild(root);
 
     const initial = STORE.selectors.elements.select(uuid);
     if (initial?.type !== EElementType.NINE_SLICE) {
@@ -75,6 +68,7 @@ export class ENineSliceElementCard {
   }
 
   private refresh(element: ENineSliceElement): void {
+    this.nameControl.value = element.name;
     this.colorControl.value = element.color;
     this.textureControl.value = STORE.selectors.assets.selectImage(element.texture);
     this.bordersControl.value = [element.sliceBorders[0], element.sliceBorders[1]];
@@ -82,7 +76,11 @@ export class ENineSliceElementCard {
     this.regionModeControl.value = element.regionMode;
   }
 
-  private readonly onColorChanged = (color: string): void => {
+  private readonly onNameChanged = (name: string): void => {
+    STORE.commands.elements.writeNineSlice({ uuid: this.uuid, name });
+  };
+
+  private readonly onColorChanged = (color: EColor): void => {
     STORE.commands.elements.writeNineSlice({ uuid: this.uuid, color });
   };
 

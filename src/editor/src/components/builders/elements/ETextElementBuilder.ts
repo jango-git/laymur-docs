@@ -34,7 +34,7 @@ export class ETextElementBuilder {
       uuid: crypto.randomUUID(),
       type: EElementType.TEXT,
       name: this.nameControl.value,
-      color: "#ffffffff",
+      color: { color: "#ffffff", alpha: 255 },
       content: [],
       resizeMode: ETextResizeMode.SCALE,
       maxLineWidth: 0,

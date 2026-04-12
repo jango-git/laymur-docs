@@ -1,6 +1,6 @@
 import type { EStoreSignalsElements } from "../signals";
 import { EStoreDeltaOperation } from "../signals";
-import type { EDocument, ELayerContext, PartialExceptUUID } from "../types";
+import type { EDocument, ELayerContext, PartialExceptUUIDField } from "../types";
 import { clone } from "../types";
 import type {
   EAnimatedImageElement,
@@ -22,13 +22,14 @@ export class EStoreCommandsElements {
   ) {}
 
   public add(layerUuid: ELayerUuid, element: EAnyElement): void {
-    this.getContext(layerUuid).elements.push(element);
-    this.signals["emitList"]({ operation: EStoreDeltaOperation.ADD, layerUuid, element });
+    const stored = clone(element);
+    this.getContext(layerUuid).elements.push(stored);
+    this.signals["emitList"]({ operation: EStoreDeltaOperation.ADD, layerUuid, element: clone(stored) });
   }
 
   public remove(layerUuid: ELayerUuid, uuid: EElementUuid): void {
     const layerContext = this.getContext(layerUuid);
-    const index = layerContext.elements.findIndex((e) => e.uuid === uuid);
+    const index = layerContext.elements.findIndex((element) => element.uuid === uuid);
     if (index === -1) {
       throw new Error(`[EStoreCommandsElements] Element not found: (uuid: ${uuid})`);
     }
@@ -38,155 +39,163 @@ export class EStoreCommandsElements {
 
   public reorder(layerUuid: ELayerUuid, uuids: EElementUuid[]): void {
     const layerContext = this.getContext(layerUuid);
-    layerContext.elements.sort((a, b) => uuids.indexOf(a.uuid) - uuids.indexOf(b.uuid));
-    this.signals["emitList"]({ operation: EStoreDeltaOperation.REORDER, layerUuid, uuids });
+    const uuidsCopy = clone(uuids);
+    layerContext.elements.sort((first, second) => uuidsCopy.indexOf(first.uuid) - uuidsCopy.indexOf(second.uuid));
+    this.signals["emitList"]({ operation: EStoreDeltaOperation.REORDER, layerUuid, uuids: clone(uuidsCopy) });
   }
 
-  public writeAnimatedImage(data: PartialExceptUUID<EAnimatedImageElement>): void {
-    const element = this.get<EAnimatedImageElement>(data.uuid, EElementType.ANIMATED_IMAGE);
-    if (data.name !== undefined) {
-      element.name = data.name;
+  public writeAnimatedImage(data: PartialExceptUUIDField<EAnimatedImageElement>): void {
+    const copy = clone(data);
+    const element = this.get<EAnimatedImageElement>(copy.uuid, EElementType.ANIMATED_IMAGE);
+    if (copy.name !== undefined) {
+      element.name = copy.name;
     }
-    if (data.color !== undefined) {
-      element.color = data.color;
+    if (copy.color !== undefined) {
+      element.color = copy.color;
     }
-    if (data.sequence !== undefined) {
-      element.sequence = clone(data.sequence);
+    if (copy.sequence !== undefined) {
+      element.sequence = copy.sequence;
     }
-    if (data.frameRate !== undefined) {
-      element.frameRate = data.frameRate;
+    if (copy.frameRate !== undefined) {
+      element.frameRate = copy.frameRate;
     }
-    if (data.timeScale !== undefined) {
-      element.timeScale = data.timeScale;
+    if (copy.timeScale !== undefined) {
+      element.timeScale = copy.timeScale;
     }
-    if (data.loopMode !== undefined) {
-      element.loopMode = data.loopMode;
+    if (copy.loopMode !== undefined) {
+      element.loopMode = copy.loopMode;
     }
-    if (data.playByDefault !== undefined) {
-      element.playByDefault = data.playByDefault;
+    if (copy.playByDefault !== undefined) {
+      element.playByDefault = copy.playByDefault;
     }
-    this.signals["emitItem"]({ element });
+    this.signals["emitItem"]({ element: clone(element) });
   }
 
-  public writeGraphics(data: PartialExceptUUID<EGraphicsElement>): void {
-    const element = this.get<EGraphicsElement>(data.uuid, EElementType.GRAPHICS);
-    if (data.name !== undefined) {
-      element.name = data.name;
+  public writeGraphics(data: PartialExceptUUIDField<EGraphicsElement>): void {
+    const copy = clone(data);
+    const element = this.get<EGraphicsElement>(copy.uuid, EElementType.GRAPHICS);
+    if (copy.name !== undefined) {
+      element.name = copy.name;
     }
-    if (data.color !== undefined) {
-      element.color = data.color;
+    if (copy.color !== undefined) {
+      element.color = copy.color;
     }
-    if (data.resolution !== undefined) {
-      element.resolution = clone(data.resolution);
+    if (copy.resolution !== undefined) {
+      element.resolution = copy.resolution;
     }
-    if (data.drawSequence !== undefined) {
-      element.drawSequence = clone(data.drawSequence);
+    if (copy.drawSequence !== undefined) {
+      element.drawSequence = copy.drawSequence;
     }
-    this.signals["emitItem"]({ element });
+    this.signals["emitItem"]({ element: clone(element) });
   }
 
-  public writeImage(data: PartialExceptUUID<EImageElement>): void {
-    const element = this.get<EImageElement>(data.uuid, EElementType.IMAGE);
-    if (data.name !== undefined) {
-      element.name = data.name;
+  public writeImage(data: PartialExceptUUIDField<EImageElement>): void {
+    const copy = clone(data);
+    const element = this.get<EImageElement>(copy.uuid, EElementType.IMAGE);
+    if (copy.name !== undefined) {
+      element.name = copy.name;
     }
-    if (data.color !== undefined) {
-      element.color = data.color;
+    if (copy.color !== undefined) {
+      element.color = copy.color;
     }
-    if (data.texture !== undefined) {
-      element.texture = data.texture;
+    if (copy.texture !== undefined) {
+      element.texture = copy.texture;
     }
-    this.signals["emitItem"]({ element });
+    this.signals["emitItem"]({ element: clone(element) });
   }
 
-  public writeNineSlice(data: PartialExceptUUID<ENineSliceElement>): void {
-    const element = this.get<ENineSliceElement>(data.uuid, EElementType.NINE_SLICE);
-    if (data.name !== undefined) {
-      element.name = data.name;
+  public writeNineSlice(data: PartialExceptUUIDField<ENineSliceElement>): void {
+    const copy = clone(data);
+    const element = this.get<ENineSliceElement>(copy.uuid, EElementType.NINE_SLICE);
+    if (copy.name !== undefined) {
+      element.name = copy.name;
     }
-    if (data.color !== undefined) {
-      element.color = data.color;
+    if (copy.color !== undefined) {
+      element.color = copy.color;
     }
-    if (data.texture !== undefined) {
-      element.texture = data.texture;
+    if (copy.texture !== undefined) {
+      element.texture = copy.texture;
     }
-    if (data.sliceBorders !== undefined) {
-      element.sliceBorders = clone(data.sliceBorders);
+    if (copy.sliceBorders !== undefined) {
+      element.sliceBorders = copy.sliceBorders;
     }
-    if (data.sliceRegions !== undefined) {
-      element.sliceRegions = clone(data.sliceRegions);
+    if (copy.sliceRegions !== undefined) {
+      element.sliceRegions = copy.sliceRegions;
     }
-    if (data.regionMode !== undefined) {
-      element.regionMode = data.regionMode;
+    if (copy.regionMode !== undefined) {
+      element.regionMode = copy.regionMode;
     }
-    this.signals["emitItem"]({ element });
+    this.signals["emitItem"]({ element: clone(element) });
   }
 
-  public writeProgress(data: PartialExceptUUID<EProgressElement>): void {
-    const element = this.get<EProgressElement>(data.uuid, EElementType.PROGRESS);
-    if (data.name !== undefined) {
-      element.name = data.name;
+  public writeProgress(data: PartialExceptUUIDField<EProgressElement>): void {
+    const copy = clone(data);
+    const element = this.get<EProgressElement>(copy.uuid, EElementType.PROGRESS);
+    if (copy.name !== undefined) {
+      element.name = copy.name;
     }
-    if (data.color !== undefined) {
-      element.color = data.color;
+    if (copy.color !== undefined) {
+      element.color = copy.color;
     }
-    if (data.texture !== undefined) {
-      element.texture = data.texture;
+    if (copy.texture !== undefined) {
+      element.texture = copy.texture;
     }
-    if (data.maskFunction !== undefined) {
-      element.maskFunction = data.maskFunction;
+    if (copy.maskFunction !== undefined) {
+      element.maskFunction = copy.maskFunction;
     }
-    if (data.progress !== undefined) {
-      element.progress = data.progress;
+    if (copy.progress !== undefined) {
+      element.progress = copy.progress;
     }
-    this.signals["emitItem"]({ element });
+    this.signals["emitItem"]({ element: clone(element) });
   }
 
-  public writeScene(data: PartialExceptUUID<ESceneElement>): void {
-    const element = this.get<ESceneElement>(data.uuid, EElementType.SCENE);
-    if (data.name !== undefined) {
-      element.name = data.name;
+  public writeScene(data: PartialExceptUUIDField<ESceneElement>): void {
+    const copy = clone(data);
+    const element = this.get<ESceneElement>(copy.uuid, EElementType.SCENE);
+    if (copy.name !== undefined) {
+      element.name = copy.name;
     }
-    if (data.color !== undefined) {
-      element.color = data.color;
+    if (copy.color !== undefined) {
+      element.color = copy.color;
     }
-    if (data.updateMode !== undefined) {
-      element.updateMode = data.updateMode;
+    if (copy.updateMode !== undefined) {
+      element.updateMode = copy.updateMode;
     }
-    if (data.resolutionFactor !== undefined) {
-      element.resolutionFactor = data.resolutionFactor;
+    if (copy.resolutionFactor !== undefined) {
+      element.resolutionFactor = copy.resolutionFactor;
     }
-    if (data.clearColor !== undefined) {
-      element.clearColor = data.clearColor;
+    if (copy.clearColor !== undefined) {
+      element.clearColor = copy.clearColor;
     }
-    if (data.enableDepthBuffer !== undefined) {
-      element.enableDepthBuffer = data.enableDepthBuffer;
+    if (copy.enableDepthBuffer !== undefined) {
+      element.enableDepthBuffer = copy.enableDepthBuffer;
     }
-    this.signals["emitItem"]({ element });
+    this.signals["emitItem"]({ element: clone(element) });
   }
 
-  public writeText(data: PartialExceptUUID<ETextElement>): void {
-    const element = this.get<ETextElement>(data.uuid, EElementType.TEXT);
-    if (data.name !== undefined) {
-      element.name = data.name;
+  public writeText(data: PartialExceptUUIDField<ETextElement>): void {
+    const copy = clone(data);
+    const element = this.get<ETextElement>(copy.uuid, EElementType.TEXT);
+    if (copy.name !== undefined) {
+      element.name = copy.name;
     }
-    if (data.color !== undefined) {
-      element.color = data.color;
+    if (copy.color !== undefined) {
+      element.color = copy.color;
     }
-    if (data.content !== undefined) {
-      element.content = clone(data.content);
+    if (copy.content !== undefined) {
+      element.content = copy.content;
     }
-    if (data.resizeMode !== undefined) {
-      element.resizeMode = data.resizeMode;
+    if (copy.resizeMode !== undefined) {
+      element.resizeMode = copy.resizeMode;
     }
-    if (data.maxLineWidth !== undefined) {
-      element.maxLineWidth = data.maxLineWidth;
+    if (copy.maxLineWidth !== undefined) {
+      element.maxLineWidth = copy.maxLineWidth;
     }
-    this.signals["emitItem"]({ element });
+    this.signals["emitItem"]({ element: clone(element) });
   }
 
   private getContext(layerUuid: ELayerUuid): ELayerContext {
-    const layerContext = this.data.layerContexts.find((c) => c.layer.uuid === layerUuid);
+    const layerContext = this.data.layerContexts.find((context) => context.layer.uuid === layerUuid);
     if (!layerContext) {
       throw new Error(`[EStoreCommandsElements] Layer not found: (uuid: ${layerUuid})`);
     }

@@ -1,6 +1,7 @@
 import type { EStoreSignalsConstraints } from "../signals";
 import { EStoreDeltaOperation } from "../signals";
-import type { EDocument, ELayerContext, PartialExceptUUID } from "../types";
+import type { EDocument, ELayerContext, PartialExceptUUIDField } from "../types";
+import { clone } from "../types";
 import type {
   EAnyConstraint,
   EAspectConstraint,
@@ -21,13 +22,14 @@ export class EStoreCommandsConstraints {
   ) {}
 
   public add(layerUuid: ELayerUuid, constraint: EAnyConstraint): void {
-    this.getContext(layerUuid).constraints.push(constraint);
-    this.signals["emitList"]({ operation: EStoreDeltaOperation.ADD, layerUuid, constraint });
+    const stored = clone(constraint);
+    this.getContext(layerUuid).constraints.push(stored);
+    this.signals["emitList"]({ operation: EStoreDeltaOperation.ADD, layerUuid, constraint: clone(stored) });
   }
 
   public remove(layerUuid: ELayerUuid, uuid: EConstraintUuid): void {
     const layerContext = this.getContext(layerUuid);
-    const index = layerContext.constraints.findIndex((c) => c.uuid === uuid);
+    const index = layerContext.constraints.findIndex((constraint) => constraint.uuid === uuid);
     if (index === -1) {
       throw new Error(`[EStoreCommandsConstraints] Constraint not found: (uuid: ${uuid})`);
     }
@@ -37,149 +39,163 @@ export class EStoreCommandsConstraints {
 
   public reorder(layerUuid: ELayerUuid, uuids: EConstraintUuid[]): void {
     const layerContext = this.getContext(layerUuid);
-    layerContext.constraints.sort((a, b) => uuids.indexOf(a.uuid) - uuids.indexOf(b.uuid));
-    this.signals["emitList"]({ operation: EStoreDeltaOperation.REORDER, layerUuid, uuids });
+    const uuidsCopy = clone(uuids);
+    layerContext.constraints.sort((first, second) => uuidsCopy.indexOf(first.uuid) - uuidsCopy.indexOf(second.uuid));
+    this.signals["emitList"]({ operation: EStoreDeltaOperation.REORDER, layerUuid, uuids: clone(uuidsCopy) });
   }
 
-  public writeAspect(data: PartialExceptUUID<EAspectConstraint>): void {
-    const constraint = this.get<EAspectConstraint>(data.uuid, EConstraintType.ASPECT);
-    if (data.name !== undefined) {
-      constraint.name = data.name;
+  public writeAspect(data: PartialExceptUUIDField<EAspectConstraint>): void {
+    const copy = clone(data);
+    const constraint = this.get<EAspectConstraint>(copy.uuid, EConstraintType.ASPECT);
+    if (copy.name !== undefined) {
+      constraint.name = copy.name;
     }
-    if (data.element !== undefined) {
-      constraint.element = data.element;
+    if (copy.element !== undefined) {
+      constraint.element = copy.element;
     }
-    if (data.aspect !== undefined) {
-      constraint.aspect = data.aspect;
+    if (copy.aspect !== undefined) {
+      constraint.aspect = copy.aspect;
     }
-    this.signals["emitItem"]({ constraint });
+    this.signals["emitItem"]({ constraint: clone(constraint) });
   }
 
-  public writeHorizontalDistance(data: PartialExceptUUID<EHorizontalDistanceConstraint>): void {
+  public writeHorizontalDistance(
+    data: PartialExceptUUIDField<EHorizontalDistanceConstraint>,
+  ): void {
+    const copy = clone(data);
     const constraint = this.get<EHorizontalDistanceConstraint>(
-      data.uuid,
+      copy.uuid,
       EConstraintType.DISTANCE_HORIZONTAL,
     );
-    if (data.name !== undefined) {
-      constraint.name = data.name;
+    if (copy.name !== undefined) {
+      constraint.name = copy.name;
     }
-    if (data.elementA !== undefined) {
-      constraint.elementA = data.elementA;
+    if (copy.elementA !== undefined) {
+      constraint.elementA = copy.elementA;
     }
-    if (data.elementB !== undefined) {
-      constraint.elementB = data.elementB;
+    if (copy.elementB !== undefined) {
+      constraint.elementB = copy.elementB;
     }
-    if (data.anchorA !== undefined) {
-      constraint.anchorA = data.anchorA;
+    if (copy.anchorA !== undefined) {
+      constraint.anchorA = copy.anchorA;
     }
-    if (data.anchorB !== undefined) {
-      constraint.anchorB = data.anchorB;
+    if (copy.anchorB !== undefined) {
+      constraint.anchorB = copy.anchorB;
     }
-    if (data.distance !== undefined) {
-      constraint.distance = data.distance;
+    if (copy.distance !== undefined) {
+      constraint.distance = copy.distance;
     }
-    this.signals["emitItem"]({ constraint });
+    this.signals["emitItem"]({ constraint: clone(constraint) });
   }
 
-  public writeVerticalDistance(data: PartialExceptUUID<EVerticalDistanceConstraint>): void {
+  public writeVerticalDistance(data: PartialExceptUUIDField<EVerticalDistanceConstraint>): void {
+    const copy = clone(data);
     const constraint = this.get<EVerticalDistanceConstraint>(
-      data.uuid,
+      copy.uuid,
       EConstraintType.DISTANCE_VERTICAL,
     );
-    if (data.name !== undefined) {
-      constraint.name = data.name;
+    if (copy.name !== undefined) {
+      constraint.name = copy.name;
     }
-    if (data.elementA !== undefined) {
-      constraint.elementA = data.elementA;
+    if (copy.elementA !== undefined) {
+      constraint.elementA = copy.elementA;
     }
-    if (data.elementB !== undefined) {
-      constraint.elementB = data.elementB;
+    if (copy.elementB !== undefined) {
+      constraint.elementB = copy.elementB;
     }
-    if (data.anchorA !== undefined) {
-      constraint.anchorA = data.anchorA;
+    if (copy.anchorA !== undefined) {
+      constraint.anchorA = copy.anchorA;
     }
-    if (data.anchorB !== undefined) {
-      constraint.anchorB = data.anchorB;
+    if (copy.anchorB !== undefined) {
+      constraint.anchorB = copy.anchorB;
     }
-    if (data.distance !== undefined) {
-      constraint.distance = data.distance;
+    if (copy.distance !== undefined) {
+      constraint.distance = copy.distance;
     }
-    this.signals["emitItem"]({ constraint });
+    this.signals["emitItem"]({ constraint: clone(constraint) });
   }
 
-  public writeHorizontalProportion(data: PartialExceptUUID<EHorizontalProportionConstraint>): void {
+  public writeHorizontalProportion(
+    data: PartialExceptUUIDField<EHorizontalProportionConstraint>,
+  ): void {
+    const copy = clone(data);
     const constraint = this.get<EHorizontalProportionConstraint>(
-      data.uuid,
+      copy.uuid,
       EConstraintType.PROPORTION_HORIZONTAL,
     );
-    if (data.name !== undefined) {
-      constraint.name = data.name;
+    if (copy.name !== undefined) {
+      constraint.name = copy.name;
     }
-    if (data.elementA !== undefined) {
-      constraint.elementA = data.elementA;
+    if (copy.elementA !== undefined) {
+      constraint.elementA = copy.elementA;
     }
-    if (data.elementB !== undefined) {
-      constraint.elementB = data.elementB;
+    if (copy.elementB !== undefined) {
+      constraint.elementB = copy.elementB;
     }
-    if (data.proportion !== undefined) {
-      constraint.proportion = data.proportion;
+    if (copy.proportion !== undefined) {
+      constraint.proportion = copy.proportion;
     }
-    this.signals["emitItem"]({ constraint });
+    this.signals["emitItem"]({ constraint: clone(constraint) });
   }
 
-  public writeVerticalProportion(data: PartialExceptUUID<EVerticalProportionConstraint>): void {
+  public writeVerticalProportion(
+    data: PartialExceptUUIDField<EVerticalProportionConstraint>,
+  ): void {
+    const copy = clone(data);
     const constraint = this.get<EVerticalProportionConstraint>(
-      data.uuid,
+      copy.uuid,
       EConstraintType.PROPORTION_VERTICAL,
     );
-    if (data.name !== undefined) {
-      constraint.name = data.name;
+    if (copy.name !== undefined) {
+      constraint.name = copy.name;
     }
-    if (data.elementA !== undefined) {
-      constraint.elementA = data.elementA;
+    if (copy.elementA !== undefined) {
+      constraint.elementA = copy.elementA;
     }
-    if (data.elementB !== undefined) {
-      constraint.elementB = data.elementB;
+    if (copy.elementB !== undefined) {
+      constraint.elementB = copy.elementB;
     }
-    if (data.proportion !== undefined) {
-      constraint.proportion = data.proportion;
+    if (copy.proportion !== undefined) {
+      constraint.proportion = copy.proportion;
     }
-    this.signals["emitItem"]({ constraint });
+    this.signals["emitItem"]({ constraint: clone(constraint) });
   }
 
-  public writeHorizontalSize(data: PartialExceptUUID<EHorizontalSizeConstraint>): void {
+  public writeHorizontalSize(data: PartialExceptUUIDField<EHorizontalSizeConstraint>): void {
+    const copy = clone(data);
     const constraint = this.get<EHorizontalSizeConstraint>(
-      data.uuid,
+      copy.uuid,
       EConstraintType.SIZE_HORIZONTAL,
     );
-    if (data.name !== undefined) {
-      constraint.name = data.name;
+    if (copy.name !== undefined) {
+      constraint.name = copy.name;
     }
-    if (data.element !== undefined) {
-      constraint.element = data.element;
+    if (copy.element !== undefined) {
+      constraint.element = copy.element;
     }
-    if (data.size !== undefined) {
-      constraint.size = data.size;
+    if (copy.size !== undefined) {
+      constraint.size = copy.size;
     }
-    this.signals["emitItem"]({ constraint });
+    this.signals["emitItem"]({ constraint: clone(constraint) });
   }
 
-  public writeVerticalSize(data: PartialExceptUUID<EVerticalSizeConstraint>): void {
-    const constraint = this.get<EVerticalSizeConstraint>(data.uuid, EConstraintType.SIZE_VERTICAL);
-    if (data.name !== undefined) {
-      constraint.name = data.name;
+  public writeVerticalSize(data: PartialExceptUUIDField<EVerticalSizeConstraint>): void {
+    const copy = clone(data);
+    const constraint = this.get<EVerticalSizeConstraint>(copy.uuid, EConstraintType.SIZE_VERTICAL);
+    if (copy.name !== undefined) {
+      constraint.name = copy.name;
     }
-    if (data.element !== undefined) {
-      constraint.element = data.element;
+    if (copy.element !== undefined) {
+      constraint.element = copy.element;
     }
-    if (data.size !== undefined) {
-      constraint.size = data.size;
+    if (copy.size !== undefined) {
+      constraint.size = copy.size;
     }
-    this.signals["emitItem"]({ constraint });
+    this.signals["emitItem"]({ constraint: clone(constraint) });
   }
 
   private getContext(layerUuid: ELayerUuid): ELayerContext {
-    const layerContext = this.data.layerContexts.find((c) => c.layer.uuid === layerUuid);
+    const layerContext = this.data.layerContexts.find((context) => context.layer.uuid === layerUuid);
     if (!layerContext) {
       throw new Error(`[EStoreCommandsConstraints] Layer not found: (uuid: ${layerUuid})`);
     }

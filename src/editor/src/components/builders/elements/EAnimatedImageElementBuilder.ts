@@ -66,7 +66,7 @@ export class EAnimatedImageElementBuilder {
       uuid: crypto.randomUUID(),
       type: EElementType.ANIMATED_IMAGE,
       name: this.nameControl.value,
-      color: "#ffffffff",
+      color: { color: "#ffffff", alpha: 255 },
       sequence,
       frameRate: 24,
       timeScale: 1,

@@ -22,7 +22,7 @@ export class EStoreValidatorsConstraints {
       return { message: "Layer is required", field: "layer" };
     }
 
-    if (!this.validateLayerContext(layer)) {
+    if (!this.isLayerContextExists(layer)) {
       return { message: `Layer with UUID ${layer} must exist`, field: "layer" };
     }
 
@@ -44,7 +44,7 @@ export class EStoreValidatorsConstraints {
       return { message: "Layer is required", field: "layer" };
     }
 
-    if (!this.validateLayerContext(layer)) {
+    if (!this.isLayerContextExists(layer)) {
       return { message: `Layer with UUID ${layer} must exist`, field: "layer" };
     }
 
@@ -65,7 +65,7 @@ export class EStoreValidatorsConstraints {
     }
   }
 
-  private validateLayerContext(layer: ELayerUuid): ELayerContext | undefined {
-    return this.data.layerContexts.find((c) => c.layer.uuid === layer);
+  private isLayerContextExists(layer: ELayerUuid): ELayerContext | undefined {
+    return this.data.layerContexts.find((layerContext) => layerContext.layer.uuid === layer);
   }
 }

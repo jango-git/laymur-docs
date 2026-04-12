@@ -4,6 +4,7 @@ import { EStoreDeltaOperation } from "../../../document/signals";
 import { STORE } from "../../../document/store";
 import type { EAnyConstraint, EConstraintType } from "../../../document/types.constraints";
 import type { EConstraintUuid, ELayerUuid } from "../../../document/types.misc";
+import { makeSortable } from "../../../miscellaneous/make-sortable";
 import { UI_STATE } from "../../../ui-state/ui-state";
 import type { EAnyConstraintBuilder } from "../../builders/constraints/types";
 import type { ConstraintEntry } from "./registry";
@@ -12,6 +13,7 @@ import { CONSTRAINT_REGISTRY, DEFAULT_BUILDER_TYPE } from "./registry";
 export class EConstraintsTab {
   private readonly cardsContentDiv: HTMLDivElement;
   private readonly cardUuidToCardContainer = new Map<EConstraintUuid, HTMLElement>();
+  private currentLayerUuid: ELayerUuid | undefined;
 
   private readonly builderContainers = new Map<EConstraintType, HTMLElement>();
   private readonly builders = new Map<EConstraintType, EAnyConstraintBuilder>();
@@ -65,6 +67,18 @@ export class EConstraintsTab {
     builderTypeSelect.signalValueChanged.on(this.onBuilderTypeChanged);
     STORE.signals.constraints.list.on(this.onCardListChanged);
     UI_STATE.signalActiveLayerChanged.on(this.onActiveLayerChanged);
+
+    makeSortable(this.cardsContentDiv, (fromIndex, toIndex) => {
+      if (this.currentLayerUuid === undefined) {
+        return;
+      }
+      const uuids = [...this.cardsContentDiv.children].map(
+        (el) => (el as HTMLElement).dataset.uuid ?? "",
+      );
+      const [moved] = uuids.splice(fromIndex, 1);
+      uuids.splice(toIndex, 0, moved);
+      STORE.commands.constraints.reorder(this.currentLayerUuid, uuids);
+    });
   }
 
   private setActiveBuilder(type: EConstraintType): void {
@@ -78,7 +92,9 @@ export class EConstraintsTab {
     container.dataset.uuid = constraint.uuid;
     this.cardsContentDiv.appendChild(container);
 
-    this.cardFactories.get(constraint.type)?.(container, constraint.uuid);
+    if (this.currentLayerUuid !== undefined) {
+      this.cardFactories.get(constraint.type)?.(container, constraint.uuid, this.currentLayerUuid);
+    }
     this.cardUuidToCardContainer.set(constraint.uuid, container);
   }
 
@@ -87,15 +103,30 @@ export class EConstraintsTab {
     this.cardUuidToCardContainer.delete(uuid);
   }
 
+  private reorderCards(uuids: EConstraintUuid[]): void {
+    for (const uuid of uuids) {
+      const card = this.cardUuidToCardContainer.get(uuid);
+      if (card !== undefined) {
+        this.cardsContentDiv.appendChild(card);
+      }
+    }
+  }
+
   private readonly onCardListChanged = (delta: EStoreDeltaConstraints): void => {
     if (delta.layerUuid !== UI_STATE.activeLayerUuid) {
       return;
     }
 
-    if (delta.operation === EStoreDeltaOperation.ADD) {
-      this.addCard(delta.constraint);
-    } else if (delta.operation === EStoreDeltaOperation.REMOVE) {
-      this.removeCard(delta.uuid);
+    switch (delta.operation) {
+      case EStoreDeltaOperation.ADD:
+        this.addCard(delta.constraint);
+        break;
+      case EStoreDeltaOperation.REMOVE:
+        this.removeCard(delta.uuid);
+        break;
+      case EStoreDeltaOperation.REORDER:
+        this.reorderCards(delta.uuids);
+        break;
     }
   };
 
@@ -104,6 +135,7 @@ export class EConstraintsTab {
       cardContainer.remove();
     }
     this.cardUuidToCardContainer.clear();
+    this.currentLayerUuid = uuid;
 
     if (uuid === undefined) {
       return;

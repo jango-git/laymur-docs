@@ -1,35 +1,28 @@
 import { EAssetControl } from "../../../controls/EAssetControl/EAssetControl";
-import { EColorControl } from "../../../controls/EColorControl/EColorControl";
 import type { EStoreDeltaElement } from "../../../document/signals";
 import { STORE } from "../../../document/store";
 import type { EImageAsset } from "../../../document/types.assets";
 import type { EImageElement } from "../../../document/types.elements";
 import { EElementType } from "../../../document/types.elements";
-import type { EElementUuid } from "../../../document/types.misc";
+import type { EColor, EElementUuid, ELayerUuid } from "../../../document/types.misc";
 import { makeRow } from "../../../utils/rows";
+import { EElementCard } from "./EElementCard";
 
-export class EImageElementCard {
-  private readonly colorControl: EColorControl;
+export class EImageElementCard extends EElementCard {
   private readonly textureControl: EAssetControl<EImageAsset>;
 
-  constructor(
-    private readonly container: HTMLElement,
-    private readonly uuid: EElementUuid,
-  ) {
-    const root = document.createElement("div");
-    root.className = "element-card";
+  constructor(container: HTMLElement, uuid: EElementUuid, layerUuid: ELayerUuid) {
+    super(container, uuid, layerUuid, "Image");
 
-    this.colorControl = new EColorControl(makeRow(root, "Color"));
+    this.nameControl.signalValueChanged.on(this.onNameChanged);
     this.colorControl.signalValueChanged.on(this.onColorChanged);
 
     this.textureControl = new EAssetControl<EImageAsset>(
-      makeRow(root, "Texture"),
+      makeRow(this.bodyRoot, "Texture"),
       () => STORE.selectors.assets.selectAllImages(),
       { nullable: false },
     );
     this.textureControl.signalValueChanged.on(this.onTextureChanged);
-
-    this.container.appendChild(root);
 
     const initial = STORE.selectors.elements.select(uuid);
     if (initial?.type !== EElementType.IMAGE) {
@@ -41,11 +34,16 @@ export class EImageElementCard {
   }
 
   private refresh(element: EImageElement): void {
+    this.nameControl.value = element.name;
     this.colorControl.value = element.color;
     this.textureControl.value = STORE.selectors.assets.selectImage(element.texture);
   }
 
-  private readonly onColorChanged = (color: string): void => {
+  private readonly onNameChanged = (name: string): void => {
+    STORE.commands.elements.writeImage({ uuid: this.uuid, name });
+  };
+
+  private readonly onColorChanged = (color: EColor): void => {
     STORE.commands.elements.writeImage({ uuid: this.uuid, color });
   };
 

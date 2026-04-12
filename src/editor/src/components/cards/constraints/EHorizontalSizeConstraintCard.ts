@@ -4,30 +4,29 @@ import type { EStoreDeltaConstraint } from "../../../document/signals";
 import { STORE } from "../../../document/store";
 import type { EHorizontalSizeConstraint } from "../../../document/types.constraints";
 import { EConstraintType } from "../../../document/types.constraints";
-import type { EConstraintUuid } from "../../../document/types.misc";
+import type { EConstraintUuid, ELayerUuid } from "../../../document/types.misc";
 import type { EConstraintTarget } from "../../../utils/constraint-targets";
 import { getConstraintElements } from "../../../utils/constraint-targets";
 import { makeRow } from "../../../utils/rows";
+import { EConstraintCard } from "./EConstraintCard";
 
-export class EHorizontalSizeConstraintCard {
+export class EHorizontalSizeConstraintCard extends EConstraintCard {
   private readonly elementControl: EAssetControl<EConstraintTarget>;
   private readonly sizeControl: ENumberControl;
 
-  constructor(
-    private readonly container: HTMLElement,
-    private readonly uuid: EConstraintUuid,
-  ) {
-    const root = document.createElement("div");
-    root.className = "element-card";
+  constructor(container: HTMLElement, uuid: EConstraintUuid, layerUuid: ELayerUuid) {
+    super(container, uuid, layerUuid, "Size Horizontal");
+
+    this.nameControl.signalValueChanged.on(this.onNameChanged);
 
     this.elementControl = new EAssetControl<EConstraintTarget>(
-      makeRow(root, "Element"),
+      makeRow(this.bodyRoot, "Element"),
       getConstraintElements,
       { nullable: false },
     );
     this.elementControl.signalValueChanged.on(this.onElementChanged);
 
-    this.sizeControl = new ENumberControl(makeRow(root, "Size"), {
+    this.sizeControl = new ENumberControl(makeRow(this.bodyRoot, "Size"), {
       value: 100,
       min: 0,
       max: 99999,
@@ -35,8 +34,6 @@ export class EHorizontalSizeConstraintCard {
       precision: 1,
     });
     this.sizeControl.signalValueChanged.on(this.onSizeChanged);
-
-    this.container.appendChild(root);
 
     const initial = STORE.selectors.constraints.select(uuid);
     if (initial?.type !== EConstraintType.SIZE_HORIZONTAL) {
@@ -50,9 +47,14 @@ export class EHorizontalSizeConstraintCard {
   }
 
   private refresh(constraint: EHorizontalSizeConstraint): void {
+    this.nameControl.value = constraint.name;
     this.elementControl.value = getConstraintElements().find((e) => e.uuid === constraint.element);
     this.sizeControl.value = constraint.size;
   }
+
+  private readonly onNameChanged = (name: string): void => {
+    STORE.commands.constraints.writeHorizontalSize({ uuid: this.uuid, name });
+  };
 
   private readonly onElementChanged = (next: EConstraintTarget | undefined): void => {
     if (next !== undefined) {

@@ -17,7 +17,7 @@ export interface EDocument {
   layerContexts: ELayerContext[];
 }
 
-export type PartialExceptUUID<T extends { uuid: string }> = Partial<Omit<T, "uuid">> &
+export type PartialExceptUUIDField<T extends { uuid: string }> = Partial<Omit<T, "uuid">> &
   Required<Pick<T, "uuid">>;
 
 export const clone = rfdc();

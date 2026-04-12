@@ -1,6 +1,7 @@
 import type { EStoreSignalsAssets } from "../signals";
 import { EStoreDeltaOperation } from "../signals";
-import type { EDocument, PartialExceptUUID } from "../types";
+import type { EDocument, PartialExceptUUIDField } from "../types";
+import { clone } from "../types";
 import type { EAnyAsset, EFontAsset, EImageAsset } from "../types.assets";
 import { EAssetType } from "../types.assets";
 import type { EAssetUuid } from "../types.misc";
@@ -12,12 +13,13 @@ export class EStoreCommandsAssets {
   ) {}
 
   public add(asset: EAnyAsset): void {
-    this.data.assets.push(asset);
-    this.signals["emitList"]({ operation: EStoreDeltaOperation.ADD, asset });
+    const stored = clone(asset);
+    this.data.assets.push(stored);
+    this.signals["emitList"]({ operation: EStoreDeltaOperation.ADD, asset: clone(stored) });
   }
 
   public remove(uuid: EAssetUuid): void {
-    const index = this.data.assets.findIndex((a) => a.uuid === uuid);
+    const index = this.data.assets.findIndex((asset) => asset.uuid === uuid);
     if (index === -1) {
       throw new Error(`[EStoreCommandsAssets] Asset not found: (uuid: ${uuid})`);
     }
@@ -26,30 +28,35 @@ export class EStoreCommandsAssets {
   }
 
   public reorder(uuids: EAssetUuid[]): void {
-    this.data.assets.sort((a, b) => uuids.indexOf(a.uuid) - uuids.indexOf(b.uuid));
-    this.signals["emitList"]({ operation: EStoreDeltaOperation.REORDER, uuids });
+    const uuidsCopy = clone(uuids);
+    this.data.assets.sort(
+      (first, second) => uuidsCopy.indexOf(first.uuid) - uuidsCopy.indexOf(second.uuid),
+    );
+    this.signals["emitList"]({ operation: EStoreDeltaOperation.REORDER, uuids: clone(uuidsCopy) });
   }
 
-  public writeFontAsset(data: PartialExceptUUID<EFontAsset>): void {
-    const asset = this.get(data.uuid, EAssetType.FONT);
-    if (data.name !== undefined) {
-      asset.name = data.name;
+  public writeFontAsset(data: PartialExceptUUIDField<EFontAsset>): void {
+    const copy = clone(data);
+    const asset = this.get(copy.uuid, EAssetType.FONT);
+    if (copy.name !== undefined) {
+      asset.name = copy.name;
     }
-    if (data.dataURL !== undefined) {
-      asset.dataURL = data.dataURL;
+    if (copy.dataURL !== undefined) {
+      asset.dataURL = copy.dataURL;
     }
-    this.signals["emitItem"]({ asset });
+    this.signals["emitItem"]({ asset: clone(asset) });
   }
 
-  public writeImageAsset(data: PartialExceptUUID<EImageAsset>): void {
-    const asset = this.get(data.uuid, EAssetType.IMAGE);
-    if (data.name !== undefined) {
-      asset.name = data.name;
+  public writeImageAsset(data: PartialExceptUUIDField<EImageAsset>): void {
+    const copy = clone(data);
+    const asset = this.get(copy.uuid, EAssetType.IMAGE);
+    if (copy.name !== undefined) {
+      asset.name = copy.name;
     }
-    if (data.dataURL !== undefined) {
-      asset.dataURL = data.dataURL;
+    if (copy.dataURL !== undefined) {
+      asset.dataURL = copy.dataURL;
     }
-    this.signals["emitItem"]({ asset });
+    this.signals["emitItem"]({ asset: clone(asset) });
   }
 
   private get(uuid: EAssetUuid, type: EAssetType.FONT): EFontAsset;

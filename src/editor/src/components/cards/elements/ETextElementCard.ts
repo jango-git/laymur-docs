@@ -1,39 +1,37 @@
 import { EArrayControl } from "../../../controls/EArrayControl/EArrayControl";
-import { EColorControl } from "../../../controls/EColorControl/EColorControl";
 import { ENumberControl } from "../../../controls/ENumberControl/ENumberControl";
 import { ESelectControl } from "../../../controls/ESelectControl/ESelectControl";
 import type { EStoreDeltaElement } from "../../../document/signals";
 import { STORE } from "../../../document/store";
 import type { ETextElement } from "../../../document/types.elements";
 import { EElementType } from "../../../document/types.elements";
-import type { EColor, EElementUuid, ETextChunk } from "../../../document/types.misc";
+import type { EColor, EElementUuid, ELayerUuid, ETextChunk } from "../../../document/types.misc";
 import { ETextResizeMode } from "../../../document/types.misc";
 import { makeRow, makeSectionHeader } from "../../../utils/rows";
+import { EElementCard } from "./EElementCard";
 import { contentTemplate, RESIZE_MODE_OPTIONS } from "./ETextElementCard.Internal";
 
-export class ETextElementCard {
-  private readonly colorControl: EColorControl;
+export class ETextElementCard extends EElementCard {
   private readonly resizeModeControl: ESelectControl<ETextResizeMode>;
   private readonly maxLineWidthControl: ENumberControl;
   private readonly contentControl: EArrayControl<ETextChunk>;
 
-  constructor(
-    private readonly container: HTMLElement,
-    private readonly uuid: EElementUuid,
-  ) {
-    const root = document.createElement("div");
-    root.className = "element-card";
+  constructor(container: HTMLElement, uuid: EElementUuid, layerUuid: ELayerUuid) {
+    super(container, uuid, layerUuid, "Text");
 
-    this.colorControl = new EColorControl(makeRow(root, "Color"));
+    this.nameControl.signalValueChanged.on(this.onNameChanged);
     this.colorControl.signalValueChanged.on(this.onColorChanged);
 
-    this.resizeModeControl = new ESelectControl<ETextResizeMode>(makeRow(root, "Resize Mode"), {
-      options: RESIZE_MODE_OPTIONS,
-      value: ETextResizeMode.SCALE,
-    });
+    this.resizeModeControl = new ESelectControl<ETextResizeMode>(
+      makeRow(this.bodyRoot, "Resize Mode"),
+      {
+        options: RESIZE_MODE_OPTIONS,
+        value: ETextResizeMode.SCALE,
+      },
+    );
     this.resizeModeControl.signalValueChanged.on(this.onResizeModeChanged);
 
-    this.maxLineWidthControl = new ENumberControl(makeRow(root, "Max Line Width"), {
+    this.maxLineWidthControl = new ENumberControl(makeRow(this.bodyRoot, "Max Line Width"), {
       value: 0,
       min: 0,
       max: 9999,
@@ -42,11 +40,9 @@ export class ETextElementCard {
     });
     this.maxLineWidthControl.signalValueChanged.on(this.onMaxLineWidthChanged);
 
-    makeSectionHeader(root, "Content");
-    this.contentControl = new EArrayControl<ETextChunk>(root, contentTemplate);
+    makeSectionHeader(this.bodyRoot, "Content");
+    this.contentControl = new EArrayControl<ETextChunk>(this.bodyRoot, contentTemplate);
     this.contentControl.signalValueChanged.on(this.onContentChanged);
-
-    this.container.appendChild(root);
 
     const initial = STORE.selectors.elements.select(uuid);
     if (initial?.type !== EElementType.TEXT) {
@@ -58,11 +54,16 @@ export class ETextElementCard {
   }
 
   private refresh(element: ETextElement): void {
+    this.nameControl.value = element.name;
     this.colorControl.value = element.color;
     this.resizeModeControl.value = element.resizeMode;
     this.maxLineWidthControl.value = element.maxLineWidth;
     this.contentControl.value = element.content;
   }
+
+  private readonly onNameChanged = (name: string): void => {
+    STORE.commands.elements.writeText({ uuid: this.uuid, name });
+  };
 
   private readonly onColorChanged = (color: EColor): void => {
     STORE.commands.elements.writeText({ uuid: this.uuid, color });

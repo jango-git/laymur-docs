@@ -1,5 +1,5 @@
 import { EElementType } from "../../../document/types.elements";
-import type { EElementUuid } from "../../../document/types.misc";
+import type { EElementUuid, ELayerUuid } from "../../../document/types.misc";
 import { EAnimatedImageElementBuilder } from "../../builders/elements/EAnimatedImageElementBuilder";
 import { EGraphicsElementBuilder } from "../../builders/elements/EGraphicsElementBuilder";
 import { EImageElementBuilder } from "../../builders/elements/EImageElementBuilder";
@@ -20,7 +20,7 @@ export interface ElementEntry {
   label: string;
   type: EElementType;
   createBuilder: (container: HTMLDivElement) => EAnyElementBuilder;
-  createCard: (container: HTMLElement, uuid: EElementUuid) => void;
+  createCard: (container: HTMLElement, uuid: EElementUuid, layerUuid: ELayerUuid) => void;
 }
 
 export const ELEMENT_REGISTRY: readonly ElementEntry[] = [
@@ -28,43 +28,43 @@ export const ELEMENT_REGISTRY: readonly ElementEntry[] = [
     label: "Animated Image",
     type: EElementType.ANIMATED_IMAGE,
     createBuilder: (container) => new EAnimatedImageElementBuilder(container),
-    createCard: (container, uuid) => new EAnimatedImageElementCard(container, uuid),
+    createCard: (container, uuid, layerUuid) => new EAnimatedImageElementCard(container, uuid, layerUuid),
   },
   {
     label: "Graphics",
     type: EElementType.GRAPHICS,
     createBuilder: (container) => new EGraphicsElementBuilder(container),
-    createCard: (container, uuid) => new EGraphicsElementCard(container, uuid),
+    createCard: (container, uuid, layerUuid) => new EGraphicsElementCard(container, uuid, layerUuid),
   },
   {
     label: "Image",
     type: EElementType.IMAGE,
     createBuilder: (container) => new EImageElementBuilder(container),
-    createCard: (container, uuid) => new EImageElementCard(container, uuid),
+    createCard: (container, uuid, layerUuid) => new EImageElementCard(container, uuid, layerUuid),
   },
   {
     label: "Nine Slice",
     type: EElementType.NINE_SLICE,
     createBuilder: (container) => new ENineSliceElementBuilder(container),
-    createCard: (container, uuid) => new ENineSliceElementCard(container, uuid),
+    createCard: (container, uuid, layerUuid) => new ENineSliceElementCard(container, uuid, layerUuid),
   },
   {
     label: "Progress",
     type: EElementType.PROGRESS,
     createBuilder: (container) => new EProgressElementBuilder(container),
-    createCard: (container, uuid) => new EProgressElementCard(container, uuid),
+    createCard: (container, uuid, layerUuid) => new EProgressElementCard(container, uuid, layerUuid),
   },
   {
     label: "Scene",
     type: EElementType.SCENE,
     createBuilder: (container) => new ESceneElementBuilder(container),
-    createCard: (container, uuid) => new ESceneElementCard(container, uuid),
+    createCard: (container, uuid, layerUuid) => new ESceneElementCard(container, uuid, layerUuid),
   },
   {
     label: "Text",
     type: EElementType.TEXT,
     createBuilder: (container) => new ETextElementBuilder(container),
-    createCard: (container, uuid) => new ETextElementCard(container, uuid),
+    createCard: (container, uuid, layerUuid) => new ETextElementCard(container, uuid, layerUuid),
   },
 ];
 

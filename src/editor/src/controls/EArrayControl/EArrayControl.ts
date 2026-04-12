@@ -41,7 +41,7 @@ export class EArrayControl<TItem> {
 
     const addButton = document.createElement("button");
     addButton.className = "array-control__add-btn";
-    addButton.textContent = "+ Add";
+    addButton.textContent = "+ ADD";
     addButton.addEventListener("click", this.handleAdd);
     this.root.appendChild(addButton);
 
@@ -113,20 +113,20 @@ export class EArrayControl<TItem> {
   private appendItem(value: TItem): void {
     const root = document.createElement("div");
     root.className = "array-control__item";
-    root.draggable = true;
 
     const header = document.createElement("div");
     header.className = "array-control__item-header";
+
+    const dragHandle = document.createElement("span");
+    dragHandle.className = "array-control__drag-handle";
+    dragHandle.dataset.dragHandle = "";
+    dragHandle.textContent = "⠿";
+    header.appendChild(dragHandle);
 
     const indexLabel = document.createElement("span");
     indexLabel.className = "array-control__item-index";
     indexLabel.textContent = String(this.activeItems.length + 1);
     header.appendChild(indexLabel);
-
-    const dragHandle = document.createElement("span");
-    dragHandle.className = "array-control__drag-handle";
-    dragHandle.textContent = "⠿";
-    header.appendChild(dragHandle);
 
     const deleteBtn = document.createElement("button");
     deleteBtn.className = "array-control__delete-btn";

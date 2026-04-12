@@ -13,12 +13,12 @@ export class EStoreValidatorsLayers {
       return { message: "Name is required", field: "name" };
     }
 
-    if (!this.validateUniqueLayerName(name)) {
+    if (!this.isUniqueLayerName(name)) {
       return { message: "Name is already in use", field: "name" };
     }
   }
 
-  private validateUniqueLayerName(name: string): boolean {
+  private isUniqueLayerName(name: string): boolean {
     return this.data.layerContexts.every(
       (layerContext: ELayerContext) => layerContext.layer.name !== name,
     );

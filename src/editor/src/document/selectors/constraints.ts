@@ -8,7 +8,7 @@ export class EStoreSelectorsConstraints {
   constructor(private readonly data: EDocument) {}
 
   public selectAll(layerUuid: ELayerUuid): EAnyConstraint[] | undefined {
-    const layerContext = this.data.layerContexts.find((c) => c.layer.uuid === layerUuid);
+    const layerContext = this.data.layerContexts.find((context) => context.layer.uuid === layerUuid);
     return layerContext && layerContext.constraints.length > 0
       ? clone(layerContext.constraints)
       : undefined;
@@ -16,7 +16,7 @@ export class EStoreSelectorsConstraints {
 
   public select(uuid: EConstraintUuid): EAnyConstraint | undefined {
     for (const { constraints } of this.data.layerContexts) {
-      const result = constraints.find((c) => c.uuid === uuid);
+      const result = constraints.find((constraint) => constraint.uuid === uuid);
       if (result) {
         return clone(result);
       }
@@ -25,8 +25,8 @@ export class EStoreSelectorsConstraints {
   }
 
   public selectLinked(elementUuid: EElementUuid): EAnyConstraint[] {
-    const ownerLayerContext = this.data.layerContexts.find((c) =>
-      c.elements.some((e) => e.uuid === elementUuid),
+    const ownerLayerContext = this.data.layerContexts.find((context) =>
+      context.elements.some((element) => element.uuid === elementUuid),
     );
     if (!ownerLayerContext) {
       return [];
@@ -54,7 +54,7 @@ export class EStoreSelectorsConstraints {
   }
 
   public selectLayerInfo(layerUuid: ELayerUuid): { uuid: string; name: string } | undefined {
-    const layerContext = this.data.layerContexts.find((c) => c.layer.uuid === layerUuid);
+    const layerContext = this.data.layerContexts.find((context) => context.layer.uuid === layerUuid);
     return layerContext
       ? { uuid: layerContext.layer.uuid, name: layerContext.layer.name }
       : undefined;

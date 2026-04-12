@@ -1,26 +1,108 @@
-.layer-card {
+.element-card {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding: 8px;
   background: #fff;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
+  overflow: hidden;
 }
 
-.layer-card__row {
+.element-card--active {
+  border-color: var(--accent);
+}
+
+.element-card__header {
   display: flex;
+  flex-direction: row;
   align-items: center;
   gap: 6px;
+  padding: 6px 8px;
+  background: var(--bg-secondary, #f5f5f5);
+  border-bottom: 1px solid var(--border);
 }
 
-.layer-card__row--params {
-  gap: 4px;
+.element-card--active .element-card__header {
+  background: var(--accent-light);
+  border-bottom-color: var(--accent);
 }
 
-.layer-card__label {
-  font-size: 12px;
-  color: var(--text-label);
+.element-card__drag-handle {
   flex-shrink: 0;
-  min-width: 16px;
+  width: 12px;
+  cursor: grab;
+  opacity: 0.4;
+  background-image: radial-gradient(circle, currentColor 1px, transparent 1px);
+  background-size: 4px 4px;
+  background-repeat: repeat;
+  height: 16px;
+}
+
+.element-card__active-toggle {
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  padding: 0;
+  border-radius: 50%;
+  border: 2px solid var(--border-strong);
+  background: none;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.element-card__active-toggle:hover {
+  border-color: var(--accent);
+}
+
+.element-card__active-toggle--active {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.element-card__type {
+  flex-shrink: 0;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  opacity: 0.5;
+  white-space: nowrap;
+}
+
+.element-card__header .string-control {
+  flex: 1;
+  min-width: 0;
+}
+
+.element-card__delete {
+  flex-shrink: 0;
+  margin-left: auto;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  opacity: 0.4;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.element-card__delete::before {
+  content: "×";
+}
+
+.element-card__delete:hover {
+  opacity: 1;
+  background: var(--danger-bg, #fee2e2);
+  color: var(--danger, #dc2626);
+}
+
+.element-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px;
 }

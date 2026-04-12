@@ -1,3 +1,5 @@
+const DRAG_HANDLE_SELECTOR = "[data-drag-handle]";
+
 export function makeSortable(
   container: HTMLElement,
   onReorder: (fromIndex: number, toIndex: number) => void,
@@ -10,65 +12,90 @@ export function makeSortable(
     });
   };
 
-  container.addEventListener("dragstart", (e: DragEvent) => {
-    const target = (e.target as HTMLElement).closest("[draggable]");
-    if (target === null || !container.contains(target)) {
+  const findDirectChild = (element: Element | null): HTMLElement | null => {
+    let current: Element | null = element;
+    while (current !== null && current.parentElement !== container) {
+      current = current.parentElement;
+    }
+    return current as HTMLElement | null;
+  };
+
+  container.addEventListener("pointerdown", (e: PointerEvent) => {
+    if (dragging !== undefined) {
       return;
     }
-    dragging = target as HTMLElement;
-    if (e.dataTransfer !== null) {
-      e.dataTransfer.effectAllowed = "move";
+    if ((e.target as HTMLElement).closest(DRAG_HANDLE_SELECTOR) === null) {
+      return;
     }
-    setTimeout(() => {
-      dragging?.classList.add("drag-ghost");
-    }, 0);
-  });
 
-  container.addEventListener("dragend", () => {
-    dragging?.classList.remove("drag-ghost");
-    dragging = undefined;
-    clearDragOver();
-  });
+    const item = findDirectChild(e.target as HTMLElement);
+    if (item === null) {
+      return;
+    }
 
-  container.addEventListener("dragover", (e: DragEvent) => {
     e.preventDefault();
-    if (e.dataTransfer !== null) {
-      e.dataTransfer.dropEffect = "move";
-    }
-    const target = (e.target as HTMLElement).closest("[draggable]");
-    if (target === null || target === dragging || !container.contains(target)) {
-      return;
-    }
-    clearDragOver();
-    const rect = target.getBoundingClientRect();
-    const isTopHalf = e.clientY < rect.top + rect.height / 2;
-    target.classList.add(isTopHalf ? "drag-over-top" : "drag-over-bottom");
+    e.stopPropagation();
+
+    dragging = item;
+    dragging.classList.add("drag-ghost");
+    container.setPointerCapture(e.pointerId);
   });
 
-  container.addEventListener("dragleave", (e: DragEvent) => {
-    if (!container.contains(e.relatedTarget as Node)) {
-      clearDragOver();
-    }
-  });
-
-  container.addEventListener("drop", (e: DragEvent) => {
-    e.preventDefault();
-    const target = (e.target as HTMLElement).closest("[draggable]");
-    if (target === null || target === dragging || !container.contains(target)) {
-      return;
-    }
-    target.classList.remove("drag-over-top", "drag-over-bottom");
-
+  container.addEventListener("pointermove", (e: PointerEvent) => {
     if (dragging === undefined) {
       return;
     }
 
-    const children = [...container.querySelectorAll("[draggable]")] as HTMLElement[];
-    const fromIndex = children.indexOf(dragging);
-    const toIndex = children.indexOf(target as HTMLElement);
+    const target = findDirectChild(document.elementFromPoint(e.clientX, e.clientY));
+    clearDragOver();
+
+    if (target === null || target === dragging) {
+      return;
+    }
+
+    const rect = target.getBoundingClientRect();
+    target.classList.add(
+      e.clientY < rect.top + rect.height / 2 ? "drag-over-top" : "drag-over-bottom",
+    );
+  });
+
+  const finishDrag = (clientX: number, clientY: number): void => {
+    if (dragging === undefined) {
+      return;
+    }
+
+    const current = dragging;
+    dragging = undefined;
+
+    const target = findDirectChild(document.elementFromPoint(clientX, clientY));
+    clearDragOver();
+    current.classList.remove("drag-ghost");
+
+    if (target === null || target === current) {
+      return;
+    }
+
+    const children = [...container.children] as HTMLElement[];
+    const fromIndex = children.indexOf(current);
+    const toIndex = children.indexOf(target);
+
     if (fromIndex === -1 || toIndex === -1 || fromIndex === toIndex) {
       return;
     }
+
     onReorder(fromIndex, toIndex);
+  };
+
+  container.addEventListener("pointerup", (e: PointerEvent) => {
+    finishDrag(e.clientX, e.clientY);
+  });
+
+  container.addEventListener("pointercancel", () => {
+    if (dragging === undefined) {
+      return;
+    }
+    dragging.classList.remove("drag-ghost");
+    dragging = undefined;
+    clearDragOver();
   });
 }

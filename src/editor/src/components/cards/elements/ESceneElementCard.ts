@@ -6,35 +6,34 @@ import type { EStoreDeltaElement } from "../../../document/signals";
 import { STORE } from "../../../document/store";
 import type { ESceneElement } from "../../../document/types.elements";
 import { EElementType } from "../../../document/types.elements";
-import type { EColor, EElementUuid } from "../../../document/types.misc";
+import type { EColor, EElementUuid, ELayerUuid } from "../../../document/types.misc";
 import { ESceneUpdateMode } from "../../../document/types.misc";
 import { makeRow } from "../../../utils/rows";
+import { EElementCard } from "./EElementCard";
 import { UPDATE_MODE_OPTIONS } from "./ESceneElementCard.Internal";
 
-export class ESceneElementCard {
-  private readonly colorControl: EColorControl;
+export class ESceneElementCard extends EElementCard {
   private readonly updateModeControl: ESelectControl<ESceneUpdateMode>;
   private readonly resolutionFactorControl: ENumberControl;
   private readonly clearColorControl: EColorControl;
   private readonly enableDepthBufferControl: EBoolControl;
 
-  constructor(
-    private readonly container: HTMLElement,
-    private readonly uuid: EElementUuid,
-  ) {
-    const root = document.createElement("div");
-    root.className = "element-card";
+  constructor(container: HTMLElement, uuid: EElementUuid, layerUuid: ELayerUuid) {
+    super(container, uuid, layerUuid, "Scene");
 
-    this.colorControl = new EColorControl(makeRow(root, "Color"));
+    this.nameControl.signalValueChanged.on(this.onNameChanged);
     this.colorControl.signalValueChanged.on(this.onColorChanged);
 
-    this.updateModeControl = new ESelectControl<ESceneUpdateMode>(makeRow(root, "Update Mode"), {
-      options: UPDATE_MODE_OPTIONS,
-      value: ESceneUpdateMode.EVERY_FRAME,
-    });
+    this.updateModeControl = new ESelectControl<ESceneUpdateMode>(
+      makeRow(this.bodyRoot, "Update Mode"),
+      {
+        options: UPDATE_MODE_OPTIONS,
+        value: ESceneUpdateMode.EVERY_FRAME,
+      },
+    );
     this.updateModeControl.signalValueChanged.on(this.onUpdateModeChanged);
 
-    this.resolutionFactorControl = new ENumberControl(makeRow(root, "Resolution Factor"), {
+    this.resolutionFactorControl = new ENumberControl(makeRow(this.bodyRoot, "Resolution Factor"), {
       value: 1,
       min: 0.1,
       max: 4,
@@ -43,13 +42,11 @@ export class ESceneElementCard {
     });
     this.resolutionFactorControl.signalValueChanged.on(this.onResolutionFactorChanged);
 
-    this.clearColorControl = new EColorControl(makeRow(root, "Clear Color"));
+    this.clearColorControl = new EColorControl(makeRow(this.bodyRoot, "Clear Color"));
     this.clearColorControl.signalValueChanged.on(this.onClearColorChanged);
 
-    this.enableDepthBufferControl = new EBoolControl(makeRow(root, "Depth Buffer"));
+    this.enableDepthBufferControl = new EBoolControl(makeRow(this.bodyRoot, "Depth Buffer"));
     this.enableDepthBufferControl.signalValueChanged.on(this.onEnableDepthBufferChanged);
-
-    this.container.appendChild(root);
 
     const initial = STORE.selectors.elements.select(uuid);
     if (initial?.type !== EElementType.SCENE) {
@@ -61,6 +58,7 @@ export class ESceneElementCard {
   }
 
   private refresh(element: ESceneElement): void {
+    this.nameControl.value = element.name;
     this.colorControl.value = element.color;
     this.updateModeControl.value = element.updateMode;
     this.resolutionFactorControl.value = element.resolutionFactor;
@@ -68,7 +66,11 @@ export class ESceneElementCard {
     this.enableDepthBufferControl.value = element.enableDepthBuffer;
   }
 
-  private readonly onColorChanged = (color: string): void => {
+  private readonly onNameChanged = (name: string): void => {
+    STORE.commands.elements.writeScene({ uuid: this.uuid, name });
+  };
+
+  private readonly onColorChanged = (color: EColor): void => {
     STORE.commands.elements.writeScene({ uuid: this.uuid, color });
   };
 

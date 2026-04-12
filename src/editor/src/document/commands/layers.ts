@@ -1,6 +1,6 @@
 import type { EStoreSignalsLayers } from "../signals";
 import { EStoreDeltaOperation } from "../signals";
-import type { EDocument, ELayerContext, PartialExceptUUID } from "../types";
+import type { EDocument, ELayerContext, PartialExceptUUIDField } from "../types";
 import { clone } from "../types";
 import type { ELayerFullscreen } from "../types.layers";
 import { ELayerType } from "../types.layers";
@@ -13,12 +13,13 @@ export class EStoreCommandsLayers {
   ) {}
 
   public add(layerContext: ELayerContext): void {
-    this.data.layerContexts.push(layerContext);
-    this.signals["emitList"]({ operation: EStoreDeltaOperation.ADD, layerContext });
+    const stored = clone(layerContext);
+    this.data.layerContexts.push(stored);
+    this.signals["emitList"]({ operation: EStoreDeltaOperation.ADD, layerContext: clone(stored) });
   }
 
   public remove(uuid: ELayerUuid): void {
-    const index = this.data.layerContexts.findIndex((c) => c.layer.uuid === uuid);
+    const index = this.data.layerContexts.findIndex((context) => context.layer.uuid === uuid);
     if (index === -1) {
       throw new Error(`[EStoreCommandsLayers] Layer not found: (uuid: ${uuid})`);
     }
@@ -27,33 +28,35 @@ export class EStoreCommandsLayers {
   }
 
   public reorder(uuids: ELayerUuid[]): void {
+    const uuidsCopy = clone(uuids);
     this.data.layerContexts.sort(
-      (a, b) => uuids.indexOf(a.layer.uuid) - uuids.indexOf(b.layer.uuid),
+      (first, second) => uuidsCopy.indexOf(first.layer.uuid) - uuidsCopy.indexOf(second.layer.uuid),
     );
-    this.signals["emitList"]({ operation: EStoreDeltaOperation.REORDER, uuids });
+    this.signals["emitList"]({ operation: EStoreDeltaOperation.REORDER, uuids: clone(uuidsCopy) });
   }
 
-  public writeFullscreen(data: PartialExceptUUID<ELayerFullscreen>): void {
-    const layerContext = this.getContext(data.uuid);
+  public writeFullscreen(data: PartialExceptUUIDField<ELayerFullscreen>): void {
+    const copy = clone(data);
+    const layerContext = this.getContext(copy.uuid);
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (layerContext.layer.type !== ELayerType.FULLSCREEN) {
-      throw new Error(`[EStoreCommandsLayers] Layer type mismatch: (uuid: ${data.uuid})`);
+      throw new Error(`[EStoreCommandsLayers] Layer type mismatch: (uuid: ${copy.uuid})`);
     }
     const layer = layerContext.layer;
-    if (data.name !== undefined) {
-      layer.name = data.name;
+    if (copy.name !== undefined) {
+      layer.name = copy.name;
     }
-    if (data.resizePolicy !== undefined) {
-      layer.resizePolicy = data.resizePolicy;
+    if (copy.resizePolicy !== undefined) {
+      layer.resizePolicy = copy.resizePolicy;
     }
-    if (data.resizePolicyParameters !== undefined) {
-      layer.resizePolicyParameters = clone(data.resizePolicyParameters);
+    if (copy.resizePolicyParameters !== undefined) {
+      layer.resizePolicyParameters = copy.resizePolicyParameters;
     }
-    this.signals["emitItem"]({ layer });
+    this.signals["emitItem"]({ layer: clone(layer) });
   }
 
   private getContext(uuid: ELayerUuid): ELayerContext {
-    const layerContext = this.data.layerContexts.find((c) => c.layer.uuid === uuid);
+    const layerContext = this.data.layerContexts.find((context) => context.layer.uuid === uuid);
     if (!layerContext) {
       throw new Error(`[EStoreCommandsLayers] Layer not found: (uuid: ${uuid})`);
     }

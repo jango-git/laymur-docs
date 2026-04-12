@@ -5,39 +5,38 @@ import type { EStoreDeltaConstraint } from "../../../document/signals";
 import { STORE } from "../../../document/store";
 import type { EVerticalDistanceConstraint } from "../../../document/types.constraints";
 import { EConstraintType } from "../../../document/types.constraints";
-import type { EConstraintUuid } from "../../../document/types.misc";
+import type { EConstraintUuid, ELayerUuid } from "../../../document/types.misc";
 import type { EConstraintTarget } from "../../../utils/constraint-targets";
 import { getConstraintTargets } from "../../../utils/constraint-targets";
 import { makeRow } from "../../../utils/rows";
+import { EConstraintCard } from "./EConstraintCard";
 
-export class EVerticalDistanceConstraintCard {
+export class EVerticalDistanceConstraintCard extends EConstraintCard {
   private readonly elementAControl: EAssetControl<EConstraintTarget>;
   private readonly elementBControl: EAssetControl<EConstraintTarget>;
   private readonly anchorsControl: EVec2Control;
   private readonly distanceControl: ENumberControl;
 
-  constructor(
-    private readonly container: HTMLElement,
-    private readonly uuid: EConstraintUuid,
-  ) {
-    const root = document.createElement("div");
-    root.className = "element-card";
+  constructor(container: HTMLElement, uuid: EConstraintUuid, layerUuid: ELayerUuid) {
+    super(container, uuid, layerUuid, "Distance Vertical");
+
+    this.nameControl.signalValueChanged.on(this.onNameChanged);
 
     this.elementAControl = new EAssetControl<EConstraintTarget>(
-      makeRow(root, "Element A"),
+      makeRow(this.bodyRoot, "Element A"),
       getConstraintTargets,
       { nullable: false },
     );
     this.elementAControl.signalValueChanged.on(this.onElementAChanged);
 
     this.elementBControl = new EAssetControl<EConstraintTarget>(
-      makeRow(root, "Element B"),
+      makeRow(this.bodyRoot, "Element B"),
       getConstraintTargets,
       { nullable: false },
     );
     this.elementBControl.signalValueChanged.on(this.onElementBChanged);
 
-    this.anchorsControl = new EVec2Control(makeRow(root, "Anchors"), {
+    this.anchorsControl = new EVec2Control(makeRow(this.bodyRoot, "Anchors"), {
       labels: ["A", "B"],
       min: 0,
       max: 1,
@@ -46,7 +45,7 @@ export class EVerticalDistanceConstraintCard {
     });
     this.anchorsControl.signalValueChanged.on(this.onAnchorsChanged);
 
-    this.distanceControl = new ENumberControl(makeRow(root, "Distance"), {
+    this.distanceControl = new ENumberControl(makeRow(this.bodyRoot, "Distance"), {
       value: 0,
       min: -99999,
       max: 99999,
@@ -54,8 +53,6 @@ export class EVerticalDistanceConstraintCard {
       precision: 1,
     });
     this.distanceControl.signalValueChanged.on(this.onDistanceChanged);
-
-    this.container.appendChild(root);
 
     const initial = STORE.selectors.constraints.select(uuid);
     if (initial?.type !== EConstraintType.DISTANCE_VERTICAL) {
@@ -69,12 +66,17 @@ export class EVerticalDistanceConstraintCard {
   }
 
   private refresh(constraint: EVerticalDistanceConstraint): void {
+    this.nameControl.value = constraint.name;
     const targets = getConstraintTargets();
     this.elementAControl.value = targets.find((e) => e.uuid === constraint.elementA);
     this.elementBControl.value = targets.find((e) => e.uuid === constraint.elementB);
     this.anchorsControl.value = [constraint.anchorA, constraint.anchorB];
     this.distanceControl.value = constraint.distance;
   }
+
+  private readonly onNameChanged = (name: string): void => {
+    STORE.commands.constraints.writeVerticalDistance({ uuid: this.uuid, name });
+  };
 
   private readonly onElementAChanged = (next: EConstraintTarget | undefined): void => {
     if (next !== undefined) {

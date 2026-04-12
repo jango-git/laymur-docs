@@ -34,10 +34,10 @@ export class ESceneElementBuilder {
       uuid: crypto.randomUUID(),
       type: EElementType.SCENE,
       name: this.nameControl.value,
-      color: "#ffffffff",
+      color: { color: "#ffffff", alpha: 255 },
       updateMode: ESceneUpdateMode.EVERY_FRAME,
       resolutionFactor: 1,
-      clearColor: "#000000ff",
+      clearColor: { color: "#000000", alpha: 255 },
       enableDepthBuffer: true,
     });
 

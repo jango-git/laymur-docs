@@ -42,7 +42,7 @@ export class EProgressElementBuilder {
       uuid: crypto.randomUUID(),
       type: EElementType.PROGRESS,
       name: this.nameControl.value,
-      color: "#ffffffff",
+      color: { color: "#ffffff", alpha: 255 },
       texture: this.textureControl.forceValue.uuid,
       maskFunction: EProgressMaskFunction.CIRCULAR,
       progress: 0,

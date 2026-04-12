@@ -45,7 +45,7 @@ export const RESIZE_MODE_OPTIONS: ESelectControlOption<ETextResizeMode>[] = [
 ];
 
 const DEFAULT_CHUNK_STYLE: ETextChunk["style"] = {
-  color: "#ffffffff",
+  color: { color: "#ffffff", alpha: 255 },
   align: ETextAlign.LEFT,
   font: "",
   fontSize: 16,
@@ -56,9 +56,9 @@ const DEFAULT_CHUNK_STYLE: ETextChunk["style"] = {
   shadowOffsetX: 0,
   shadowOffsetY: 0,
   shadowBlur: 0,
-  shadowColor: "#000000ff",
+  shadowColor: { color: "#000000", alpha: 255 },
   enableStroke: false,
-  strokeColor: "#000000ff",
+  strokeColor: { color: "#000000", alpha: 255 },
   strokeThickness: 1,
 };
 

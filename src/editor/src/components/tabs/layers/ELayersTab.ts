@@ -5,8 +5,9 @@ import { STORE } from "../../../document/store";
 import type { ELayerContext } from "../../../document/types";
 import { ELayerType } from "../../../document/types.layers";
 import type { ELayerUuid } from "../../../document/types.misc";
-import { UI_STATE } from "../../../ui-state/ui-state";
+import { makeSortable } from "../../../miscellaneous/make-sortable";
 import { EFullscreenLayerBuilder } from "../../builders/layers/EFullscreenLayerBuilder";
+import { EFullscreenLayerCard } from "../../cards/layers/EFullscreenLayerCard";
 
 export class ELayersTab {
   private readonly layersContent: HTMLElement;
@@ -52,46 +53,44 @@ export class ELayersTab {
     });
 
     STORE.signals.layers.list.on(this.onLayerListChanged);
-    UI_STATE.signalActiveLayerChanged.on(this.onActiveLayerChanged);
 
     for (const layerContext of STORE.selectors.layers.selectAllContexts()) {
-      this.addRow(layerContext);
+      this.addCard(layerContext);
     }
+
+    makeSortable(this.layersContent, (fromIndex, toIndex) => {
+      const uuids = [...this.layersContent.children].map(
+        (el) => (el as HTMLElement).dataset.uuid ?? "",
+      );
+      const [moved] = uuids.splice(fromIndex, 1);
+      uuids.splice(toIndex, 0, moved);
+      STORE.commands.layers.reorder(uuids);
+    });
   }
 
-  private addRow(layerContext: ELayerContext): void {
-    const row = document.createElement("div");
-    row.className = "layer-row";
-    row.dataset.uuid = layerContext.layer.uuid;
+  private addCard(layerContext: ELayerContext): void {
+    const container = document.createElement("div");
+    container.dataset.uuid = layerContext.layer.uuid;
+    this.layersContent.appendChild(container);
 
-    const nameSpan = document.createElement("span");
-    nameSpan.className = "layer-row__name";
-    nameSpan.textContent = layerContext.layer.name;
-    row.appendChild(nameSpan);
-    row.addEventListener("click", () => UI_STATE.setActiveLayer(layerContext.layer.uuid));
-
-    this.layersContent.appendChild(row);
-    this.uuidToCardMap.set(layerContext.layer.uuid, row);
-
-    if (UI_STATE.activeLayerUuid === layerContext.layer.uuid) {
-      row.classList.add("layer-row--active");
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    if (layerContext.layer.type === ELayerType.FULLSCREEN) {
+      new EFullscreenLayerCard(container, layerContext.layer.uuid);
     }
+
+    this.uuidToCardMap.set(layerContext.layer.uuid, container);
   }
 
-  private removeRow(uuid: ELayerUuid): void {
+  private removeCard(uuid: ELayerUuid): void {
     this.uuidToCardMap.get(uuid)?.remove();
     this.uuidToCardMap.delete(uuid);
-
-    if (UI_STATE.activeLayerUuid === uuid) {
-      UI_STATE.setActiveLayer(undefined);
-    }
   }
 
-  private reorderRows(uuids: ELayerUuid[]): void {
+  private reorderCards(uuids: ELayerUuid[]): void {
     for (const uuid of uuids) {
-      const row = this.uuidToCardMap.get(uuid);
-      if (row) {
-        this.layersContent.appendChild(row);
+      const card = this.uuidToCardMap.get(uuid);
+      if (card) {
+        this.layersContent.appendChild(card);
       }
     }
   }
@@ -99,20 +98,14 @@ export class ELayersTab {
   private readonly onLayerListChanged = (delta: EStoreDeltaLayers): void => {
     switch (delta.operation) {
       case EStoreDeltaOperation.ADD:
-        this.addRow(delta.layerContext);
+        this.addCard(delta.layerContext);
         break;
       case EStoreDeltaOperation.REMOVE:
-        this.removeRow(delta.uuid);
+        this.removeCard(delta.uuid);
         break;
       case EStoreDeltaOperation.REORDER:
-        this.reorderRows(delta.uuids);
+        this.reorderCards(delta.uuids);
         break;
-    }
-  };
-
-  private readonly onActiveLayerChanged = (uuid: ELayerUuid | undefined): void => {
-    for (const [rowUuid, row] of this.uuidToCardMap) {
-      row.classList.toggle("layer-row--active", rowUuid === uuid);
     }
   };
 }

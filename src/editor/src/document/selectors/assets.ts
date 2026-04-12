@@ -12,18 +12,18 @@ export class EStoreSelectorsAssets {
   }
 
   public selectAllFonts(): EFontAsset[] {
-    return clone(this.data.assets.filter((a): a is EFontAsset => a.type === EAssetType.FONT));
+    return clone(this.data.assets.filter((asset): asset is EFontAsset => asset.type === EAssetType.FONT));
   }
 
   public selectAllImages(): EImageAsset[] {
-    return clone(this.data.assets.filter((a): a is EImageAsset => a.type === EAssetType.IMAGE));
+    return clone(this.data.assets.filter((asset): asset is EImageAsset => asset.type === EAssetType.IMAGE));
   }
 
   public selectFont(uuid: EAssetUuid): EFontAsset | undefined {
-    return this.selectAllFonts().find((a): a is EFontAsset => a.uuid === uuid);
+    return this.selectAllFonts().find((asset): asset is EFontAsset => asset.uuid === uuid);
   }
 
   public selectImage(uuid: EAssetUuid): EImageAsset | undefined {
-    return this.selectAllImages().find((a): a is EImageAsset => a.uuid === uuid);
+    return this.selectAllImages().find((asset): asset is EImageAsset => asset.uuid === uuid);
   }
 }

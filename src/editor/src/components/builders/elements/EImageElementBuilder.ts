@@ -41,7 +41,7 @@ export class EImageElementBuilder {
       uuid: crypto.randomUUID(),
       type: EElementType.IMAGE,
       name: this.nameControl.value,
-      color: "#ffffffff",
+      color: { color: "#ffffff", alpha: 255 },
       texture: this.textureControl.forceValue.uuid,
     });
 

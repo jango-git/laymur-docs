@@ -1,113 +1,100 @@
 import { ENumberControl } from "../../../controls/ENumberControl/ENumberControl";
 import { ESelectControl } from "../../../controls/ESelectControl/ESelectControl";
+import type { EStoreDeltaLayer } from "../../../document/signals";
 import { STORE } from "../../../document/store";
+import type { ELayerFullscreen } from "../../../document/types.layers";
 import { ELayerType } from "../../../document/types.layers";
 import type { ELayerUuid } from "../../../document/types.misc";
 import { EResizePolicyType } from "../../../document/types.misc";
+import { makeRow } from "../../../utils/rows";
 import { RESIZE_POLICY_OPTIONS } from "./EFullscreenLayerCard.Internal";
+import { ELayerCard } from "./ELayerCard";
 
-export class EFullscreenLayerCard {
+export class EFullscreenLayerCard extends ELayerCard {
   private readonly resizePolicyControl: ESelectControl<EResizePolicyType>;
-  private readonly parametersRow: HTMLDivElement;
   private readonly horizontalControl: ENumberControl;
   private readonly verticalControl: ENumberControl;
+  private readonly horizontalRow: HTMLElement;
+  private readonly verticalRow: HTMLElement;
 
-  constructor(
-    private readonly container: HTMLElement,
-    private readonly uuid: ELayerUuid,
-  ) {
-    const root = document.createElement("div");
-    root.className = "layer-card";
+  constructor(container: HTMLElement, uuid: ELayerUuid) {
+    super(container, uuid, "Fullscreen");
 
-    const policyRow = document.createElement("div");
-    policyRow.className = "layer-card__row";
+    this.nameControl.signalValueChanged.on(this.onNameChanged);
 
-    const policyLabel = document.createElement("span");
-    policyLabel.className = "layer-card__label";
-    policyLabel.textContent = "Resize Policy";
+    this.resizePolicyControl = new ESelectControl<EResizePolicyType>(
+      makeRow(this.bodyRoot, "Resize Policy"),
+      {
+        options: RESIZE_POLICY_OPTIONS,
+        value: EResizePolicyType.NONE,
+      },
+    );
+    this.resizePolicyControl.signalValueChanged.on(this.onResizePolicyChanged);
 
-    this.resizePolicyControl = new ESelectControl<EResizePolicyType>(policyRow, {
-      options: RESIZE_POLICY_OPTIONS,
-      value: EResizePolicyType.NONE,
-    });
-
-    policyRow.prepend(policyLabel);
-    root.appendChild(policyRow);
-
-    this.parametersRow = document.createElement("div");
-    this.parametersRow.className = "layer-card__row layer-card__row--params";
-
-    const hLabel = document.createElement("span");
-    hLabel.className = "layer-card__label";
-    hLabel.textContent = "H";
-
-    this.horizontalControl = new ENumberControl(this.parametersRow, {
+    this.horizontalRow = makeRow(this.bodyRoot, "Horizontal");
+    this.horizontalControl = new ENumberControl(this.horizontalRow, {
       value: 0,
       min: 0,
       max: 99999,
       step: 1,
       precision: 2,
     });
+    this.horizontalControl.signalValueChanged.on(this.onHorizontalChanged);
 
-    const vLabel = document.createElement("span");
-    vLabel.className = "layer-card__label";
-    vLabel.textContent = "V";
-
-    this.verticalControl = new ENumberControl(this.parametersRow, {
+    this.verticalRow = makeRow(this.bodyRoot, "Vertical");
+    this.verticalControl = new ENumberControl(this.verticalRow, {
       value: 0,
       min: 0,
       max: 99999,
       step: 1,
       precision: 2,
     });
-
-    this.parametersRow.prepend(vLabel);
-    this.parametersRow.prepend(hLabel);
-    root.appendChild(this.parametersRow);
-
-    this.container.appendChild(root);
-
-    this.resizePolicyControl.signalValueChanged.on((next) => {
-      STORE.commands.layers.writeFullscreen({ uuid: this.uuid, resizePolicy: next });
-    });
-
-    this.horizontalControl.signalValueChanged.on((next) => {
-      const current = this.currentParameters();
-      STORE.commands.layers.writeFullscreen({
-        uuid: this.uuid,
-        resizePolicyParameters: [next, current[1]],
-      });
-    });
-
-    this.verticalControl.signalValueChanged.on((next) => {
-      const current = this.currentParameters();
-      STORE.commands.layers.writeFullscreen({
-        uuid: this.uuid,
-        resizePolicyParameters: [current[0], next],
-      });
-    });
+    this.verticalControl.signalValueChanged.on(this.onVerticalChanged);
 
     const initial = STORE.selectors.layers.select(uuid);
     if (initial?.type === ELayerType.FULLSCREEN) {
-      this.refresh(initial.resizePolicy, initial.resizePolicyParameters);
+      this.refresh(initial);
     }
 
-    STORE.signals.layers.item.on((delta) => {
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-      if (delta.layer.uuid === this.uuid && delta.layer.type === ELayerType.FULLSCREEN) {
-        this.refresh(delta.layer.resizePolicy, delta.layer.resizePolicyParameters);
-      }
+    STORE.signals.layers.item.on(this.onLayerItemChanged);
+  }
+
+  private refresh(layer: ELayerFullscreen): void {
+    this.nameControl.value = layer.name;
+    this.resizePolicyControl.value = layer.resizePolicy;
+    this.horizontalControl.value = layer.resizePolicyParameters[0];
+    this.verticalControl.value = layer.resizePolicyParameters[1];
+    const showParams = layer.resizePolicy !== EResizePolicyType.NONE;
+    this.horizontalRow.style.display = showParams ? "" : "none";
+    this.verticalRow.style.display = showParams ? "" : "none";
+  }
+
+  private readonly onNameChanged = (name: string): void => {
+    STORE.commands.layers.writeFullscreen({ uuid: this.uuid, name });
+  };
+
+  private readonly onResizePolicyChanged = (resizePolicy: EResizePolicyType): void => {
+    STORE.commands.layers.writeFullscreen({ uuid: this.uuid, resizePolicy });
+  };
+
+  private readonly onHorizontalChanged = (horizontal: number): void => {
+    STORE.commands.layers.writeFullscreen({
+      uuid: this.uuid,
+      resizePolicyParameters: [horizontal, this.verticalControl.value],
     });
-  }
+  };
 
-  private currentParameters(): [number, number] {
-    return [this.horizontalControl.value, this.verticalControl.value];
-  }
+  private readonly onVerticalChanged = (vertical: number): void => {
+    STORE.commands.layers.writeFullscreen({
+      uuid: this.uuid,
+      resizePolicyParameters: [this.horizontalControl.value, vertical],
+    });
+  };
 
-  private refresh(policy: EResizePolicyType, params: [number, number]): void {
-    this.resizePolicyControl.value = policy;
-    this.horizontalControl.value = params[0];
-    this.verticalControl.value = params[1];
-    this.parametersRow.style.display = policy === EResizePolicyType.NONE ? "none" : "";
-  }
+  private readonly onLayerItemChanged = (delta: EStoreDeltaLayer): void => {
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    if (delta.layer.uuid === this.uuid && delta.layer.type === ELayerType.FULLSCREEN) {
+      this.refresh(delta.layer);
+    }
+  };
 }

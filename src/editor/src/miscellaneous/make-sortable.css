@@ -1,0 +1,12 @@
+.drag-ghost {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.drag-over-top {
+  border-top: 2px solid var(--accent);
+}
+
+.drag-over-bottom {
+  border-bottom: 2px solid var(--accent);
+}

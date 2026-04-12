@@ -1,4 +1,7 @@
-export type EColor = string; // RRGGBBAA
+export interface EColor {
+  color: string; // RRGGBB
+  alpha: number;
+}
 
 export type EAssetUuid = string;
 
@@ -86,7 +89,7 @@ export interface EGraphicsArcDrawCommand extends EGraphicsDrawCommand {
   radius: number;
   startAngle: number;
   endAngle: number;
-  color: string;
+  color: EColor;
 }
 
 export interface EGraphicsCircleDrawCommand extends EGraphicsDrawCommand {
@@ -94,13 +97,13 @@ export interface EGraphicsCircleDrawCommand extends EGraphicsDrawCommand {
   x: number;
   y: number;
   radius: number;
-  color: string;
+  color: EColor;
 }
 
 export interface EGraphicsPolylineDrawCommand extends EGraphicsDrawCommand {
   type: EGraphicsDrawCommandType.POLYLINE;
   points: [number, number][];
-  color: string;
+  color: EColor;
   lineWidth: number;
 }
 
@@ -110,7 +113,7 @@ export interface EGraphicsRectDrawCommand extends EGraphicsDrawCommand {
   y: number;
   width: number;
   height: number;
-  color: string;
+  color: EColor;
 }
 
 export type EAnyGraphicsDrawCommand =

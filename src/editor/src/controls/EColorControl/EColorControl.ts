@@ -1,25 +1,30 @@
 import type { FerrsignView2 } from "ferrsign";
 import { Ferrsign2 } from "ferrsign";
+import { clone } from "../../document/types";
+import type { EColor } from "../../document/types.misc";
 import { ENumberControl } from "../ENumberControl/ENumberControl";
 
 export interface EColorControlOptions {
-  value: string; // #RRGGBBAA
+  value: EColor;
 }
 
 export class EColorControl {
   private readonly container: HTMLElement;
-  private currentValue: string;
+  private currentValue: EColor;
 
   private readonly root: HTMLDivElement;
   private readonly colorInput: HTMLInputElement;
   private readonly alphaContainer: HTMLDivElement;
   private readonly alphaControl: ENumberControl;
 
-  private readonly signalValueChangedInternal = new Ferrsign2<string, string>();
+  private readonly signalValueChangedInternal = new Ferrsign2<EColor, EColor>();
 
   constructor(container: HTMLElement, options: Partial<EColorControlOptions> = {}) {
     this.container = container;
-    this.currentValue = options.value ?? "#000000FF";
+    this.currentValue = {
+      color: options.value?.color ?? "#ffffff",
+      alpha: options.value?.alpha ?? 255,
+    };
 
     this.root = document.createElement("div");
     this.root.className = "color-control";
@@ -50,17 +55,17 @@ export class EColorControl {
     this.syncDOMFromValue(this.currentValue);
   }
 
-  public get signalValueChanged(): FerrsignView2<string, string> {
+  public get signalValueChanged(): FerrsignView2<EColor, EColor> {
     return this.signalValueChangedInternal;
   }
 
-  public get value(): string {
-    return this.currentValue;
+  public get value(): Readonly<EColor> {
+    return clone(this.currentValue);
   }
 
-  public set value(value: string) {
-    this.currentValue = value;
-    this.syncDOMFromValue(value);
+  public set value(value: EColor) {
+    this.currentValue = clone(value);
+    this.syncDOMFromValue(this.currentValue);
   }
 
   public flash(): void {
@@ -92,23 +97,18 @@ export class EColorControl {
 
   private emitCombined(): void {
     const color = this.colorInput.value; // #RRGGBB
-    const alphaHex = Math.round(this.alphaControl.value)
-      .toString(16)
-      .padStart(2, "0")
-      .toUpperCase();
-    const newValue = `${color.toUpperCase()}${alphaHex}`;
-    if (newValue === this.currentValue) {
+    const alpha = Math.round(this.alphaControl.value);
+    if (color === this.currentValue.color && alpha === this.currentValue.alpha) {
       return;
     }
     const previousValue = this.currentValue;
-    this.currentValue = newValue;
+    this.currentValue = { color, alpha };
     console.debug("[EColorControl] value: %o → %o", previousValue, this.currentValue);
     this.signalValueChangedInternal.emit(this.currentValue, previousValue);
   }
 
-  private syncDOMFromValue(value: string): void {
-    this.colorInput.value = value.slice(0, 7);
-    const alphaHex = value.slice(7, 9);
-    this.alphaControl.value = alphaHex.length === 2 ? parseInt(alphaHex, 16) : 255;
+  private syncDOMFromValue(value: EColor): void {
+    this.colorInput.value = value.color;
+    this.alphaControl.value = value.alpha;
   }
 }
