@@ -6,14 +6,14 @@ import { STORE } from "../../../document/store";
 import type { EImageAsset } from "../../../document/types.assets";
 import { EElementType } from "../../../document/types.elements";
 import { ENineSliceRegionMode } from "../../../document/types.misc";
+import type { ENineSliceElementError } from "../../../document/validators/elements";
 import { UI_STATE } from "../../../ui-state/ui-state";
 import { makeRow } from "../../../utils/rows";
+import { TOAST } from "../../toast/EToast";
 
 export class ENineSliceElementBuilder {
   private readonly nameControl: EStringControl;
   private readonly textureControl: EAssetControl<EImageAsset>;
-  private readonly errorMessage: HTMLElement;
-
   private readonly signalBuildAvailabilityInternal = new Ferrsign1<boolean>();
 
   constructor(container: HTMLElement) {
@@ -27,12 +27,8 @@ export class ENineSliceElementBuilder {
     );
     this.textureControl.signalValueChanged.on(this.handleDataUpdate);
 
-    this.errorMessage = document.createElement("div");
-    this.errorMessage.className = "element-card__error";
-    container.appendChild(this.errorMessage);
-
     UI_STATE.signalActiveLayerChanged.on(this.handleDataUpdate);
-    this.handleDataUpdate();
+    this.tryUpdateData();
   }
 
   public get buildAvailabilitySignal(): FerrsignView1<boolean> {
@@ -54,25 +50,31 @@ export class ENineSliceElementBuilder {
     this.nameControl.value = "";
     this.textureControl.value = undefined;
 
-    this.handleDataUpdate();
+    this.tryUpdateData();
   }
 
   private readonly handleDataUpdate = (): void => {
-    const error = STORE.validators.elements.validateNineSliceBuilder(
-      UI_STATE.activeLayerUuid,
-      this.nameControl.value,
-      this.textureControl.value?.uuid,
-    );
-    const isAvailable = error === undefined;
-    this.signalBuildAvailabilityInternal.emit(isAvailable);
+    const error = this.tryUpdateData();
+    if (error === undefined) {
+      return;
+    }
 
-    this.errorMessage.textContent = error?.message ?? "";
-    this.errorMessage.style.display = !isAvailable ? "block" : "none";
+    TOAST.warning(`[ENineSliceElementBuilder] ${error.message}`);
 
-    if (error?.field === "name") {
+    if (error.field === "name") {
       this.nameControl.flash();
-    } else if (error?.field === "texture") {
+    } else if (error.field === "texture") {
       this.textureControl.flash();
     }
   };
+
+  private tryUpdateData(): ENineSliceElementError | undefined {
+    const error = STORE.validators.elements.nineSlice(
+      UI_STATE.activeLayerUuid,
+      { name: this.nameControl.value, texture: this.textureControl.value?.uuid },
+      false,
+    );
+    this.signalBuildAvailabilityInternal.emit(error === undefined);
+    return error;
+  }
 }

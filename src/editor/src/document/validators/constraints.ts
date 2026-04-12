@@ -31,7 +31,6 @@ export interface EProportionConstraintError {
   field: "layer" | "elementA" | "elementB" | "name" | "proportion";
 }
 
-// Backward-compatible alias
 export type EValidateConstraintAspectError = EAspectConstraintError;
 
 export class EStoreValidatorsConstraints {
@@ -40,7 +39,7 @@ export class EStoreValidatorsConstraints {
   public aspect(
     layer: UUID | undefined,
     constraint: Partial<Omit<EAspectConstraint, "type">>,
-    fullValidation: boolean,
+    softValidation = false,
   ): EAspectConstraintError | undefined {
     if (layer === undefined) {
       return { message: "layer is required", field: "layer" };
@@ -55,7 +54,7 @@ export class EStoreValidatorsConstraints {
       return elementError;
     }
 
-    if (fullValidation) {
+    if (softValidation) {
       return undefined;
     }
 
@@ -75,7 +74,7 @@ export class EStoreValidatorsConstraints {
   public sizeHorizontal(
     layer: UUID | undefined,
     constraint: Partial<Omit<EHorizontalSizeConstraint, "type">>,
-    fullValidation: boolean,
+    softValidation = false,
   ): ESizeConstraintError | undefined {
     if (layer === undefined) {
       return { message: "layer is required", field: "layer" };
@@ -90,7 +89,7 @@ export class EStoreValidatorsConstraints {
       return elementError;
     }
 
-    if (fullValidation) {
+    if (softValidation) {
       return undefined;
     }
 
@@ -110,15 +109,15 @@ export class EStoreValidatorsConstraints {
   public sizeVertical(
     layer: UUID | undefined,
     constraint: Partial<Omit<EVerticalSizeConstraint, "type">>,
-    fullValidation: boolean,
+    softValidation = false,
   ): ESizeConstraintError | undefined {
-    return this.sizeHorizontal(layer, constraint, fullValidation);
+    return this.sizeHorizontal(layer, constraint, softValidation);
   }
 
   public distanceHorizontal(
     layer: UUID | undefined,
     constraint: Partial<Omit<EHorizontalDistanceConstraint, "type">>,
-    fullValidation: boolean,
+    softValidation = false,
   ): EDistanceConstraintError | undefined {
     if (layer === undefined) {
       return { message: "layer is required", field: "layer" };
@@ -137,7 +136,7 @@ export class EStoreValidatorsConstraints {
       return elementsError;
     }
 
-    if (fullValidation) {
+    if (softValidation) {
       return undefined;
     }
 
@@ -160,15 +159,15 @@ export class EStoreValidatorsConstraints {
   public distanceVertical(
     layer: UUID | undefined,
     constraint: Partial<Omit<EVerticalDistanceConstraint, "type">>,
-    fullValidation: boolean,
+    softValidation = false,
   ): EDistanceConstraintError | undefined {
-    return this.distanceHorizontal(layer, constraint, fullValidation);
+    return this.distanceHorizontal(layer, constraint, softValidation);
   }
 
   public proportionHorizontal(
     layer: UUID | undefined,
     constraint: Partial<Omit<EHorizontalProportionConstraint, "type">>,
-    fullValidation: boolean,
+    softValidation = false,
   ): EProportionConstraintError | undefined {
     if (layer === undefined) {
       return { message: "layer is required", field: "layer" };
@@ -187,7 +186,7 @@ export class EStoreValidatorsConstraints {
       return elementsError;
     }
 
-    if (fullValidation) {
+    if (softValidation) {
       return undefined;
     }
 
@@ -207,9 +206,9 @@ export class EStoreValidatorsConstraints {
   public proportionVertical(
     layer: UUID | undefined,
     constraint: Partial<Omit<EVerticalProportionConstraint, "type">>,
-    fullValidation: boolean,
+    softValidation = false,
   ): EProportionConstraintError | undefined {
-    return this.proportionHorizontal(layer, constraint, fullValidation);
+    return this.proportionHorizontal(layer, constraint, softValidation);
   }
 
   private validateSingleElement(

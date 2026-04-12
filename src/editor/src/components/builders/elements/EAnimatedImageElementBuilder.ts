@@ -12,8 +12,10 @@ import type { EImageAsset } from "../../../document/types.assets";
 import { EElementType } from "../../../document/types.elements";
 import type { UUID } from "../../../document/types.misc";
 import { EAnimatedImageLoopMode } from "../../../document/types.misc";
+import type { EAnimatedImageElementError } from "../../../document/validators/elements";
 import { UI_STATE } from "../../../ui-state/ui-state";
 import { makeRow } from "../../../utils/rows";
+import { TOAST } from "../../toast/EToast";
 
 const sequenceTemplate: EArrayControlTemplate<UUID> = {
   createDefault: () => "",
@@ -34,8 +36,6 @@ const sequenceTemplate: EArrayControlTemplate<UUID> = {
 export class EAnimatedImageElementBuilder {
   private readonly nameControl: EStringControl;
   private readonly sequenceControl: EArrayControl<UUID>;
-  private readonly errorMessage: HTMLElement;
-
   private readonly signalBuildAvailabilityInternal = new Ferrsign1<boolean>();
 
   constructor(container: HTMLElement) {
@@ -48,12 +48,8 @@ export class EAnimatedImageElementBuilder {
     );
     this.sequenceControl.signalValueChanged.on(this.handleDataUpdate);
 
-    this.errorMessage = document.createElement("div");
-    this.errorMessage.className = "element-card__error";
-    container.appendChild(this.errorMessage);
-
     UI_STATE.signalActiveLayerChanged.on(this.handleDataUpdate);
-    this.handleDataUpdate();
+    this.tryUpdateData();
   }
 
   public get buildAvailabilitySignal(): FerrsignView1<boolean> {
@@ -77,27 +73,33 @@ export class EAnimatedImageElementBuilder {
     this.nameControl.value = "";
     this.sequenceControl.value = [];
 
-    this.handleDataUpdate();
+    this.tryUpdateData();
   }
 
   private readonly handleDataUpdate = (): void => {
-    const sequence = this.sequenceControl.value.filter((uuid) => uuid !== "");
-    const error = STORE.validators.elements.validateAnimatedImageBuilder(
-      UI_STATE.activeLayerUuid,
-      this.nameControl.value,
-      sequence,
-    );
+    const error = this.tryUpdateData();
+    if (error === undefined) {
+      return;
+    }
 
-    const isAvailable = error === undefined;
-    this.signalBuildAvailabilityInternal.emit(isAvailable);
+    TOAST.warning(`[EAnimatedImageElementBuilder] ${error.message}`);
 
-    this.errorMessage.textContent = error?.message ?? "";
-    this.errorMessage.style.display = !isAvailable ? "block" : "none";
-
-    if (error?.field === "name") {
+    if (error.field === "name") {
       this.nameControl.flash();
-    } else if (error?.field === "sequence") {
+    } else if (error.field === "sequence") {
       this.sequenceControl.flash();
     }
   };
+
+  private tryUpdateData(): EAnimatedImageElementError | undefined {
+    const sequence = this.sequenceControl.value.filter((uuid) => uuid !== "");
+    const error = STORE.validators.elements.animatedImage(
+      UI_STATE.activeLayerUuid,
+      { name: this.nameControl.value, sequence },
+      false,
+    );
+
+    this.signalBuildAvailabilityInternal.emit(error === undefined);
+    return error;
+  }
 }

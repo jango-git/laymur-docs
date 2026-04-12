@@ -12,7 +12,7 @@ export class EStoreValidatorsLayers {
 
   public fullscreen(
     layer: Partial<Omit<ELayerFullscreen, "type">>,
-    fullValidation: boolean,
+    softValidation = false,
   ): EFullscreenLayerError | undefined {
     if (layer.name === undefined || layer.name === "") {
       return { message: "name is required", field: "name" };
@@ -23,15 +23,16 @@ export class EStoreValidatorsLayers {
     if (!this.isLayerNameUnique(layer.name)) {
       return { message: `name "${layer.name}" is already in use`, field: "name" };
     }
+
+    if (softValidation) {
+      return undefined;
+    }
+
     if (layer.resizePolicy === undefined) {
       return { message: "resizePolicy is required", field: "resizePolicy" };
     }
     if (layer.resizePolicyParameters === undefined) {
       return { message: "resizePolicyParameters is required", field: "resizePolicyParameters" };
-    }
-
-    if (fullValidation) {
-      return undefined;
     }
 
     const [parameterA, parameterB] = layer.resizePolicyParameters;

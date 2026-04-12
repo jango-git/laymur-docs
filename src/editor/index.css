@@ -46,6 +46,14 @@
   /* Misc */
   --radius-sm: 4px;
   --error: #e05252;
+
+  /* Toast */
+  --toast-warning-bg: #fffbea;
+  --toast-warning-border: #e6a800;
+  --toast-warning-text: #7a5500;
+  --toast-error-bg: #fff5f5;
+  --toast-error-border: #e05555;
+  --toast-error-text: #8b1a1a;
 }
 
 * {

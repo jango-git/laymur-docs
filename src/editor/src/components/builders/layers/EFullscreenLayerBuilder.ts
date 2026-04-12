@@ -5,12 +5,12 @@ import { STORE } from "../../../document/store";
 import type { ELayerContext } from "../../../document/types";
 import { ELayerType } from "../../../document/types.layers";
 import { EResizePolicyType } from "../../../document/types.misc";
+import type { EFullscreenLayerError } from "../../../document/validators/layers";
 import { UI_STATE } from "../../../ui-state/ui-state";
+import { TOAST } from "../../toast/EToast";
 
 export class EFullscreenLayerBuilder {
   private readonly nameControl: EStringControl;
-  private readonly errorMessage: HTMLElement;
-
   private readonly signalBuildAvailabilityInternal = new Ferrsign1<boolean>();
 
   constructor(private readonly container: HTMLElement) {
@@ -28,13 +28,9 @@ export class EFullscreenLayerBuilder {
       this.nameControl = new EStringControl(nameRow, { placeholder: "name" });
     }
 
-    this.errorMessage = document.createElement("div");
-    this.errorMessage.className = "element-card__error";
-    this.container.appendChild(this.errorMessage);
-
     this.nameControl.signalValueChanged.on(this.handleDataUpdate);
 
-    this.handleDataUpdate();
+    this.handleAvailability();
   }
 
   public get buildAvailabilitySignal(): FerrsignView1<boolean> {
@@ -67,19 +63,25 @@ export class EFullscreenLayerBuilder {
     UI_STATE.setActiveLayer(uuid);
 
     this.nameControl.value = "";
-    this.handleDataUpdate();
+    this.handleAvailability();
   }
 
   private readonly handleDataUpdate = (): void => {
-    const error = STORE.validators.layers.validateFullscreenBuilder(this.nameControl.value);
-    const isAvailable = error === undefined;
-    this.signalBuildAvailabilityInternal.emit(isAvailable);
+    const error = this.handleAvailability();
+    if (error === undefined) {
+      return;
+    }
 
-    this.errorMessage.textContent = error?.message ?? "";
-    this.errorMessage.style.display = error !== undefined ? "block" : "none";
+    TOAST.warning(`**[EFullscreenLayerBuilder]** ${error.message}`);
 
-    if (error?.field === "name") {
+    if (error.field === "name") {
       this.nameControl.flash();
     }
   };
+
+  private handleAvailability(): EFullscreenLayerError | undefined {
+    const error = STORE.validators.layers.fullscreen({ name: this.nameControl.value }, true);
+    this.signalBuildAvailabilityInternal.emit(error === undefined);
+    return error;
+  }
 }

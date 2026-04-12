@@ -77,7 +77,7 @@ export class EStoreValidatorsElements {
   public animatedImage(
     layer: UUID | undefined,
     element: Partial<Omit<EAnimatedImageElement, "type">>,
-    fullValidation: boolean,
+    softValidation = false,
   ): EAnimatedImageElementError | undefined {
     if (layer === undefined) {
       return { message: "layer is required", field: "layer" };
@@ -101,7 +101,7 @@ export class EStoreValidatorsElements {
       }
     }
 
-    if (fullValidation) {
+    if (softValidation) {
       return undefined;
     }
 
@@ -138,7 +138,7 @@ export class EStoreValidatorsElements {
   public graphics(
     layer: UUID | undefined,
     element: Partial<Omit<EGraphicsElement, "type">>,
-    fullValidation: boolean,
+    softValidation = false,
   ): EGraphicsElementError | undefined {
     if (layer === undefined) {
       return { message: "layer is required", field: "layer" };
@@ -153,7 +153,7 @@ export class EStoreValidatorsElements {
       return nameError;
     }
 
-    if (fullValidation) {
+    if (softValidation) {
       return undefined;
     }
 
@@ -185,7 +185,7 @@ export class EStoreValidatorsElements {
   public image(
     layer: UUID | undefined,
     element: Partial<Omit<EImageElement, "type">>,
-    fullValidation: boolean,
+    softValidation = false,
   ): EImageElementError | undefined {
     if (layer === undefined) {
       return { message: "layer is required", field: "layer" };
@@ -207,7 +207,7 @@ export class EStoreValidatorsElements {
       return { message: `texture with UUID ${element.texture} must exist`, field: "texture" };
     }
 
-    if (fullValidation) {
+    if (softValidation) {
       return undefined;
     }
 
@@ -222,7 +222,7 @@ export class EStoreValidatorsElements {
   public nineSlice(
     layer: UUID | undefined,
     element: Partial<Omit<ENineSliceElement, "type">>,
-    fullValidation: boolean,
+    softValidation = false,
   ): ENineSliceElementError | undefined {
     if (layer === undefined) {
       return { message: "layer is required", field: "layer" };
@@ -244,7 +244,7 @@ export class EStoreValidatorsElements {
       return { message: `texture with UUID ${element.texture} must exist`, field: "texture" };
     }
 
-    if (fullValidation) {
+    if (softValidation) {
       return undefined;
     }
 
@@ -277,7 +277,7 @@ export class EStoreValidatorsElements {
   public progress(
     layer: UUID | undefined,
     element: Partial<Omit<EProgressElement, "type">>,
-    fullValidation: boolean,
+    softValidation = false,
   ): EProgressElementError | undefined {
     if (layer === undefined) {
       return { message: "layer is required", field: "layer" };
@@ -299,7 +299,7 @@ export class EStoreValidatorsElements {
       return { message: `texture with UUID ${element.texture} must exist`, field: "texture" };
     }
 
-    if (fullValidation) {
+    if (softValidation) {
       return undefined;
     }
 
@@ -325,7 +325,7 @@ export class EStoreValidatorsElements {
   public scene(
     layer: UUID | undefined,
     element: Partial<Omit<ESceneElement, "type">>,
-    fullValidation: boolean,
+    softValidation = false,
   ): ESceneElementError | undefined {
     if (layer === undefined) {
       return { message: "layer is required", field: "layer" };
@@ -340,7 +340,7 @@ export class EStoreValidatorsElements {
       return nameError;
     }
 
-    if (fullValidation) {
+    if (softValidation) {
       return undefined;
     }
 
@@ -377,7 +377,7 @@ export class EStoreValidatorsElements {
   public text(
     layer: UUID | undefined,
     element: Partial<Omit<ETextElement, "type">>,
-    fullValidation: boolean,
+    softValidation = false,
   ): ETextElementError | undefined {
     if (layer === undefined) {
       return { message: "layer is required", field: "layer" };
@@ -392,7 +392,7 @@ export class EStoreValidatorsElements {
       return nameError;
     }
 
-    if (fullValidation) {
+    if (softValidation) {
       return undefined;
     }
 
