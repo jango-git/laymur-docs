@@ -5,9 +5,9 @@ import { STORE } from "../../../document/store";
 import type { EAspectConstraint } from "../../../document/types.constraints";
 import { EConstraintType } from "../../../document/types.constraints";
 import type { UUID } from "../../../document/types.misc";
-import type { EConstraintTarget } from "../../../utils/constraint-targets";
-import { getConstraintElements } from "../../../utils/constraint-targets";
-import { makeRow } from "../../../utils/rows";
+import type { EConstraintTarget } from "../../../miscellaneous/constraint-targets";
+import { getConstraintElements } from "../../../miscellaneous/constraint-targets";
+import { makeRow } from "../../../miscellaneous/rows";
 import { EConstraintCard } from "./EConstraintCard";
 
 export class EAspectConstraintCard extends EConstraintCard {

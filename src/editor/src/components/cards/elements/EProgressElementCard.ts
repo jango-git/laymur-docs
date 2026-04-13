@@ -8,7 +8,7 @@ import type { EProgressElement } from "../../../document/types.elements";
 import { EElementType } from "../../../document/types.elements";
 import type { EColor, UUID } from "../../../document/types.misc";
 import { EProgressMaskFunction } from "../../../document/types.misc";
-import { makeRow } from "../../../utils/rows";
+import { makeRow } from "../../../miscellaneous/rows";
 import { EElementCard } from "./EElementCard";
 import { MASK_FUNCTION_OPTIONS } from "./EProgressElementCard.Internal";
 

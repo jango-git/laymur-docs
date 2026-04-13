@@ -8,7 +8,7 @@ import type { EAnimatedImageElement } from "../../../document/types.elements";
 import { EElementType } from "../../../document/types.elements";
 import type { EColor, UUID } from "../../../document/types.misc";
 import { EAnimatedImageLoopMode } from "../../../document/types.misc";
-import { makeRow } from "../../../utils/rows";
+import { makeRow } from "../../../miscellaneous/rows";
 import { LOOP_MODE_OPTIONS, sequenceTemplate } from "./EAnimatedImageElementCard.Internal";
 import { EElementCard } from "./EElementCard";
 
@@ -22,9 +22,6 @@ export class EAnimatedImageElementCard extends EElementCard {
   constructor(container: HTMLElement, uuid: UUID, layerUuid: UUID) {
     super(container, uuid, layerUuid, "Animated Image");
 
-    this.nameControl.signalValueChanged.on(this.onNameChanged);
-    this.colorControl.signalValueChanged.on(this.onColorChanged);
-
     this.frameRateControl = new ENumberControl(makeRow(this.bodyRoot, "Frame Rate"), {
       value: 24,
       min: 1,
@@ -32,7 +29,6 @@ export class EAnimatedImageElementCard extends EElementCard {
       step: 1,
       precision: 0,
     });
-    this.frameRateControl.signalValueChanged.on(this.onFrameRateChanged);
 
     this.timeScaleControl = new ENumberControl(makeRow(this.bodyRoot, "Time Scale"), {
       value: 1,
@@ -41,7 +37,6 @@ export class EAnimatedImageElementCard extends EElementCard {
       step: 0.01,
       precision: 2,
     });
-    this.timeScaleControl.signalValueChanged.on(this.onTimeScaleChanged);
 
     this.loopModeControl = new ESelectControl<EAnimatedImageLoopMode>(
       makeRow(this.bodyRoot, "Loop Mode"),
@@ -50,17 +45,22 @@ export class EAnimatedImageElementCard extends EElementCard {
         value: EAnimatedImageLoopMode.LOOP,
       },
     );
-    this.loopModeControl.signalValueChanged.on(this.onLoopModeChanged);
 
     this.playByDefaultControl = new EBoolControl(makeRow(this.bodyRoot, "Auto Play"), {
       value: true,
     });
-    this.playByDefaultControl.signalValueChanged.on(this.onPlayByDefaultChanged);
 
     this.sequenceControl = new EArrayControl<UUID>(
       makeRow(this.bodyRoot, "Sequence"),
       sequenceTemplate,
     );
+
+    this.nameControl.signalValueChanged.on(this.onNameChanged);
+    this.colorControl.signalValueChanged.on(this.onColorChanged);
+    this.frameRateControl.signalValueChanged.on(this.onFrameRateChanged);
+    this.timeScaleControl.signalValueChanged.on(this.onTimeScaleChanged);
+    this.loopModeControl.signalValueChanged.on(this.onLoopModeChanged);
+    this.playByDefaultControl.signalValueChanged.on(this.onPlayByDefaultChanged);
     this.sequenceControl.signalValueChanged.on(this.onSequenceChanged);
 
     const initial = STORE.selectors.elements.select(uuid);
@@ -74,10 +74,6 @@ export class EAnimatedImageElementCard extends EElementCard {
     STORE.signals.elements.item.on(this.onElementItemChanged);
   }
 
-  private readonly onNameChanged = (name: string): void => {
-    STORE.commands.elements.writeAnimatedImage({ uuid: this.uuid, name });
-  };
-
   private refresh(element: EAnimatedImageElement): void {
     this.nameControl.value = element.name;
     this.colorControl.value = element.color;
@@ -87,6 +83,10 @@ export class EAnimatedImageElementCard extends EElementCard {
     this.playByDefaultControl.value = element.playByDefault;
     this.sequenceControl.value = element.sequence;
   }
+
+  private readonly onNameChanged = (name: string): void => {
+    STORE.commands.elements.writeAnimatedImage({ uuid: this.uuid, name });
+  };
 
   private readonly onColorChanged = (color: EColor): void => {
     STORE.commands.elements.writeAnimatedImage({ uuid: this.uuid, color });

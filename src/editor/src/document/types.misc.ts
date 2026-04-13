@@ -1,6 +1,6 @@
 export interface EColor {
-  color: string; // RRGGBB
-  alpha: number; // 0-255
+  color: string; // #RRGGBB
+  alpha: number; // 0-1
 }
 
 export type UUID = string;

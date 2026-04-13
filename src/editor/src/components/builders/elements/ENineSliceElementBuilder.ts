@@ -5,8 +5,9 @@ import type { EImageAsset } from "../../../document/types.assets";
 import type { ENineSliceElement } from "../../../document/types.elements";
 import { EElementType } from "../../../document/types.elements";
 import { ENineSliceRegionMode } from "../../../document/types.misc";
+import { DEFAULT_ECOLOR } from "../../../miscellaneous/defaults";
+import { makeRow } from "../../../miscellaneous/rows";
 import { UI_STATE } from "../../../ui-state/ui-state";
-import { makeRow } from "../../../utils/rows";
 import { TOAST } from "../../toast/EToast";
 
 export class ENineSliceElementBuilder {
@@ -28,7 +29,7 @@ export class ENineSliceElementBuilder {
       uuid: crypto.randomUUID(),
       type: EElementType.NINE_SLICE,
       name: this.nameControl.value,
-      color: { color: "#ffffff", alpha: 1 },
+      color: DEFAULT_ECOLOR,
       texture: this.textureControl.value?.uuid ?? "",
       sliceBorders: [0, 0, 0, 0],
       sliceRegions: [0, 0, 0, 0],

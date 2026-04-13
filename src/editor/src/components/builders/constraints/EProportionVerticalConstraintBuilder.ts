@@ -2,10 +2,10 @@ import { EAssetControl } from "../../../controls/EAssetControl/EAssetControl";
 import { STORE } from "../../../document/store";
 import type { EVerticalProportionConstraint } from "../../../document/types.constraints";
 import { EConstraintType } from "../../../document/types.constraints";
+import type { EConstraintTarget } from "../../../miscellaneous/constraint-targets";
+import { getConstraintTargets } from "../../../miscellaneous/constraint-targets";
+import { makeRow } from "../../../miscellaneous/rows";
 import { UI_STATE } from "../../../ui-state/ui-state";
-import type { EConstraintTarget } from "../../../utils/constraint-targets";
-import { getConstraintTargets } from "../../../utils/constraint-targets";
-import { makeRow } from "../../../utils/rows";
 import { TOAST } from "../../toast/EToast";
 
 export class EProportionVerticalConstraintBuilder {

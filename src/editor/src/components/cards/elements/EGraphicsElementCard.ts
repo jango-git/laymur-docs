@@ -5,7 +5,7 @@ import { STORE } from "../../../document/store";
 import type { EGraphicsElement } from "../../../document/types.elements";
 import { EElementType } from "../../../document/types.elements";
 import type { EAnyGraphicsDrawCommand, EColor, UUID } from "../../../document/types.misc";
-import { makeRow, makeSectionHeader } from "../../../utils/rows";
+import { makeRow, makeSectionHeader } from "../../../miscellaneous/rows";
 import { EElementCard } from "./EElementCard";
 import { drawCommandTemplate } from "./subcards/EDrawCommandSubcard.Internal";
 

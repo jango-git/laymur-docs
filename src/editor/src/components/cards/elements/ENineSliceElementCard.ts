@@ -8,7 +8,8 @@ import type { ENineSliceElement } from "../../../document/types.elements";
 import { EElementType } from "../../../document/types.elements";
 import type { EColor, UUID } from "../../../document/types.misc";
 import { ENineSliceRegionMode } from "../../../document/types.misc";
-import { makeRow } from "../../../utils/rows";
+import { LARGE } from "../../../miscellaneous/math";
+import { makeRow } from "../../../miscellaneous/rows";
 import { EElementCard } from "./EElementCard";
 import { REGION_MODE_OPTIONS } from "./ENineSliceElementCard.Internal";
 
@@ -34,7 +35,7 @@ export class ENineSliceElementCard extends EElementCard {
     this.bordersControl = new EVec2Control(makeRow(this.bodyRoot, "Borders"), {
       labels: ["H", "V"],
       min: 0,
-      max: 9999,
+      max: LARGE,
       step: 1,
       precision: 1,
     });
@@ -43,7 +44,7 @@ export class ENineSliceElementCard extends EElementCard {
     this.regionsControl = new EVec2Control(makeRow(this.bodyRoot, "Regions"), {
       labels: ["H", "V"],
       min: 0,
-      max: 9999,
+      max: LARGE,
       step: 1,
       precision: 1,
     });

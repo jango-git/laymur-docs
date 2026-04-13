@@ -8,6 +8,7 @@ import type { ENumberControl } from "../../../../controls/ENumberControl/ENumber
 import { EVec2Control } from "../../../../controls/EVec2Control/EVec2Control";
 import type { EAnyGraphicsDrawCommand } from "../../../../document/types.misc";
 import { EGraphicsDrawCommandType } from "../../../../document/types.misc";
+import { DEFAULT_ECOLOR } from "../../../../miscellaneous/defaults";
 import { EDrawCommandSubcard } from "./EDrawCommandSubcard";
 
 export interface EDrawCommandControlsArc {
@@ -58,7 +59,7 @@ export const REGISTRY: Record<
       radius: 50,
       startAngle: 0,
       endAngle: Math.PI * 2,
-      color: { color: "#ffffff", alpha: 255 },
+      color: DEFAULT_ECOLOR,
     },
   },
   [EGraphicsDrawCommandType.CIRCLE]: {
@@ -68,7 +69,7 @@ export const REGISTRY: Record<
       x: 0,
       y: 0,
       radius: 50,
-      color: { color: "#ffffff", alpha: 255 },
+      color: DEFAULT_ECOLOR,
     },
   },
   [EGraphicsDrawCommandType.POLYLINE]: {
@@ -76,7 +77,7 @@ export const REGISTRY: Record<
     default: {
       type: EGraphicsDrawCommandType.POLYLINE,
       points: [],
-      color: { color: "#ffffff", alpha: 255 },
+      color: DEFAULT_ECOLOR,
       lineWidth: 1,
     },
   },
@@ -88,7 +89,7 @@ export const REGISTRY: Record<
       y: 0,
       width: 100,
       height: 100,
-      color: { color: "#ffffff", alpha: 255 },
+      color: DEFAULT_ECOLOR,
     },
   },
 };
@@ -114,9 +115,6 @@ export const drawCommandTemplate: EArrayControlTemplate<EAnyGraphicsDrawCommand>
   createDefault: () => REGISTRY[EGraphicsDrawCommandType.RECT].default,
   buildItem(container, value, onChange): EArrayControlItem<EAnyGraphicsDrawCommand> {
     const subcard = new EDrawCommandSubcard(container, value, onChange);
-    return {
-      getValue: () => subcard.getValue(),
-      destroy: () => subcard.destroy(),
-    };
+    return { getValue: () => subcard.getValue(), destroy: () => subcard.destroy() };
   },
 };

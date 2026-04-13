@@ -3,8 +3,9 @@ import { STORE } from "../../../document/store";
 import type { ETextElement } from "../../../document/types.elements";
 import { EElementType } from "../../../document/types.elements";
 import { ETextResizeMode } from "../../../document/types.misc";
+import { DEFAULT_ECOLOR } from "../../../miscellaneous/defaults";
+import { makeRow } from "../../../miscellaneous/rows";
 import { UI_STATE } from "../../../ui-state/ui-state";
-import { makeRow } from "../../../utils/rows";
 import { TOAST } from "../../toast/EToast";
 
 export class ETextElementBuilder {
@@ -19,7 +20,7 @@ export class ETextElementBuilder {
       uuid: crypto.randomUUID(),
       type: EElementType.TEXT,
       name: this.nameControl.value,
-      color: { color: "#ffffff", alpha: 1 },
+      color: DEFAULT_ECOLOR,
       content: [],
       resizeMode: ETextResizeMode.SCALE,
       maxLineWidth: 0,

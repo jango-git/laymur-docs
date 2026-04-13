@@ -6,9 +6,10 @@ import { STORE } from "../../../document/store";
 import type { EHorizontalDistanceConstraint } from "../../../document/types.constraints";
 import { EConstraintType } from "../../../document/types.constraints";
 import type { UUID } from "../../../document/types.misc";
-import type { EConstraintTarget } from "../../../utils/constraint-targets";
-import { getConstraintTargets } from "../../../utils/constraint-targets";
-import { makeRow } from "../../../utils/rows";
+import type { EConstraintTarget } from "../../../miscellaneous/constraint-targets";
+import { getConstraintTargets } from "../../../miscellaneous/constraint-targets";
+import { LARGE } from "../../../miscellaneous/math";
+import { makeRow } from "../../../miscellaneous/rows";
 import { EConstraintCard } from "./EConstraintCard";
 
 export class EHorizontalDistanceConstraintCard extends EConstraintCard {
@@ -47,8 +48,8 @@ export class EHorizontalDistanceConstraintCard extends EConstraintCard {
 
     this.distanceControl = new ENumberControl(makeRow(this.bodyRoot, "Distance"), {
       value: 0,
-      min: -99999,
-      max: 99999,
+      min: -LARGE,
+      max: LARGE,
       step: 1,
       precision: 1,
     });

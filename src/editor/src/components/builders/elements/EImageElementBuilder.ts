@@ -4,8 +4,9 @@ import { STORE } from "../../../document/store";
 import type { EImageAsset } from "../../../document/types.assets";
 import type { EImageElement } from "../../../document/types.elements";
 import { EElementType } from "../../../document/types.elements";
+import { DEFAULT_ECOLOR } from "../../../miscellaneous/defaults";
+import { makeRow } from "../../../miscellaneous/rows";
 import { UI_STATE } from "../../../ui-state/ui-state";
-import { makeRow } from "../../../utils/rows";
 import { TOAST } from "../../toast/EToast";
 
 export class EImageElementBuilder {
@@ -25,7 +26,7 @@ export class EImageElementBuilder {
       uuid: crypto.randomUUID(),
       type: EElementType.IMAGE,
       name: this.nameControl.value,
-      color: { color: "#ffffff", alpha: 1 },
+      color: DEFAULT_ECOLOR,
       texture: this.textureControl.value?.uuid ?? "",
     };
 

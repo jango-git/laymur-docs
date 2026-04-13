@@ -5,9 +5,10 @@ import { STORE } from "../../../document/store";
 import type { EVerticalSizeConstraint } from "../../../document/types.constraints";
 import { EConstraintType } from "../../../document/types.constraints";
 import type { UUID } from "../../../document/types.misc";
-import type { EConstraintTarget } from "../../../utils/constraint-targets";
-import { getConstraintElements } from "../../../utils/constraint-targets";
-import { makeRow } from "../../../utils/rows";
+import type { EConstraintTarget } from "../../../miscellaneous/constraint-targets";
+import { getConstraintElements } from "../../../miscellaneous/constraint-targets";
+import { LARGE } from "../../../miscellaneous/math";
+import { makeRow } from "../../../miscellaneous/rows";
 import { EConstraintCard } from "./EConstraintCard";
 
 export class EVerticalSizeConstraintCard extends EConstraintCard {
@@ -29,7 +30,7 @@ export class EVerticalSizeConstraintCard extends EConstraintCard {
     this.sizeControl = new ENumberControl(makeRow(this.bodyRoot, "Size"), {
       value: 100,
       min: 0,
-      max: 99999,
+      max: LARGE,
       step: 1,
       precision: 1,
     });

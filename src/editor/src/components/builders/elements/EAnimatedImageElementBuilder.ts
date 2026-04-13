@@ -11,8 +11,9 @@ import type { EAnimatedImageElement } from "../../../document/types.elements";
 import { EElementType } from "../../../document/types.elements";
 import type { UUID } from "../../../document/types.misc";
 import { EAnimatedImageLoopMode } from "../../../document/types.misc";
+import { DEFAULT_ECOLOR } from "../../../miscellaneous/defaults";
+import { makeRow } from "../../../miscellaneous/rows";
 import { UI_STATE } from "../../../ui-state/ui-state";
-import { makeRow } from "../../../utils/rows";
 import { TOAST } from "../../toast/EToast";
 
 const sequenceTemplate: EArrayControlTemplate<UUID> = {
@@ -49,7 +50,7 @@ export class EAnimatedImageElementBuilder {
       uuid: crypto.randomUUID(),
       type: EElementType.ANIMATED_IMAGE,
       name: this.nameControl.value,
-      color: { color: "#ffffff", alpha: 1 },
+      color: DEFAULT_ECOLOR,
       sequence: this.sequenceControl.value,
       frameRate: 24,
       timeScale: 1,

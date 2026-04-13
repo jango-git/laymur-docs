@@ -2,7 +2,7 @@ import { EColorControl } from "../../../controls/EColorControl/EColorControl";
 import { EStringControl } from "../../../controls/EStringControl/EStringControl";
 import { STORE } from "../../../document/store";
 import type { UUID } from "../../../document/types.misc";
-import { makeRow } from "../../../utils/rows";
+import { makeRow } from "../../../miscellaneous/rows";
 
 export abstract class EElementCard {
   protected readonly bodyRoot: HTMLDivElement;

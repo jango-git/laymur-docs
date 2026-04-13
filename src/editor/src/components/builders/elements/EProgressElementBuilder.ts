@@ -5,8 +5,9 @@ import type { EImageAsset } from "../../../document/types.assets";
 import type { EProgressElement } from "../../../document/types.elements";
 import { EElementType } from "../../../document/types.elements";
 import { EProgressMaskFunction } from "../../../document/types.misc";
+import { DEFAULT_ECOLOR } from "../../../miscellaneous/defaults";
+import { makeRow } from "../../../miscellaneous/rows";
 import { UI_STATE } from "../../../ui-state/ui-state";
-import { makeRow } from "../../../utils/rows";
 import { TOAST } from "../../toast/EToast";
 
 export class EProgressElementBuilder {
@@ -26,7 +27,7 @@ export class EProgressElementBuilder {
       uuid: crypto.randomUUID(),
       type: EElementType.PROGRESS,
       name: this.nameControl.value,
-      color: { color: "#ffffff", alpha: 1 },
+      color: DEFAULT_ECOLOR,
       texture: this.textureControl.value?.uuid ?? "",
       maskFunction: EProgressMaskFunction.CIRCULAR,
       progress: 0,

@@ -5,9 +5,9 @@ import { STORE } from "../../../document/store";
 import type { EVerticalProportionConstraint } from "../../../document/types.constraints";
 import { EConstraintType } from "../../../document/types.constraints";
 import type { UUID } from "../../../document/types.misc";
-import type { EConstraintTarget } from "../../../utils/constraint-targets";
-import { getConstraintTargets } from "../../../utils/constraint-targets";
-import { makeRow } from "../../../utils/rows";
+import type { EConstraintTarget } from "../../../miscellaneous/constraint-targets";
+import { getConstraintTargets } from "../../../miscellaneous/constraint-targets";
+import { makeRow } from "../../../miscellaneous/rows";
 import { EConstraintCard } from "./EConstraintCard";
 
 export class EVerticalProportionConstraintCard extends EConstraintCard {

@@ -6,7 +6,8 @@ import type { ELayerFullscreen } from "../../../document/types.layers";
 import { ELayerType } from "../../../document/types.layers";
 import type { UUID } from "../../../document/types.misc";
 import { EResizePolicyType } from "../../../document/types.misc";
-import { makeRow } from "../../../utils/rows";
+import { LARGE } from "../../../miscellaneous/math";
+import { makeRow } from "../../../miscellaneous/rows";
 import { RESIZE_POLICY_OPTIONS } from "./EFullscreenLayerCard.Internal";
 import { ELayerCard } from "./ELayerCard";
 
@@ -35,7 +36,7 @@ export class EFullscreenLayerCard extends ELayerCard {
     this.horizontalControl = new ENumberControl(this.horizontalRow, {
       value: 0,
       min: 0,
-      max: 99999,
+      max: LARGE,
       step: 1,
       precision: 2,
     });
@@ -45,7 +46,7 @@ export class EFullscreenLayerCard extends ELayerCard {
     this.verticalControl = new ENumberControl(this.verticalRow, {
       value: 0,
       min: 0,
-      max: 99999,
+      max: LARGE,
       step: 1,
       precision: 2,
     });

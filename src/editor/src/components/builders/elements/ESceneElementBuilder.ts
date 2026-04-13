@@ -3,8 +3,9 @@ import { STORE } from "../../../document/store";
 import type { ESceneElement } from "../../../document/types.elements";
 import { EElementType } from "../../../document/types.elements";
 import { ESceneUpdateMode } from "../../../document/types.misc";
+import { DEFAULT_ECOLOR } from "../../../miscellaneous/defaults";
+import { makeRow } from "../../../miscellaneous/rows";
 import { UI_STATE } from "../../../ui-state/ui-state";
-import { makeRow } from "../../../utils/rows";
 import { TOAST } from "../../toast/EToast";
 
 export class ESceneElementBuilder {
@@ -19,7 +20,7 @@ export class ESceneElementBuilder {
       uuid: crypto.randomUUID(),
       type: EElementType.SCENE,
       name: this.nameControl.value,
-      color: { color: "#ffffff", alpha: 1 },
+      color: DEFAULT_ECOLOR,
       updateMode: ESceneUpdateMode.EVERY_FRAME,
       resolutionFactor: 1,
       clearColor: { color: "#000000", alpha: 1 },

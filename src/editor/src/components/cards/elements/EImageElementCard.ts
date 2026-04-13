@@ -5,7 +5,7 @@ import type { EImageAsset } from "../../../document/types.assets";
 import type { EImageElement } from "../../../document/types.elements";
 import { EElementType } from "../../../document/types.elements";
 import type { EColor, UUID } from "../../../document/types.misc";
-import { makeRow } from "../../../utils/rows";
+import { makeRow } from "../../../miscellaneous/rows";
 import { EElementCard } from "./EElementCard";
 
 export class EImageElementCard extends EElementCard {

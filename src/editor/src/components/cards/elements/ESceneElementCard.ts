@@ -8,7 +8,7 @@ import type { ESceneElement } from "../../../document/types.elements";
 import { EElementType } from "../../../document/types.elements";
 import type { EColor, UUID } from "../../../document/types.misc";
 import { ESceneUpdateMode } from "../../../document/types.misc";
-import { makeRow } from "../../../utils/rows";
+import { makeRow } from "../../../miscellaneous/rows";
 import { EElementCard } from "./EElementCard";
 import { UPDATE_MODE_OPTIONS } from "./ESceneElementCard.Internal";
 

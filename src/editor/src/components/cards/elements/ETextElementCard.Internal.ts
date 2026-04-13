@@ -18,7 +18,7 @@ import {
   ETextFontWeight,
   ETextResizeMode,
 } from "../../../document/types.misc";
-import { makeRow } from "../../../utils/rows";
+import { makeRow } from "../../../miscellaneous/rows";
 
 const ALIGN_OPTIONS: ESelectControlOption<ETextAlign>[] = [
   { label: "Left", value: ETextAlign.LEFT },
@@ -56,9 +56,9 @@ const DEFAULT_CHUNK_STYLE: ETextChunk["style"] = {
   shadowOffsetX: 0,
   shadowOffsetY: 0,
   shadowBlur: 0,
-  shadowColor: { color: "#000000", alpha: 255 },
+  shadowColor: { color: "#000000", alpha: 1 },
   enableStroke: false,
-  strokeColor: { color: "#000000", alpha: 255 },
+  strokeColor: { color: "#000000", alpha: 1 },
   strokeThickness: 1,
 };
 
