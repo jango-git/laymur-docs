@@ -1,9 +1,11 @@
+import { consoleDebug } from "../../../../miscellaneous/debug.print";
 import { STORE } from "../../../../document/store";
-import { UI_STATE } from "../../../../ui-state/ui-state";
+import { UI_STATE } from "../../../../ui-state/EUIState";
 import { generateLayerCode } from "./export-ts/generate-layer-code";
 
 export class EExportTSAction {
   public execute(): void {
+    consoleDebug("[EExportTSAction] execute");
     const layerUuid = UI_STATE.activeLayerUuid;
     if (layerUuid === undefined) {
       console.warn("[EExportTSAction] No active layer");

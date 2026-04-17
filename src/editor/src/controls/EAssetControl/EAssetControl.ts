@@ -232,7 +232,6 @@ export class EAssetControl<T extends EAssetControlItem> {
     }
     const previousValue = this.currentValue;
     this.currentValue = value;
-    console.debug("[EAssetControl] value: %o → %o", previousValue, this.currentValue);
     this.refreshDisplay();
     this.signalValueChangedInternal.emit(this.currentValue, previousValue);
   }

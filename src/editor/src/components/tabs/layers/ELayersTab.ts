@@ -1,5 +1,6 @@
+import { consoleDebug } from "../../../miscellaneous/debug.print";
 import { ESelectControl } from "../../../controls/ESelectControl/ESelectControl";
-import type { EStoreDeltaLayers } from "../../../document/signals";
+import type { EStoreDeltaLayerList } from "../../../document/signals";
 import { EStoreDeltaOperation } from "../../../document/signals";
 import { STORE } from "../../../document/store";
 import type { ELayerContext } from "../../../document/types";
@@ -93,6 +94,7 @@ export class ELayersTab {
   }
 
   private readonly onSetup = (): void => {
+    consoleDebug("[ELayersTab] onSetup");
     for (const container of this.uuidToCardMap.values()) {
       container.remove();
     }
@@ -103,7 +105,8 @@ export class ELayersTab {
     }
   };
 
-  private readonly onLayerListChanged = (delta: EStoreDeltaLayers): void => {
+  private readonly onLayerListChanged = (delta: EStoreDeltaLayerList): void => {
+    consoleDebug("[ELayersTab] onLayerListChanged:", delta);
     switch (delta.operation) {
       case EStoreDeltaOperation.ADD:
         this.addCard(delta.layerContext);

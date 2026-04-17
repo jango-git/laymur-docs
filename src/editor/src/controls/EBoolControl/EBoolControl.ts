@@ -10,7 +10,6 @@ export class EBoolControl {
   private currentValue: boolean;
 
   private readonly root: HTMLDivElement;
-  private readonly checkbox: HTMLInputElement;
 
   private readonly signalValueChangedInternal = new Ferrsign2<boolean, boolean>();
 
@@ -21,13 +20,9 @@ export class EBoolControl {
     this.root = document.createElement("div");
     this.root.className = "bool-control";
     this.root.dataset.checked = String(this.currentValue);
-
-    this.checkbox = document.createElement("input");
-    this.checkbox.className = "bool-control__checkbox";
-    this.checkbox.type = "checkbox";
-    this.checkbox.checked = this.currentValue;
-    this.checkbox.tabIndex = 0;
-    this.checkbox.setAttribute("aria-label", "Toggle");
+    this.root.tabIndex = 0;
+    this.root.setAttribute("role", "switch");
+    this.root.setAttribute("aria-checked", String(this.currentValue));
 
     const track = document.createElement("span");
     track.className = "bool-control__track";
@@ -36,11 +31,11 @@ export class EBoolControl {
     thumb.className = "bool-control__thumb";
 
     track.appendChild(thumb);
-    this.root.appendChild(this.checkbox);
     this.root.appendChild(track);
     this.container.appendChild(this.root);
 
-    this.checkbox.addEventListener("change", this.handleChange);
+    this.root.addEventListener("click", this.handleClick);
+    this.root.addEventListener("keydown", this.handleKeydown);
   }
 
   public get signalValueChanged(): FerrsignView2<boolean, boolean> {
@@ -53,8 +48,8 @@ export class EBoolControl {
 
   public set value(value: boolean) {
     this.currentValue = value;
-    this.checkbox.checked = value;
     this.root.dataset.checked = String(value);
+    this.root.setAttribute("aria-checked", String(value));
   }
 
   public flash(): void {
@@ -71,12 +66,20 @@ export class EBoolControl {
   }
 
   public destroy(): void {
-    this.checkbox.removeEventListener("change", this.handleChange);
+    this.root.removeEventListener("click", this.handleClick);
+    this.root.removeEventListener("keydown", this.handleKeydown);
     this.root.remove();
   }
 
-  private readonly handleChange = (): void => {
-    this.applyValue(this.checkbox.checked);
+  private readonly handleClick = (): void => {
+    this.applyValue(!this.currentValue);
+  };
+
+  private readonly handleKeydown = (e: KeyboardEvent): void => {
+    if (e.key === " " || e.key === "Enter") {
+      e.preventDefault();
+      this.applyValue(!this.currentValue);
+    }
   };
 
   private applyValue(value: boolean): void {
@@ -85,9 +88,8 @@ export class EBoolControl {
     }
     const previousValue = this.currentValue;
     this.currentValue = value;
-    this.checkbox.checked = value;
     this.root.dataset.checked = String(value);
-    console.debug("[EBoolControl] value: %o → %o", previousValue, this.currentValue);
+    this.root.setAttribute("aria-checked", String(value));
     this.signalValueChangedInternal.emit(this.currentValue, previousValue);
   }
 }

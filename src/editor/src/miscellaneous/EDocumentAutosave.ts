@@ -1,7 +1,6 @@
 import { STORE } from "../document/store";
+import { consoleDebug } from "./debug.print";
 import { openDatabase, STORE_NAME } from "./open-database";
-
-const DOCUMENT_KEY = "document";
 
 export class EDocumentAutosave {
   constructor() {
@@ -14,6 +13,8 @@ export class EDocumentAutosave {
     STORE.signals.elements.item.on(this.onAnyChange);
     STORE.signals.constraints.list.on(this.onAnyChange);
     STORE.signals.constraints.item.on(this.onAnyChange);
+
+    consoleDebug("[EDocumentAutosave] initialized");
   }
 
   private readonly onAnyChange = (): void => {
@@ -22,12 +23,12 @@ export class EDocumentAutosave {
 
   private async save(): Promise<void> {
     try {
-      const db = await openDatabase();
+      const database = await openDatabase();
       await new Promise<void>((resolve, reject) => {
-        const request = db
+        const request = database
           .transaction(STORE_NAME, "readwrite")
           .objectStore(STORE_NAME)
-          .put(STORE.selectors.all(), DOCUMENT_KEY);
+          .put(STORE.selectors.all(), "document");
         request.onsuccess = (): void => resolve();
         request.onerror = (): void => reject(request.error);
       });

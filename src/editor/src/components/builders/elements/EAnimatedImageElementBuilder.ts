@@ -13,7 +13,7 @@ import type { UUID } from "../../../document/types.misc";
 import { EAnimatedImageLoopMode } from "../../../document/types.misc";
 import { DEFAULT_ECOLOR } from "../../../miscellaneous/defaults";
 import { makeRow } from "../../../miscellaneous/rows";
-import { UI_STATE } from "../../../ui-state/ui-state";
+import { UI_STATE } from "../../../ui-state/EUIState";
 import { TOAST } from "../../toast/EToast";
 
 const sequenceTemplate: EArrayControlTemplate<UUID> = {

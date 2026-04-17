@@ -15,6 +15,7 @@
 @import "./src/components/builders/style.css";
 @import "./src/components/tabs/project/style.css";
 @import "./src/components/toast/style.css";
+@import "./src/components/debug/style.css";
 
 :root {
   /* Backgrounds */
@@ -108,6 +109,7 @@ body {
 /* Panel (right side, 40%) */
 #panel {
   flex: 0 0 40%;
+  min-width: 0;
   background: var(--bg-panel);
   display: flex;
   flex-direction: column;
@@ -223,4 +225,5 @@ body {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  min-width: 0;
 }

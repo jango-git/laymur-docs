@@ -34,19 +34,21 @@ export class ENineSliceElementCard extends EElementCard {
 
     this.bordersControl = new EVec2Control(makeRow(this.bodyRoot, "Borders"), {
       labels: ["H", "V"],
-      min: 0,
-      max: LARGE,
-      step: 1,
-      precision: 1,
+      value: [0.1, 0.1],
+      min: 0.01,
+      max: 1,
+      step: 0.01,
+      precision: 2,
     });
     this.bordersControl.signalValueChanged.on(this.onBordersChanged);
 
     this.regionsControl = new EVec2Control(makeRow(this.bodyRoot, "Regions"), {
       labels: ["H", "V"],
-      min: 0,
+      value: [100, 100],
+      min: 1,
       max: LARGE,
       step: 1,
-      precision: 1,
+      precision: 0,
     });
     this.regionsControl.signalValueChanged.on(this.onRegionsChanged);
 
@@ -54,7 +56,7 @@ export class ENineSliceElementCard extends EElementCard {
       makeRow(this.bodyRoot, "Region Mode"),
       {
         options: REGION_MODE_OPTIONS,
-        value: ENineSliceRegionMode.NORMALIZED,
+        value: ENineSliceRegionMode.WORLD,
       },
     );
     this.regionModeControl.signalValueChanged.on(this.onRegionModeChanged);
@@ -73,8 +75,23 @@ export class ENineSliceElementCard extends EElementCard {
     this.colorControl.value = element.color;
     this.textureControl.value = STORE.selectors.assets.selectImage(element.texture);
     this.bordersControl.value = [element.sliceBorders[0], element.sliceBorders[1]];
-    this.regionsControl.value = [element.sliceRegions[0], element.sliceRegions[1]];
     this.regionModeControl.value = element.regionMode;
+    this.applyRegionMode(element.regionMode);
+    this.regionsControl.value = [element.sliceRegions[0], element.sliceRegions[1]];
+  }
+
+  private applyRegionMode(mode: ENineSliceRegionMode): void {
+    if (mode === ENineSliceRegionMode.WORLD) {
+      this.regionsControl.min = 1;
+      this.regionsControl.max = LARGE;
+      this.regionsControl.step = 1;
+      this.regionsControl.precision = 0;
+    } else {
+      this.regionsControl.min = 0.01;
+      this.regionsControl.max = 1;
+      this.regionsControl.step = 0.01;
+      this.regionsControl.precision = 2;
+    }
   }
 
   private readonly onNameChanged = (name: string): void => {
@@ -100,6 +117,7 @@ export class ENineSliceElementCard extends EElementCard {
   };
 
   private readonly onRegionModeChanged = (regionMode: ENineSliceRegionMode): void => {
+    this.applyRegionMode(regionMode);
     STORE.commands.elements.writeNineSlice({ uuid: this.uuid, regionMode });
   };
 

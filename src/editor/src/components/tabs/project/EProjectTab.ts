@@ -1,3 +1,4 @@
+import { consoleDebug } from "../../../miscellaneous/debug.print";
 import type { EStoreDeltaAssets } from "../../../document/signals";
 import { EStoreDeltaOperation } from "../../../document/signals";
 import { STORE } from "../../../document/store";
@@ -120,17 +121,13 @@ export class EProjectTab {
   }
 
   private addCard(asset: EAnyAsset): void {
-    const wrapper = document.createElement("div");
-    wrapper.dataset.uuid = asset.uuid;
-    this.cardList.appendChild(wrapper);
-
     if (asset.type === EAssetType.FONT) {
-      new EFontAssetCard(wrapper, asset.uuid);
+      new EFontAssetCard(this.cardList, asset.uuid);
     } else {
-      new EImageAssetCard(wrapper, asset.uuid);
+      new EImageAssetCard(this.cardList, asset.uuid);
     }
 
-    this.cardMap.set(asset.uuid, wrapper);
+    this.cardMap.set(asset.uuid, this.cardList.lastElementChild as HTMLElement);
   }
 
   private removeCard(uuid: string): void {
@@ -175,6 +172,7 @@ export class EProjectTab {
   }
 
   private readonly onAssetsListChange = (delta: EStoreDeltaAssets): void => {
+    consoleDebug("[EProjectTab] onAssetsListChange:", delta);
     if (delta.operation === EStoreDeltaOperation.ADD) {
       this.addCard(delta.asset);
     } else if (delta.operation === EStoreDeltaOperation.REMOVE) {
@@ -211,16 +209,19 @@ export class EProjectTab {
   };
 
   private readonly onImageFileChange = (): void => {
+    consoleDebug("[EProjectTab] onImageFileChange");
     this.handleImageFiles(this.imageFileInput.files);
     this.imageFileInput.value = "";
   };
 
   private readonly onFontFileChange = (): void => {
+    consoleDebug("[EProjectTab] onFontFileChange");
     this.handleFontFiles(this.fontFileInput.files);
     this.fontFileInput.value = "";
   };
 
   private readonly onSetup = (): void => {
+    consoleDebug("[EProjectTab] onSetup");
     for (const wrapper of this.cardMap.values()) {
       wrapper.remove();
     }

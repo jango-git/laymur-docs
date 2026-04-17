@@ -29,10 +29,23 @@
 
 .asset-card__name {
   flex: 1;
+  min-width: 0;
   font-size: 13px;
   color: var(--text);
+  display: flex;
+  overflow: hidden;
+}
+
+.asset-card__name-base {
+  flex: 1;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.asset-card__name-ext {
+  flex-shrink: 0;
   white-space: nowrap;
 }
 

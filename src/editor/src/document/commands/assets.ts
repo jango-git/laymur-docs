@@ -1,3 +1,4 @@
+import { consoleDebug } from "../../miscellaneous/debug.print";
 import type { EStoreSignalsAssets } from "../signals";
 import { EStoreDeltaOperation } from "../signals";
 import type { EDocument, PartialExceptUUIDField } from "../types";
@@ -15,6 +16,7 @@ export class EStoreCommandsAssets {
   public add(asset: EAnyAsset): void {
     const stored = clone(asset);
     this.data.assets.push(stored);
+    consoleDebug("[EStoreCommandsAssets] command 'add' was evaluated", asset);
     this.signals["emitList"]({ operation: EStoreDeltaOperation.ADD, asset: clone(stored) });
   }
 
@@ -24,6 +26,7 @@ export class EStoreCommandsAssets {
       throw new Error(`[EStoreCommandsAssets] Asset not found: (uuid: ${uuid})`);
     }
     this.data.assets.splice(index, 1);
+    consoleDebug("[EStoreCommandsAssets] command 'remove' was evaluated", uuid);
     this.signals["emitList"]({ operation: EStoreDeltaOperation.REMOVE, uuid });
   }
 
@@ -32,6 +35,7 @@ export class EStoreCommandsAssets {
     this.data.assets.sort(
       (first, second) => uuidsCopy.indexOf(first.uuid) - uuidsCopy.indexOf(second.uuid),
     );
+    consoleDebug("[EStoreCommandsAssets] command 'reorder' was evaluated", uuids);
     this.signals["emitList"]({ operation: EStoreDeltaOperation.REORDER, uuids: clone(uuidsCopy) });
   }
 
@@ -44,6 +48,7 @@ export class EStoreCommandsAssets {
     if (copy.dataURL !== undefined) {
       asset.dataURL = copy.dataURL;
     }
+    consoleDebug("[EStoreCommandsAssets] command 'writeFontAsset' was evaluated", data);
     this.signals["emitItem"]({ asset: clone(asset) });
   }
 
@@ -56,6 +61,7 @@ export class EStoreCommandsAssets {
     if (copy.dataURL !== undefined) {
       asset.dataURL = copy.dataURL;
     }
+    consoleDebug("[EStoreCommandsAssets] command 'writeImageAsset' was evaluated", data);
     this.signals["emitItem"]({ asset: clone(asset) });
   }
 

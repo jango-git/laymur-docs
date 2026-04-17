@@ -1,7 +1,7 @@
 import { EStringControl } from "../../../controls/EStringControl/EStringControl";
 import { STORE } from "../../../document/store";
 import type { UUID } from "../../../document/types.misc";
-import { UI_STATE } from "../../../ui-state/ui-state";
+import { UI_STATE } from "../../../ui-state/EUIState";
 
 export abstract class ELayerCard {
   protected readonly bodyRoot: HTMLDivElement;
@@ -36,7 +36,7 @@ export abstract class ELayerCard {
     header.appendChild(this.activeToggle);
     header.appendChild(typeSpan);
 
-    this.nameControl = new EStringControl(header, { placeholder: "Name" });
+    this.nameControl = new EStringControl(header, { placeholder: "name" });
 
     const deleteButton = document.createElement("button");
     deleteButton.className = "element-card__delete";
@@ -51,13 +51,8 @@ export abstract class ELayerCard {
 
     container.appendChild(this.root);
 
-    this.updateActiveState(UI_STATE.activeLayerUuid === uuid);
+    this.updateActivityStyles(UI_STATE.activeLayerUuid === uuid);
     UI_STATE.signalActiveLayerChanged.on(this.onActiveLayerChanged);
-  }
-
-  private updateActiveState(active: boolean): void {
-    this.root.classList.toggle("element-card--active", active);
-    this.activeToggle.classList.toggle("element-card__active-toggle--active", active);
   }
 
   private readonly onActiveToggleClicked = (): void => {
@@ -69,6 +64,11 @@ export abstract class ELayerCard {
   };
 
   private readonly onActiveLayerChanged = (uuid: UUID | undefined): void => {
-    this.updateActiveState(uuid === this.uuid);
+    this.updateActivityStyles(uuid === this.uuid);
   };
+
+  private updateActivityStyles(active: boolean): void {
+    this.root.classList.toggle("element-card--active", active);
+    this.activeToggle.classList.toggle("element-card__active-toggle--active", active);
+  }
 }

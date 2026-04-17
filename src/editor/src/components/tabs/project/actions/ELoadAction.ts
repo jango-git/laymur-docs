@@ -1,8 +1,10 @@
+import { consoleDebug } from "../../../../miscellaneous/debug.print";
 import { STORE } from "../../../../document/store";
 import type { EDocument } from "../../../../document/types";
 
 export class ELoadAction {
   public execute(): void {
+    consoleDebug("[ELoadAction] execute");
     const fileInput = window.document.createElement("input");
     fileInput.type = "file";
     fileInput.accept = ".json,application/json";
@@ -17,6 +19,7 @@ export class ELoadAction {
       reader.addEventListener("load", () => {
         try {
           const editorDocument = JSON.parse(reader.result as string) as EDocument;
+          consoleDebug("[ELoadAction] project file loaded successfully", editorDocument);
           STORE.commands.setup(editorDocument);
         } catch {
           console.error("[ELoadAction] failed to parse project file");

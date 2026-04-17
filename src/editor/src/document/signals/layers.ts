@@ -1,11 +1,12 @@
 import type { FerrsignView1 } from "ferrsign";
 import { Ferrsign1 } from "ferrsign";
+import { consoleDebug } from "../../miscellaneous/debug.print";
 import type { ELayerContext } from "../types";
 import type { EAnyLayer } from "../types.layers";
 import type { UUID } from "../types.misc";
 import type { EStoreDeltaOperation } from "./index";
 
-export type EStoreDeltaLayers =
+export type EStoreDeltaLayerList =
   | { operation: EStoreDeltaOperation.ADD; layerContext: ELayerContext }
   | { operation: EStoreDeltaOperation.REMOVE; uuid: UUID }
   | { operation: EStoreDeltaOperation.REORDER; uuids: UUID[] };
@@ -15,10 +16,10 @@ export interface EStoreDeltaLayer {
 }
 
 export class EStoreSignalsLayers {
-  private readonly listInternal = new Ferrsign1<EStoreDeltaLayers>();
+  private readonly listInternal = new Ferrsign1<EStoreDeltaLayerList>();
   private readonly itemInternal = new Ferrsign1<EStoreDeltaLayer>();
 
-  public get list(): FerrsignView1<EStoreDeltaLayers> {
+  public get list(): FerrsignView1<EStoreDeltaLayerList> {
     return this.listInternal;
   }
 
@@ -26,11 +27,13 @@ export class EStoreSignalsLayers {
     return this.itemInternal;
   }
 
-  protected emitList(delta: EStoreDeltaLayers): void {
+  protected emitList(delta: EStoreDeltaLayerList): void {
+    consoleDebug(`[EStoreSignalsLayers] emit list:`, delta);
     this.listInternal.emit(delta);
   }
 
   protected emitItem(delta: EStoreDeltaLayer): void {
+    consoleDebug(`[EStoreSignalsLayers] emit item:`, delta);
     this.itemInternal.emit(delta);
   }
 }

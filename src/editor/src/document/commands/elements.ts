@@ -1,3 +1,4 @@
+import { consoleDebug } from "../../miscellaneous/debug.print";
 import type { EStoreSignalsElements } from "../signals";
 import { EStoreDeltaOperation } from "../signals";
 import type { EDocument, ELayerContext, PartialExceptUUIDField } from "../types";
@@ -24,6 +25,7 @@ export class EStoreCommandsElements {
   public add(layerUuid: UUID, element: EAnyElement): void {
     const stored = clone(element);
     this.getContext(layerUuid).elements.push(stored);
+    consoleDebug("[EStoreCommandsElements] command 'add' was evaluated", element);
     this.signals["emitList"]({
       operation: EStoreDeltaOperation.ADD,
       layerUuid,
@@ -38,6 +40,7 @@ export class EStoreCommandsElements {
       throw new Error(`[EStoreCommandsElements] Element not found: (uuid: ${uuid})`);
     }
     layerContext.elements.splice(index, 1);
+    consoleDebug("[EStoreCommandsElements] command 'remove' was evaluated", uuid);
     this.signals["emitList"]({ operation: EStoreDeltaOperation.REMOVE, layerUuid, uuid });
   }
 
@@ -47,6 +50,7 @@ export class EStoreCommandsElements {
     layerContext.elements.sort(
       (first, second) => uuidsCopy.indexOf(first.uuid) - uuidsCopy.indexOf(second.uuid),
     );
+    consoleDebug("[EStoreCommandsElements] command 'reorder' was evaluated", uuids);
     this.signals["emitList"]({
       operation: EStoreDeltaOperation.REORDER,
       layerUuid,
@@ -78,6 +82,7 @@ export class EStoreCommandsElements {
     if (copy.playByDefault !== undefined) {
       element.playByDefault = copy.playByDefault;
     }
+    consoleDebug("[EStoreCommandsElements] command 'writeAnimatedImage' was evaluated", data);
     this.signals["emitItem"]({ element: clone(element) });
   }
 
@@ -96,6 +101,7 @@ export class EStoreCommandsElements {
     if (copy.drawSequence !== undefined) {
       element.drawSequence = copy.drawSequence;
     }
+    consoleDebug("[EStoreCommandsElements] command 'writeGraphics' was evaluated", data);
     this.signals["emitItem"]({ element: clone(element) });
   }
 
@@ -111,6 +117,7 @@ export class EStoreCommandsElements {
     if (copy.texture !== undefined) {
       element.texture = copy.texture;
     }
+    consoleDebug("[EStoreCommandsElements] command 'writeImage' was evaluated", data);
     this.signals["emitItem"]({ element: clone(element) });
   }
 
@@ -135,6 +142,7 @@ export class EStoreCommandsElements {
     if (copy.regionMode !== undefined) {
       element.regionMode = copy.regionMode;
     }
+    consoleDebug("[EStoreCommandsElements] command 'writeNineSlice' was evaluated", data);
     this.signals["emitItem"]({ element: clone(element) });
   }
 
@@ -156,6 +164,7 @@ export class EStoreCommandsElements {
     if (copy.progress !== undefined) {
       element.progress = copy.progress;
     }
+    consoleDebug("[EStoreCommandsElements] command 'writeProgress' was evaluated", data);
     this.signals["emitItem"]({ element: clone(element) });
   }
 
@@ -180,6 +189,7 @@ export class EStoreCommandsElements {
     if (copy.enableDepthBuffer !== undefined) {
       element.enableDepthBuffer = copy.enableDepthBuffer;
     }
+    consoleDebug("[EStoreCommandsElements] command 'writeScene' was evaluated", data);
     this.signals["emitItem"]({ element: clone(element) });
   }
 
@@ -201,6 +211,7 @@ export class EStoreCommandsElements {
     if (copy.maxLineWidth !== undefined) {
       element.maxLineWidth = copy.maxLineWidth;
     }
+    consoleDebug("[EStoreCommandsElements] command 'writeText' was evaluated", data);
     this.signals["emitItem"]({ element: clone(element) });
   }
 

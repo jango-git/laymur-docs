@@ -7,7 +7,7 @@ import { EElementType } from "../../../document/types.elements";
 import { ENineSliceRegionMode } from "../../../document/types.misc";
 import { DEFAULT_ECOLOR } from "../../../miscellaneous/defaults";
 import { makeRow } from "../../../miscellaneous/rows";
-import { UI_STATE } from "../../../ui-state/ui-state";
+import { UI_STATE } from "../../../ui-state/EUIState";
 import { TOAST } from "../../toast/EToast";
 
 export class ENineSliceElementBuilder {
@@ -31,9 +31,9 @@ export class ENineSliceElementBuilder {
       name: this.nameControl.value,
       color: DEFAULT_ECOLOR,
       texture: this.textureControl.value?.uuid ?? "",
-      sliceBorders: [0, 0, 0, 0],
-      sliceRegions: [0, 0, 0, 0],
-      regionMode: ENineSliceRegionMode.NORMALIZED,
+      sliceBorders: [0.1, 0.1, 0.1, 0.1],
+      sliceRegions: [100, 100, 100, 100],
+      regionMode: ENineSliceRegionMode.WORLD,
     };
 
     const error = STORE.validators.elements.nineSlice(UI_STATE.activeLayerUuid, data);

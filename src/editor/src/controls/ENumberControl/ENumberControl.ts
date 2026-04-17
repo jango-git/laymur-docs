@@ -126,6 +126,11 @@ export class ENumberControl {
     this.refreshDisplay();
   }
 
+  public set precision(precision: number) {
+    this.precisionValue = precision;
+    this.refreshDisplay();
+  }
+
   public flash(): void {
     this.root.classList.remove("number-control--flash");
     void this.root.offsetWidth;
@@ -258,7 +263,7 @@ export class ENumberControl {
     this.root.dataset.state = nextState;
 
     if (nextState === ENumberControlState.EDIT) {
-      this.input.value = String(this.currentValue);
+      this.input.value = this.currentValue.toFixed(this.precisionValue);
       requestAnimationFrame(() => {
         this.input.focus();
         this.input.select();
@@ -289,7 +294,6 @@ export class ENumberControl {
 
     const previousValue = this.currentValue;
     this.currentValue = MathUtils.clamp(value, this.minValue, this.maxValue);
-    console.debug("[ENumberControl] value: %o → %o", previousValue, this.currentValue);
     this.refreshDisplay();
     this.signalValueChangedInternal.emit(this.currentValue, previousValue);
   }

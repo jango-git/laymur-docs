@@ -103,7 +103,6 @@ export class EColorControl {
     }
     const previousValue = this.currentValue;
     this.currentValue = { color, alpha };
-    console.debug("[EColorControl] value: %o → %o", previousValue, this.currentValue);
     this.signalValueChangedInternal.emit(this.currentValue, previousValue);
   }
 

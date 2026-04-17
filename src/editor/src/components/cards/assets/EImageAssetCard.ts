@@ -7,6 +7,8 @@ export class EImageAssetCard {
   private readonly root: HTMLDivElement;
   private readonly thumbnail: HTMLImageElement;
   private readonly nameLabel: HTMLSpanElement;
+  private readonly nameBase: HTMLSpanElement;
+  private readonly nameExt: HTMLSpanElement;
   private readonly downloadButton: HTMLButtonElement;
   private readonly deleteButton: HTMLButtonElement;
 
@@ -25,6 +27,15 @@ export class EImageAssetCard {
 
     this.nameLabel = document.createElement("span");
     this.nameLabel.className = "asset-card__name";
+
+    this.nameBase = document.createElement("span");
+    this.nameBase.className = "asset-card__name-base";
+
+    this.nameExt = document.createElement("span");
+    this.nameExt.className = "asset-card__name-ext";
+
+    this.nameLabel.appendChild(this.nameBase);
+    this.nameLabel.appendChild(this.nameExt);
 
     this.downloadButton = document.createElement("button");
     this.downloadButton.className = "asset-card__action-btn";
@@ -56,7 +67,9 @@ export class EImageAssetCard {
 
   private refresh(asset: EImageAsset): void {
     this.thumbnail.src = asset.dataURL;
-    this.nameLabel.textContent = asset.name;
+    const dotIdx = asset.name.lastIndexOf(".");
+    this.nameBase.textContent = dotIdx > 0 ? asset.name.slice(0, dotIdx) : asset.name;
+    this.nameExt.textContent = dotIdx > 0 ? asset.name.slice(dotIdx) : "";
     this.asset = asset;
   }
 

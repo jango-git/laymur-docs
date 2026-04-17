@@ -1,3 +1,4 @@
+import { consoleDebug } from "../../miscellaneous/debug.print";
 import type { EStoreSignalsLayers } from "../signals";
 import { EStoreDeltaOperation } from "../signals";
 import type { EDocument, ELayerContext, PartialExceptUUIDField } from "../types";
@@ -15,6 +16,7 @@ export class EStoreCommandsLayers {
   public add(layerContext: ELayerContext): void {
     const stored = clone(layerContext);
     this.data.layerContexts.push(stored);
+    consoleDebug("[EStoreCommandsLayers] command 'add' was evaluated", layerContext);
     this.signals["emitList"]({ operation: EStoreDeltaOperation.ADD, layerContext: clone(stored) });
   }
 
@@ -24,6 +26,7 @@ export class EStoreCommandsLayers {
       throw new Error(`[EStoreCommandsLayers] Layer not found: (uuid: ${uuid})`);
     }
     this.data.layerContexts.splice(index, 1);
+    consoleDebug("[EStoreCommandsLayers] command 'remove' was evaluated", uuid);
     this.signals["emitList"]({ operation: EStoreDeltaOperation.REMOVE, uuid });
   }
 
@@ -32,6 +35,7 @@ export class EStoreCommandsLayers {
     this.data.layerContexts.sort(
       (first, second) => uuidsCopy.indexOf(first.layer.uuid) - uuidsCopy.indexOf(second.layer.uuid),
     );
+    consoleDebug("[EStoreCommandsLayers] command 'reorder' was evaluated", uuids);
     this.signals["emitList"]({ operation: EStoreDeltaOperation.REORDER, uuids: clone(uuidsCopy) });
   }
 
@@ -52,6 +56,7 @@ export class EStoreCommandsLayers {
     if (copy.resizePolicyParameters !== undefined) {
       layer.resizePolicyParameters = copy.resizePolicyParameters;
     }
+    consoleDebug("[EStoreCommandsLayers] command 'writeFullscreen' was evaluated", data);
     this.signals["emitItem"]({ layer: clone(layer) });
   }
 

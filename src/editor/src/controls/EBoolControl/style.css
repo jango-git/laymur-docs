@@ -7,14 +7,6 @@
   user-select: none;
 }
 
-/* Hide native checkbox but keep it focusable */
-.bool-control__checkbox {
-  position: absolute;
-  opacity: 0;
-  width: 0;
-  height: 0;
-  pointer-events: none;
-}
 
 .bool-control__track {
   position: relative;
@@ -55,8 +47,8 @@
   background-color: #fff;
 }
 
-/* Focus ring via the hidden checkbox */
-.bool-control__checkbox:focus-visible + .bool-control__track {
+/* Focus ring */
+.bool-control:focus-visible .bool-control__track {
   box-shadow: 0 0 0 2px var(--accent);
 }
 

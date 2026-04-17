@@ -1,3 +1,4 @@
+import { consoleDebug } from "../../../miscellaneous/debug.print";
 import { ESelectControl } from "../../../controls/ESelectControl/ESelectControl";
 import type { EStoreDeltaConstraints } from "../../../document/signals";
 import { EStoreDeltaOperation } from "../../../document/signals";
@@ -5,7 +6,7 @@ import { STORE } from "../../../document/store";
 import type { EAnyConstraint, EConstraintType } from "../../../document/types.constraints";
 import type { UUID } from "../../../document/types.misc";
 import { makeSortable } from "../../../miscellaneous/make-sortable";
-import { UI_STATE } from "../../../ui-state/ui-state";
+import { UI_STATE } from "../../../ui-state/EUIState";
 import type { EAnyConstraintBuilder } from "../../builders/constraints/types";
 import type { ConstraintEntry } from "./registry";
 import { CONSTRAINT_REGISTRY, DEFAULT_BUILDER_TYPE } from "./registry";
@@ -119,10 +120,12 @@ export class EConstraintsTab {
   }
 
   private readonly onSetup = (): void => {
+    consoleDebug("[EConstraintsTab] onSetup");
     this.onActiveLayerChanged(undefined);
   };
 
   private readonly onCardListChanged = (delta: EStoreDeltaConstraints): void => {
+    consoleDebug("[EConstraintsTab] onCardListChanged:", delta);
     if (delta.layerUuid !== UI_STATE.activeLayerUuid) {
       return;
     }
@@ -141,6 +144,7 @@ export class EConstraintsTab {
   };
 
   private readonly onActiveLayerChanged = (uuid?: UUID): void => {
+    consoleDebug("[EConstraintsTab] onActiveLayerChanged:", uuid);
     for (const cardContainer of this.cardUuidToCardContainer.values()) {
       cardContainer.remove();
     }

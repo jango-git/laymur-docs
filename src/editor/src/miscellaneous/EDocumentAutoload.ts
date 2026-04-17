@@ -1,7 +1,6 @@
 import { STORE } from "../document/store";
 import type { EDocument } from "../document/types";
-import { UI_STATE } from "../ui-state/ui-state";
-import { createDefaultLayerContext } from "./create-default-layer-context";
+import { consoleDebug, consoleError } from "./debug.print";
 import { openDatabase, STORE_NAME } from "./open-database";
 
 const DOCUMENT_KEY = "document";
@@ -9,6 +8,7 @@ const DOCUMENT_KEY = "document";
 export class EDocumentAutoload {
   public static async load(): Promise<void> {
     try {
+      consoleDebug("[EDocumentAutoload] loading project from IndexedDB...");
       const database = await openDatabase();
       const editorDocument = await new Promise<EDocument | undefined>((resolve, reject) => {
         const request = database
@@ -20,20 +20,13 @@ export class EDocumentAutoload {
       });
 
       if (editorDocument !== undefined) {
+        consoleDebug("[EDocumentAutoload] loaded project from IndexedDB", editorDocument);
         STORE.commands.setup(editorDocument);
+      } else {
+        consoleDebug("[EDocumentAutoload] no project found in IndexedDB");
       }
     } catch {
-      console.error("[EDocumentAutoload] failed to load project from IndexedDB");
-    }
-
-    if (STORE.selectors.layers.selectAllContexts().length === 0) {
-      const defaultLayer = createDefaultLayerContext();
-      STORE.commands.layers.add(defaultLayer);
-    }
-
-    const layers = STORE.selectors.layers.selectAll();
-    if (layers.length > 0) {
-      UI_STATE.setActiveLayer(layers[0].uuid);
+      consoleError("[EDocumentAutoload] failed to load project from IndexedDB");
     }
   }
 }

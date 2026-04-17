@@ -1,3 +1,4 @@
+import { consoleDebug } from "../../../miscellaneous/debug.print";
 import { ESelectControl } from "../../../controls/ESelectControl/ESelectControl";
 import type { EStoreDeltaElements } from "../../../document/signals";
 import { EStoreDeltaOperation } from "../../../document/signals";
@@ -5,7 +6,7 @@ import { STORE } from "../../../document/store";
 import type { EAnyElement, EElementType } from "../../../document/types.elements";
 import type { UUID } from "../../../document/types.misc";
 import { makeSortable } from "../../../miscellaneous/make-sortable";
-import { UI_STATE } from "../../../ui-state/ui-state";
+import { UI_STATE } from "../../../ui-state/EUIState";
 import type { EAnyElementBuilder } from "../../builders/elements/types";
 import type { ElementEntry } from "./registry";
 import { DEFAULT_BUILDER_TYPE, ELEMENT_REGISTRY } from "./registry";
@@ -119,10 +120,12 @@ export class EElementsTab {
   }
 
   private readonly onSetup = (): void => {
+    consoleDebug("[EElementsTab] onSetup");
     this.onActiveLayerChanged(undefined);
   };
 
   private readonly onCardListChanged = (delta: EStoreDeltaElements): void => {
+    consoleDebug("[EElementsTab] onCardListChanged:", delta);
     if (delta.layerUuid !== UI_STATE.activeLayerUuid) {
       return;
     }
@@ -141,6 +144,7 @@ export class EElementsTab {
   };
 
   private readonly onActiveLayerChanged = (uuid?: UUID): void => {
+    consoleDebug("[EElementsTab] onActiveLayerChanged:", uuid);
     for (const cardContainer of this.cardUuidToCardContainer.values()) {
       cardContainer.remove();
     }

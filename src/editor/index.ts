@@ -1,7 +1,9 @@
+import { EDebug } from "./src/components/debug/EDebug";
 import { EConstraintsTab } from "./src/components/tabs/constraints/EConstraintsTab";
 import { EElementsTab } from "./src/components/tabs/elements/EElementsTab";
 import { ELayersTab } from "./src/components/tabs/layers/ELayersTab";
 import { EProjectTab } from "./src/components/tabs/project/EProjectTab";
+import { EActiveLayerGuard } from "./src/miscellaneous/EActiveLayerGuard";
 import { EDocumentAutoload } from "./src/miscellaneous/EDocumentAutoload";
 import { EDocumentAutosave } from "./src/miscellaneous/EDocumentAutosave";
 
@@ -25,11 +27,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const layersContainerElementId = "tab-layers";
   const elementsContainerElementId = "tab-elements";
   const constraintsContainerElementId = "tab-constraints";
+  const viewportToolbarContainerElementId = "viewport-toolbar";
 
   const projectContainer = document.getElementById(projectContainerElementId);
   const layersContainer = document.getElementById(layersContainerElementId);
   const elementsContainer = document.getElementById(elementsContainerElementId);
   const constraintsContainer = document.getElementById(constraintsContainerElementId);
+  const viewportToolbarContainer = document.getElementById(viewportToolbarContainerElementId);
 
   if (!projectContainer) {
     throw new Error(
@@ -51,14 +55,22 @@ document.addEventListener("DOMContentLoaded", () => {
       `[DOMContentLoaded] constraintsContainer is not defined with id "${constraintsContainerElementId}"`,
     );
   }
+  if (!viewportToolbarContainer) {
+    throw new Error(
+      `[DOMContentLoaded] viewportToolbarContainer is not defined with id "${viewportToolbarContainerElementId}"`,
+    );
+  }
 
   void (async (): Promise<void> => {
     await EDocumentAutoload.load();
 
+    new EActiveLayerGuard();
     new EDocumentAutosave();
+
     new ELayersTab(layersContainer);
     new EElementsTab(elementsContainer);
     new EConstraintsTab(constraintsContainer);
     new EProjectTab(projectContainer);
+    new EDebug(viewportToolbarContainer);
   })();
 });

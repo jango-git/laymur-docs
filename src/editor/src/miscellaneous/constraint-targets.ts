@@ -1,6 +1,6 @@
 import { STORE } from "../document/store";
 import type { EAnyElement } from "../document/types.elements";
-import { UI_STATE } from "../ui-state/ui-state";
+import { UI_STATE } from "../ui-state/EUIState";
 
 export interface EConstraintTarget {
   uuid: string;

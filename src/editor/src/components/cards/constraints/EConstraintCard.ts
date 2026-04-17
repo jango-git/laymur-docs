@@ -29,7 +29,7 @@ export abstract class EConstraintCard {
     header.appendChild(dragHandle);
     header.appendChild(typeSpan);
 
-    this.nameControl = new EStringControl(header, { placeholder: "Name" });
+    this.nameControl = new EStringControl(header, { placeholder: "name" });
 
     const deleteButton = document.createElement("button");
     deleteButton.className = "element-card__delete";

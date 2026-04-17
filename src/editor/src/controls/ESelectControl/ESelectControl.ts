@@ -94,7 +94,6 @@ export class ESelectControl<T> {
     }
     const previousValue = this.currentValue;
     this.currentValue = value;
-    console.debug("[ESelectControl] value: %o → %o", previousValue, this.currentValue);
     this.signalValueChangedInternal.emit(this.currentValue, previousValue);
   }
 }

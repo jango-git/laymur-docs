@@ -1,8 +1,6 @@
 const DB_NAME = "laymur";
 const DB_VERSION = 1;
-const STORE_NAME = "project";
-
-export { STORE_NAME };
+export const STORE_NAME = "project";
 
 export function openDatabase(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {

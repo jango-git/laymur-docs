@@ -34,21 +34,21 @@ export class EFullscreenLayerCard extends ELayerCard {
 
     this.horizontalRow = makeRow(this.bodyRoot, "Horizontal");
     this.horizontalControl = new ENumberControl(this.horizontalRow, {
-      value: 0,
-      min: 0,
+      value: 1920,
+      min: 2,
       max: LARGE,
       step: 1,
-      precision: 2,
+      precision: 0,
     });
     this.horizontalControl.signalValueChanged.on(this.onHorizontalChanged);
 
     this.verticalRow = makeRow(this.bodyRoot, "Vertical");
     this.verticalControl = new ENumberControl(this.verticalRow, {
-      value: 0,
-      min: 0,
+      value: 1920,
+      min: 2,
       max: LARGE,
       step: 1,
-      precision: 2,
+      precision: 0,
     });
     this.verticalControl.signalValueChanged.on(this.onVerticalChanged);
 

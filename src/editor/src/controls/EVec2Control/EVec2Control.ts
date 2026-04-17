@@ -63,6 +63,26 @@ export class EVec2Control {
     this.yControl.value = next[1];
   }
 
+  public set min(min: number) {
+    this.xControl.min = min;
+    this.yControl.min = min;
+  }
+
+  public set max(max: number) {
+    this.xControl.max = max;
+    this.yControl.max = max;
+  }
+
+  public set step(step: number) {
+    this.xControl.step = step;
+    this.yControl.step = step;
+  }
+
+  public set precision(precision: number) {
+    this.xControl.precision = precision;
+    this.yControl.precision = precision;
+  }
+
   private readonly handleXChanged = (next: number, prev: number): void => {
     this.signalValueChangedInternal.emit([next, this.yControl.value], [prev, this.yControl.value]);
   };

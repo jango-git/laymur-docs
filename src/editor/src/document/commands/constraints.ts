@@ -1,3 +1,4 @@
+import { consoleDebug } from "../../miscellaneous/debug.print";
 import type { EStoreSignalsConstraints } from "../signals";
 import { EStoreDeltaOperation } from "../signals";
 import type { EDocument, ELayerContext, PartialExceptUUIDField } from "../types";
@@ -24,6 +25,7 @@ export class EStoreCommandsConstraints {
   public add(layerUuid: UUID, constraint: EAnyConstraint): void {
     const stored = clone(constraint);
     this.getContext(layerUuid).constraints.push(stored);
+    consoleDebug("[EStoreCommandsConstraints] command 'add' was evaluated", constraint);
     this.signals["emitList"]({
       operation: EStoreDeltaOperation.ADD,
       layerUuid,
@@ -38,6 +40,7 @@ export class EStoreCommandsConstraints {
       throw new Error(`[EStoreCommandsConstraints] Constraint not found: (uuid: ${uuid})`);
     }
     layerContext.constraints.splice(index, 1);
+    consoleDebug("[EStoreCommandsConstraints] command 'remove' was evaluated", uuid);
     this.signals["emitList"]({ operation: EStoreDeltaOperation.REMOVE, layerUuid, uuid });
   }
 
@@ -47,6 +50,7 @@ export class EStoreCommandsConstraints {
     layerContext.constraints.sort(
       (first, second) => uuidsCopy.indexOf(first.uuid) - uuidsCopy.indexOf(second.uuid),
     );
+    consoleDebug("[EStoreCommandsConstraints] command 'reorder' was evaluated", uuids);
     this.signals["emitList"]({
       operation: EStoreDeltaOperation.REORDER,
       layerUuid,
@@ -66,6 +70,7 @@ export class EStoreCommandsConstraints {
     if (copy.aspect !== undefined) {
       constraint.aspect = copy.aspect;
     }
+    consoleDebug("[EStoreCommandsConstraints] command 'writeAspect' was evaluated", data);
     this.signals["emitItem"]({ constraint: clone(constraint) });
   }
 
@@ -95,6 +100,10 @@ export class EStoreCommandsConstraints {
     if (copy.distance !== undefined) {
       constraint.distance = copy.distance;
     }
+    consoleDebug(
+      "[EStoreCommandsConstraints] command 'writeHorizontalDistance' was evaluated",
+      data,
+    );
     this.signals["emitItem"]({ constraint: clone(constraint) });
   }
 
@@ -122,6 +131,7 @@ export class EStoreCommandsConstraints {
     if (copy.distance !== undefined) {
       constraint.distance = copy.distance;
     }
+    consoleDebug("[EStoreCommandsConstraints] command 'writeVerticalDistance' was evaluated", data);
     this.signals["emitItem"]({ constraint: clone(constraint) });
   }
 
@@ -145,6 +155,10 @@ export class EStoreCommandsConstraints {
     if (copy.proportion !== undefined) {
       constraint.proportion = copy.proportion;
     }
+    consoleDebug(
+      "[EStoreCommandsConstraints] command 'writeHorizontalProportion' was evaluated",
+      data,
+    );
     this.signals["emitItem"]({ constraint: clone(constraint) });
   }
 
@@ -168,6 +182,10 @@ export class EStoreCommandsConstraints {
     if (copy.proportion !== undefined) {
       constraint.proportion = copy.proportion;
     }
+    consoleDebug(
+      "[EStoreCommandsConstraints] command 'writeVerticalProportion' was evaluated",
+      data,
+    );
     this.signals["emitItem"]({ constraint: clone(constraint) });
   }
 
@@ -186,6 +204,7 @@ export class EStoreCommandsConstraints {
     if (copy.size !== undefined) {
       constraint.size = copy.size;
     }
+    consoleDebug("[EStoreCommandsConstraints] command 'writeHorizontalSize' was evaluated", data);
     this.signals["emitItem"]({ constraint: clone(constraint) });
   }
 
@@ -201,6 +220,7 @@ export class EStoreCommandsConstraints {
     if (copy.size !== undefined) {
       constraint.size = copy.size;
     }
+    consoleDebug("[EStoreCommandsConstraints] command 'writeVerticalSize' was evaluated", data);
     this.signals["emitItem"]({ constraint: clone(constraint) });
   }
 

@@ -1,0 +1,48 @@
+.debug-toggle {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  margin-left: auto;
+}
+
+.debug-toggle__popup {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 200;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  padding: 6px 0;
+  width: 220px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.debug-toggle:hover .debug-toggle__popup,
+.debug-toggle__popup:hover {
+  display: block;
+}
+
+.debug-toggle__popup .element-card__body {
+  width: 100%;
+}
+
+.debug-toggle__popup .element-card__row {
+  width: 100%;
+  cursor: default;
+  padding: 2px 8px;
+}
+
+.debug-toggle__popup .element-card__label {
+  width: auto;
+  flex: 1;
+}
+
+.debug-toggle__popup .bool-control {
+  flex-shrink: 0;
+}
+
+.debug-toggle__popup .element-card__row:hover {
+  background: var(--overlay-hover);
+}

@@ -1,5 +1,6 @@
 import type { FerrsignView1 } from "ferrsign";
 import { Ferrsign1 } from "ferrsign";
+import { consoleDebug } from "../../miscellaneous/debug.print";
 import type { EAnyConstraint } from "../types.constraints";
 import type { UUID } from "../types.misc";
 import type { EStoreDeltaOperation } from "./index";
@@ -26,10 +27,12 @@ export class EStoreSignalsConstraints {
   }
 
   protected emitList(delta: EStoreDeltaConstraints): void {
+    consoleDebug(`[EStoreSignalsConstraints] emit list:`, delta);
     this.listInternal.emit(delta);
   }
 
   protected emitItem(delta: EStoreDeltaConstraint): void {
+    consoleDebug(`[EStoreSignalsConstraints] emit item:`, delta);
     this.itemInternal.emit(delta);
   }
 }

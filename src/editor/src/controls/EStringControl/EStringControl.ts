@@ -120,7 +120,6 @@ export class EStringControl {
     }
     const previousValue = this.currentValue;
     this.currentValue = value;
-    console.debug("[EStringControl] value: %o → %o", previousValue, this.currentValue);
     this.refreshDisplay();
     this.signalValueChangedInternal.emit(this.currentValue, previousValue);
   }

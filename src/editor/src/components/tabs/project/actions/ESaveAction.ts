@@ -1,7 +1,9 @@
+import { consoleDebug } from "../../../../miscellaneous/debug.print";
 import { STORE } from "../../../../document/store";
 
 export class ESaveAction {
   public execute(): void {
+    consoleDebug("[ESaveAction] execute");
     const document = STORE.selectors.all();
     const json = JSON.stringify(document, null, 2);
     const blob = new Blob([json], { type: "application/json" });

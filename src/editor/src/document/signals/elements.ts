@@ -1,5 +1,6 @@
 import type { FerrsignView1 } from "ferrsign";
 import { Ferrsign1 } from "ferrsign";
+import { consoleDebug } from "../../miscellaneous/debug.print";
 import type { EAnyElement } from "../types.elements";
 import type { UUID } from "../types.misc";
 import type { EStoreDeltaOperation } from "./index";
@@ -26,10 +27,12 @@ export class EStoreSignalsElements {
   }
 
   protected emitList(delta: EStoreDeltaElements): void {
+    consoleDebug(`[EStoreSignalsElements] emit list:`, delta);
     this.listInternal.emit(delta);
   }
 
   protected emitItem(delta: EStoreDeltaElement): void {
+    consoleDebug(`[EStoreSignalsElements] emit item:`, delta);
     this.itemInternal.emit(delta);
   }
 }

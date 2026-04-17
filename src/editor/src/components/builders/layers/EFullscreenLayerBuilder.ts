@@ -3,7 +3,7 @@ import { STORE } from "../../../document/store";
 import type { ELayerContext } from "../../../document/types";
 import { ELayerType } from "../../../document/types.layers";
 import { EResizePolicyType } from "../../../document/types.misc";
-import { UI_STATE } from "../../../ui-state/ui-state";
+import { UI_STATE } from "../../../ui-state/EUIState";
 import { TOAST } from "../../toast/EToast";
 
 export class EFullscreenLayerBuilder {
@@ -34,15 +34,6 @@ export class EFullscreenLayerBuilder {
         name: this.nameControl.value,
         resizePolicy: EResizePolicyType.NONE,
         resizePolicyParameters: [1920, 1920],
-      },
-      debug: {
-        showAspect: false,
-        showHeight: false,
-        showWidth: false,
-        showHorizontalDistance: false,
-        showHorizontalInterpolation: false,
-        showVerticalDistance: false,
-        showVerticalInterpolation: false,
       },
       elements: [],
       constraints: [],
