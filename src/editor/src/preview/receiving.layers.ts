@@ -1,6 +1,6 @@
 import { UIFullscreenLayer } from "laymur";
 import { UILayerDebug } from "laymur/debug";
-import type { ELayerContext as EDocLayerContext } from "../document/types";
+import type { ELayerContext } from "../document/types";
 import type { EAnyLayer } from "../document/types.layers";
 import type { UUID } from "../document/types.misc";
 import {
@@ -13,24 +13,24 @@ import {
 } from "./miscellaneous";
 import { addConstraint } from "./receiving.constraints";
 import { addElement } from "./receiving.elements";
-import type { UILayerContext } from "./types";
+import type { EPreviewLayerContext } from "./types";
 
-export function addLayerContext(docLayerContext: EDocLayerContext): void {
-  const { layer, elements, constraints } = docLayerContext;
+export function addLayerContext(layerContext: ELayerContext): void {
+  const { layer, elements, constraints } = layerContext;
 
   const uiLayer = new UIFullscreenLayer({
     name: layer.name,
     resizePolicy: buildResizePolicy(layer.resizePolicy, layer.resizePolicyParameters),
   });
 
-  const layerCtx: UILayerContext = {
+  const previewLayerContext: EPreviewLayerContext = {
     layer: uiLayer,
     debug: new UILayerDebug(uiLayer),
     elements: new Map(),
     constraints: new Map(),
   };
 
-  LAYER_DATABASE.set(layer.uuid, layerCtx);
+  LAYER_DATABASE.set(layer.uuid, previewLayerContext);
   setLayerContextActive(layer.uuid, true);
 
   for (const element of elements) {
@@ -42,20 +42,20 @@ export function addLayerContext(docLayerContext: EDocLayerContext): void {
 }
 
 export function removeLayerContext(uuid: UUID): void {
-  const ctx = resolveLayerContext(uuid);
+  const layerContext = resolveLayerContext(uuid);
 
   if (isLayerContextActive(uuid)) {
     resetLayerContextActive();
   }
 
-  ctx.debug.destroy();
-  for (const c of ctx.constraints.values()) {
-    c.destroy();
+  layerContext.debug.destroy();
+  for (const constraint of layerContext.constraints.values()) {
+    constraint.destroy();
   }
-  for (const e of ctx.elements.values()) {
-    e.destroy();
+  for (const element of layerContext.elements.values()) {
+    element.destroy();
   }
-  ctx.layer.destroy();
+  layerContext.layer.destroy();
   LAYER_DATABASE.delete(uuid);
 }
 

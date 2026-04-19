@@ -1,9 +1,10 @@
 import type { EAnyConstraint } from "../../../../../document/types.constraints";
 import { EConstraintType } from "../../../../../document/types.constraints";
+import type { UUID } from "../../../../../document/types.misc";
 
 export function generateConstraintStatement(
   constraint: EAnyConstraint,
-  ref: (uuid: string) => string,
+  ref: (uuid: UUID) => string,
 ): { code: string; imports: string[] } {
   switch (constraint.type) {
     case EConstraintType.ASPECT:

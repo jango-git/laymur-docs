@@ -53,7 +53,7 @@ export class EStoreSelectorsConstraints {
     return clone(result);
   }
 
-  public selectLayerInfo(layerUuid: UUID): { uuid: string; name: string } | undefined {
+  public selectLayerInfo(layerUuid: UUID): { uuid: UUID; name: string } | undefined {
     const layerContext = this.data.layerContexts.find(
       (context) => context.layer.uuid === layerUuid,
     );

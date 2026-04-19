@@ -3,6 +3,7 @@ import type { EStoreDeltaAssetList } from "../../../document/signals/assets";
 import { STORE } from "../../../document/store";
 import type { EAnyAsset } from "../../../document/types.assets";
 import { EAssetType } from "../../../document/types.assets";
+import type { UUID } from "../../../document/types.misc";
 import { consoleDebug } from "../../../miscellaneous/debug.print";
 import { EFontAssetCard } from "../../cards/assets/EFontAssetCard";
 import { EImageAssetCard } from "../../cards/assets/EImageAssetCard";
@@ -130,7 +131,7 @@ export class EProjectTab {
     this.cardMap.set(asset.uuid, this.cardList.lastElementChild as HTMLElement);
   }
 
-  private removeCard(uuid: string): void {
+  private removeCard(uuid: UUID): void {
     this.cardMap.get(uuid)?.remove();
     this.cardMap.delete(uuid);
   }

@@ -3,6 +3,7 @@ import type { EAnyAsset } from "./types.assets";
 import type { EAnyConstraint } from "./types.constraints";
 import type { EAnyElement } from "./types.elements";
 import type { EAnyLayer } from "./types.layers";
+import type { UUID } from "./types.misc";
 
 export interface ELayerContext {
   layer: EAnyLayer;
@@ -15,7 +16,7 @@ export interface EDocument {
   layerContexts: ELayerContext[];
 }
 
-export type PartialExceptUUIDField<T extends { uuid: string }> = Partial<Omit<T, "uuid">> &
+export type PartialExceptUUIDField<T extends { uuid: UUID }> = Partial<Omit<T, "uuid">> &
   Required<Pick<T, "uuid">>;
 
 export const clone = rfdc();

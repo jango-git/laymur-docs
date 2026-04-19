@@ -14,7 +14,7 @@ import {
   applyDrawSequence,
   buildCSSColor,
   buildLoopMode,
-  buildMaskFunction,
+  buildProgressMaskFunction,
   buildRegionMode,
   buildTextContent,
   buildTextResizeMode,
@@ -27,86 +27,109 @@ import {
   resolveTextureAsset,
 } from "./miscellaneous";
 
-export function addElement(layerUuid: string, element: EAnyElement): void {
-  ensureUniqueElement(element.uuid);
-  const ctx = resolveLayerContext(layerUuid);
+export function addElement(layerUuid: UUID, data: EAnyElement): void {
+  ensureUniqueElement(data.uuid);
+  const layerContext = resolveLayerContext(layerUuid);
 
-  switch (element.type) {
+  switch (data.type) {
     case EElementType.ANIMATED_IMAGE: {
-      const e = new UIAnimatedImage(ctx.layer, element.sequence.map(resolveTextureAsset), {
-        name: element.name,
-        color: buildCSSColor(element.color),
-        frameRate: element.frameRate,
-        timeScale: element.timeScale,
-        loopMode: buildLoopMode(element.loopMode),
-        playByDefault: element.playByDefault,
-      });
-      ctx.elements.set(element.uuid, e);
+      const element = new UIAnimatedImage(
+        layerContext.layer,
+        data.sequence.map(resolveTextureAsset),
+        {
+          name: data.name,
+          color: buildCSSColor(data.color),
+          frameRate: data.frameRate,
+          timeScale: data.timeScale,
+          loopMode: buildLoopMode(data.loopMode),
+          playByDefault: data.playByDefault,
+        },
+      );
+      layerContext.elements.set(data.uuid, element);
       break;
     }
     case EElementType.GRAPHICS: {
-      const e = new UIGraphics(ctx.layer, {
-        width: element.resolution[0],
-        height: element.resolution[1],
-        color: buildCSSColor(element.color),
-        name: element.name,
+      const e = new UIGraphics(layerContext.layer, {
+        width: data.resolution[0],
+        height: data.resolution[1],
+        color: buildCSSColor(data.color),
+        name: data.name,
       });
-      applyDrawSequence(e, element.drawSequence);
-      ctx.elements.set(element.uuid, e);
+      applyDrawSequence(e, data.drawSequence);
+      layerContext.elements.set(data.uuid, e);
       break;
     }
     case EElementType.IMAGE: {
-      const e = new UIImage(ctx.layer, resolveTextureAsset(element.texture), {
-        color: buildCSSColor(element.color),
-        name: element.name,
+      const e = new UIImage(layerContext.layer, resolveTextureAsset(data.texture), {
+        color: buildCSSColor(data.color),
+        name: data.name,
       });
-      ctx.elements.set(element.uuid, e);
+      layerContext.elements.set(data.uuid, e);
       break;
     }
     case EElementType.NINE_SLICE: {
-      const e = new UINineSlice(ctx.layer, resolveTextureAsset(element.texture), {
-        color: buildCSSColor(element.color),
-        name: element.name,
-        regionMode: buildRegionMode(element.regionMode),
-        sliceBorders: element.sliceBorders,
-        sliceRegions: element.sliceRegions,
+      const e = new UINineSlice(layerContext.layer, resolveTextureAsset(data.texture), {
+        color: buildCSSColor(data.color),
+        name: data.name,
+        regionMode: buildRegionMode(data.regionMode),
+        sliceBorders: data.sliceBorders,
+        sliceRegions: data.sliceRegions,
       });
-      ctx.elements.set(element.uuid, e);
+      layerContext.elements.set(data.uuid, e);
       break;
     }
     case EElementType.PROGRESS: {
-      const e = new UIProgress(ctx.layer, resolveTextureAsset(element.texture), {
-        name: element.name,
-        color: buildCSSColor(element.color),
-        maskFunction: buildMaskFunction(element.maskFunction),
-        progress: element.progress,
+      const e = new UIProgress(layerContext.layer, resolveTextureAsset(data.texture), {
+        name: data.name,
+        color: buildCSSColor(data.color),
+        maskFunction: buildProgressMaskFunction(data.maskFunction),
+        progress: data.progress,
       });
-      ctx.elements.set(element.uuid, e);
+      layerContext.elements.set(data.uuid, e);
       break;
     }
     case EElementType.SCENE: {
       console.warn("[preview] UIScene.enableDepthBuffer is not supported, ignoring");
-      const e = new UIScene(ctx.layer, {
-        name: element.name,
-        color: buildCSSColor(element.color),
-        clearColor: buildCSSColor(element.clearColor),
-        resolutionFactor: element.resolutionFactor,
-        updateMode: buildUpdateMode(element.updateMode),
+      const e = new UIScene(layerContext.layer, {
+        name: data.name,
+        color: buildCSSColor(data.color),
+        clearColor: buildCSSColor(data.clearColor),
+        resolutionFactor: data.resolutionFactor,
+        updateMode: buildUpdateMode(data.updateMode),
       });
-      ctx.elements.set(element.uuid, e);
+      layerContext.elements.set(data.uuid, e);
       break;
     }
     case EElementType.TEXT: {
-      const e = new UIText(ctx.layer, buildTextContent(element.content), {
-        name: element.name,
-        color: buildCSSColor(element.color),
-        maxLineWidth: element.maxLineWidth,
-        resizeMode: buildTextResizeMode(element.resizeMode),
+      const e = new UIText(layerContext.layer, buildTextContent(data.content), {
+        name: data.name,
+        color: buildCSSColor(data.color),
+        maxLineWidth: data.maxLineWidth,
+        resizeMode: buildTextResizeMode(data.resizeMode),
       });
-      ctx.elements.set(element.uuid, e);
+      layerContext.elements.set(data.uuid, e);
       break;
     }
   }
+}
+
+export function removeElement(layerUuid: UUID, uuid: UUID): void {
+  const element = resolveElement(layerUuid, uuid);
+
+  for (const layerContext of LAYER_DATABASE.values()) {
+    for (const constraint of layerContext.constraints.values()) {
+      if (
+        ("element" in constraint && constraint.element === element) ||
+        ("a" in constraint && constraint.a === element) ||
+        ("b" in constraint && constraint.b === element)
+      ) {
+        throw new Error(`Element ${uuid} is referenced by a constraint`);
+      }
+    }
+  }
+
+  element.destroy();
+  resolveLayerContext(layerUuid).elements.delete(uuid);
 }
 
 export function updateElement(element: EAnyElement): void {
@@ -152,7 +175,7 @@ export function updateElement(element: EAnyElement): void {
       e.name = element.name;
       e.color = buildCSSColor(element.color);
       e.texture.set(resolveTextureAsset(element.texture));
-      e.maskFunction = buildMaskFunction(element.maskFunction);
+      e.maskFunction = buildProgressMaskFunction(element.maskFunction);
       e.progress = element.progress;
       break;
     }
@@ -176,23 +199,4 @@ export function updateElement(element: EAnyElement): void {
       break;
     }
   }
-}
-
-export function removeElement(layerUuid: UUID, uuid: UUID): void {
-  const element = resolveElement(layerUuid, uuid);
-
-  for (const layerContext of LAYER_DATABASE.values()) {
-    for (const constraint of layerContext.constraints.values()) {
-      if (
-        ("element" in constraint && constraint.element === element) ||
-        ("a" in constraint && constraint.a === element) ||
-        ("b" in constraint && constraint.b === element)
-      ) {
-        throw new Error(`Element ${uuid} is referenced by a constraint`);
-      }
-    }
-  }
-
-  element.destroy();
-  resolveLayerContext(layerUuid).elements.delete(uuid);
 }

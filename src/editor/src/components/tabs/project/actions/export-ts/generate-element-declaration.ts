@@ -1,12 +1,13 @@
 import type { EAnyElement } from "../../../../../document/types.elements";
 import { EElementType } from "../../../../../document/types.elements";
+import type { UUID } from "../../../../../document/types.misc";
 
 export function generateElementDeclaration(
   name: string,
   element: EAnyElement,
   assetMap: Map<string, string>,
 ): { code: string; imports: string[] } {
-  const assetRef = (uuid: string): string => {
+  const assetRef = (uuid: UUID): string => {
     const assetName = assetMap.get(uuid);
     return assetName !== undefined ? `/* TODO: ${assetName} */` : `/* TODO: unknown asset */`;
   };

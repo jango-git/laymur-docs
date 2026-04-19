@@ -15,9 +15,7 @@ import {
   UITextResizeMode,
 } from "laymur";
 import { SRGBColorSpace, Texture, TextureLoader } from "three";
-import type { EAnyAsset } from "../document/types.assets";
-import { EAssetType } from "../document/types.assets";
-import type { EAnyGraphicsDrawCommand, EColor, ETextChunk } from "../document/types.misc";
+import type { EAnyGraphicsDrawCommand, EColor, ETextChunk, UUID } from "../document/types.misc";
 import {
   EAnimatedImageLoopMode,
   EGraphicsDrawCommandType,
@@ -30,25 +28,37 @@ import {
   ETextFontWeight,
   ETextResizeMode,
 } from "../document/types.misc";
-import type { EAssetRawDataType, UIAnyConstraint, UIAnyElement, UILayerContext } from "./types";
+import type {
+  EAnyUIConstraint,
+  EAnyUIElement,
+  EAssetDataType,
+  EPreviewLayerContext,
+} from "./types";
 
-export const LAYER_DATABASE = new Map<string, UILayerContext>();
-export const ASSET_DATABASE = new Map<string, EAssetRawDataType>();
+export const LAYER_DATABASE = new Map<string, EPreviewLayerContext>();
+export const ASSET_DATABASE = new Map<string, EAssetDataType>();
 
-let LAYER_ACTIVE: UILayerContext | undefined;
+let LAYER_ACTIVE: EPreviewLayerContext | undefined;
 
 const TEXTURE_LOADER = new TextureLoader();
 
 export async function loadTexture(dataURL: string): Promise<Texture> {
   return new Promise((resolve) => {
-    TEXTURE_LOADER.load(dataURL, (texture) => {
-      texture.colorSpace = SRGBColorSpace;
-      resolve(texture);
-    });
+    TEXTURE_LOADER.load(
+      dataURL,
+      (texture) => {
+        texture.colorSpace = SRGBColorSpace;
+        resolve(texture);
+      },
+      undefined,
+      (error) => {
+        throw new Error(`Failed to load texture: ${error}`);
+      },
+    );
   });
 }
 
-export function setLayerContextActive(uuid: string, isActive: boolean): void {
+export function setLayerContextActive(uuid: UUID, isActive: boolean): void {
   LAYER_ACTIVE = isActive ? resolveLayerContext(uuid) : undefined;
 }
 
@@ -56,12 +66,100 @@ export function resetLayerContextActive(): void {
   LAYER_ACTIVE = undefined;
 }
 
-export function getLayerContextActive(): UILayerContext | undefined {
+export function getLayerContextActive(): EPreviewLayerContext | undefined {
   return LAYER_ACTIVE;
 }
 
-export function isLayerContextActive(uuid: string): boolean {
+export function isLayerContextActive(uuid: UUID): boolean {
   return LAYER_ACTIVE === LAYER_DATABASE.get(uuid);
+}
+
+export function resolveLayerContext(uuid: UUID): EPreviewLayerContext {
+  const layerData = LAYER_DATABASE.get(uuid);
+  if (!layerData) {
+    throw new Error(`Layer not found: ${uuid}`);
+  }
+  return layerData;
+}
+
+export function resolveElement(uuidOwner: UUID, uuid: UUID): EAnyUIElement {
+  const element = resolveLayerContext(uuidOwner).elements.get(uuid);
+  if (!element) {
+    throw new Error(`Element not found: ${uuid}`);
+  }
+  return element;
+}
+
+export function resolveConstraint(uuidOwner: UUID, uuid: UUID): EAnyUIConstraint {
+  const constraint = resolveLayerContext(uuidOwner).constraints.get(uuid);
+  if (!constraint) {
+    throw new Error(`Constraint not found: ${uuid}`);
+  }
+  return constraint;
+}
+
+export function resolveAsset(uuid: UUID): EAssetDataType {
+  const asset = ASSET_DATABASE.get(uuid);
+  if (!asset) {
+    throw new Error(`Asset not found: ${uuid}`);
+  }
+  return asset;
+}
+
+export function resolveTextureAsset(uuid: UUID): Texture {
+  const asset = resolveAsset(uuid);
+  if (!(asset instanceof Texture)) {
+    throw new Error(`Asset is not a texture: ${uuid}`);
+  }
+  return asset;
+}
+
+export function resolveFontAsset(uuid: UUID): FontFace {
+  const asset = resolveAsset(uuid);
+  if (!(asset instanceof FontFace)) {
+    throw new Error(`Asset is not a font: ${uuid}`);
+  }
+  return asset;
+}
+
+export function ensureUniqueElement(uuid: UUID): void {
+  for (const { elements } of LAYER_DATABASE.values()) {
+    if (elements.has(uuid)) {
+      throw new Error(`Element already exists: ${uuid}`);
+    }
+  }
+}
+
+export function ensureUniqueConstraint(uuid: UUID): void {
+  for (const { constraints } of LAYER_DATABASE.values()) {
+    if (constraints.has(uuid)) {
+      throw new Error(`Constraint already exists: ${uuid}`);
+    }
+  }
+}
+
+export function ensureUniqueAsset(uuid: UUID): void {
+  if (ASSET_DATABASE.has(uuid)) {
+    throw new Error(`Asset already exists: ${uuid}`);
+  }
+}
+
+export function findLayerUuidForElement(elementUuid: UUID): string {
+  for (const [layerUuid, ctx] of LAYER_DATABASE.entries()) {
+    if (ctx.elements.has(elementUuid)) {
+      return layerUuid;
+    }
+  }
+  throw new Error(`Element not found in any layer: ${elementUuid}`);
+}
+
+export function findLayerUuidForConstraint(constraintUuid: UUID): UUID {
+  for (const [layerUuid, ctx] of LAYER_DATABASE.entries()) {
+    if (ctx.constraints.has(constraintUuid)) {
+      return layerUuid;
+    }
+  }
+  throw new Error(`Constraint not found in any layer: ${constraintUuid}`);
 }
 
 export function buildResizePolicy(
@@ -101,7 +199,7 @@ export function buildCSSColor(eColor: EColor): string {
   return `${eColor.color}${alphaHex}`;
 }
 
-export function buildMaskFunction(
+export function buildProgressMaskFunction(
   maskFunction: EProgressMaskFunction,
 ): UIProgressMaskFunctionCircular | UIProgressMaskFunctionDirectional {
   switch (maskFunction) {
@@ -112,94 +210,6 @@ export function buildMaskFunction(
     default:
       throw new Error(`Unknown mask function: ${maskFunction}`);
   }
-}
-
-export function resolveLayerContext(uuid: string): UILayerContext {
-  const layerData = LAYER_DATABASE.get(uuid);
-  if (!layerData) {
-    throw new Error(`Layer not found: ${uuid}`);
-  }
-  return layerData;
-}
-
-export function resolveElement(uuidOwner: string, uuid: string): UIAnyElement {
-  const element = resolveLayerContext(uuidOwner).elements.get(uuid);
-  if (!element) {
-    throw new Error(`Element not found: ${uuid}`);
-  }
-  return element;
-}
-
-export function resolveConstraint(uuidOwner: string, uuid: string): UIAnyConstraint {
-  const constraint = resolveLayerContext(uuidOwner).constraints.get(uuid);
-  if (!constraint) {
-    throw new Error(`Constraint not found: ${uuid}`);
-  }
-  return constraint;
-}
-
-export function resolveAsset(uuid: string): EAssetRawDataType {
-  const asset = ASSET_DATABASE.get(uuid);
-  if (!asset) {
-    throw new Error(`Asset not found: ${uuid}`);
-  }
-  return asset;
-}
-
-export function resolveTextureAsset(uuid: string): Texture {
-  const asset = resolveAsset(uuid);
-  if (!(asset instanceof Texture)) {
-    throw new Error(`Asset is not a texture: ${uuid}`);
-  }
-  return asset;
-}
-
-export function resolveFontAsset(uuid: string): FontFace {
-  const asset = resolveAsset(uuid);
-  if (!(asset instanceof FontFace)) {
-    throw new Error(`Asset is not a font: ${uuid}`);
-  }
-  return asset;
-}
-
-export function ensureUniqueElement(uuid: string): void {
-  for (const { elements } of LAYER_DATABASE.values()) {
-    if (elements.has(uuid)) {
-      throw new Error(`Element already exists: ${uuid}`);
-    }
-  }
-}
-
-export function ensureUniqueConstraint(uuid: string): void {
-  for (const { constraints } of LAYER_DATABASE.values()) {
-    if (constraints.has(uuid)) {
-      throw new Error(`Constraint already exists: ${uuid}`);
-    }
-  }
-}
-
-export function ensureUniqueAsset(uuid: string): void {
-  if (ASSET_DATABASE.has(uuid)) {
-    throw new Error(`Asset already exists: ${uuid}`);
-  }
-}
-
-export function findLayerUuidForElement(elementUuid: string): string {
-  for (const [layerUuid, ctx] of LAYER_DATABASE.entries()) {
-    if (ctx.elements.has(elementUuid)) {
-      return layerUuid;
-    }
-  }
-  throw new Error(`Element not found in any layer: ${elementUuid}`);
-}
-
-export function findLayerUuidForConstraint(constraintUuid: string): string {
-  for (const [layerUuid, ctx] of LAYER_DATABASE.entries()) {
-    if (ctx.constraints.has(constraintUuid)) {
-      return layerUuid;
-    }
-  }
-  throw new Error(`Constraint not found in any layer: ${constraintUuid}`);
 }
 
 export function applyDrawSequence(
@@ -355,19 +365,5 @@ export function buildTextResizeMode(resizeMode: ETextResizeMode): UITextResizeMo
       return UITextResizeMode.SCALE;
     case ETextResizeMode.BREAK:
       return UITextResizeMode.BREAK;
-  }
-}
-
-export async function loadAsset(asset: EAnyAsset): Promise<void> {
-  ensureUniqueAsset(asset.uuid);
-
-  if (asset.type === EAssetType.FONT) {
-    const fontFace = new FontFace(asset.name, `url(${asset.dataURL})`);
-    await fontFace.load();
-    document.fonts.add(fontFace);
-    ASSET_DATABASE.set(asset.uuid, fontFace);
-  } else {
-    const texture = await loadTexture(asset.dataURL);
-    ASSET_DATABASE.set(asset.uuid, texture);
   }
 }

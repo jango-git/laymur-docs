@@ -9,6 +9,7 @@ import {
 } from "laymur";
 import type { EAnyConstraint } from "../document/types.constraints";
 import { EConstraintType } from "../document/types.constraints";
+import { UUID } from "../document/types.misc";
 import {
   ensureUniqueConstraint,
   findLayerUuidForConstraint,
@@ -17,77 +18,88 @@ import {
   resolveLayerContext,
 } from "./miscellaneous";
 
-export function addConstraint(layerUuid: string, constraint: EAnyConstraint): void {
+export function addConstraint(layerUuid: UUID, constraint: EAnyConstraint): void {
   ensureUniqueConstraint(constraint.uuid);
-  const ctx = resolveLayerContext(layerUuid);
+  const layerContext = resolveLayerContext(layerUuid);
 
   switch (constraint.type) {
     case EConstraintType.ASPECT: {
       const element = resolveElement(layerUuid, constraint.element);
-      const c = new UIAspectConstraint(element, {
+      const constraint = new UIAspectConstraint(element, {
         name: constraint.name,
         aspect: constraint.aspect,
       });
-      ctx.constraints.set(constraint.uuid, c);
+      layerContext.constraints.set(constraint.uuid, constraint);
       break;
     }
     case EConstraintType.DISTANCE_HORIZONTAL: {
       const elementA = resolveElement(layerUuid, constraint.elementA);
       const elementB = resolveElement(layerUuid, constraint.elementB);
-      const c = new UIHorizontalDistanceConstraint(elementA, elementB, {
+      const constraint = new UIHorizontalDistanceConstraint(elementA, elementB, {
         name: constraint.name,
         anchorA: constraint.anchorA,
         anchorB: constraint.anchorB,
         distance: constraint.distance,
       });
-      ctx.constraints.set(constraint.uuid, c);
+      layerContext.constraints.set(constraint.uuid, constraint);
       break;
     }
     case EConstraintType.DISTANCE_VERTICAL: {
       const elementA = resolveElement(layerUuid, constraint.elementA);
       const elementB = resolveElement(layerUuid, constraint.elementB);
-      const c = new UIVerticalDistanceConstraint(elementA, elementB, {
+      const constraint = new UIVerticalDistanceConstraint(elementA, elementB, {
         name: constraint.name,
         anchorA: constraint.anchorA,
         anchorB: constraint.anchorB,
         distance: constraint.distance,
       });
-      ctx.constraints.set(constraint.uuid, c);
+      layerContext.constraints.set(constraint.uuid, constraint);
       break;
     }
     case EConstraintType.PROPORTION_HORIZONTAL: {
       const elementA = resolveElement(layerUuid, constraint.elementA);
       const elementB = resolveElement(layerUuid, constraint.elementB);
-      const c = new UIHorizontalProportionConstraint(elementA, elementB, {
+      const constraint = new UIHorizontalProportionConstraint(elementA, elementB, {
         name: constraint.name,
         proportion: constraint.proportion,
       });
-      ctx.constraints.set(constraint.uuid, c);
+      layerContext.constraints.set(constraint.uuid, constraint);
       break;
     }
     case EConstraintType.PROPORTION_VERTICAL: {
       const elementA = resolveElement(layerUuid, constraint.elementA);
       const elementB = resolveElement(layerUuid, constraint.elementB);
-      const c = new UIVerticalProportionConstraint(elementA, elementB, {
+      const constraint = new UIVerticalProportionConstraint(elementA, elementB, {
         name: constraint.name,
         proportion: constraint.proportion,
       });
-      ctx.constraints.set(constraint.uuid, c);
+      layerContext.constraints.set(constraint.uuid, constraint);
       break;
     }
     case EConstraintType.SIZE_HORIZONTAL: {
       const element = resolveElement(layerUuid, constraint.element);
-      const c = new UIWidthConstraint(element, { name: constraint.name, width: constraint.size });
-      ctx.constraints.set(constraint.uuid, c);
+      const constraint = new UIWidthConstraint(element, {
+        name: constraint.name,
+        width: constraint.size,
+      });
+      layerContext.constraints.set(constraint.uuid, constraint);
       break;
     }
     case EConstraintType.SIZE_VERTICAL: {
       const element = resolveElement(layerUuid, constraint.element);
-      const c = new UIHeightConstraint(element, { name: constraint.name, height: constraint.size });
-      ctx.constraints.set(constraint.uuid, c);
+      const constraint = new UIHeightConstraint(element, {
+        name: constraint.name,
+        height: constraint.size,
+      });
+      layerContext.constraints.set(constraint.uuid, constraint);
       break;
     }
   }
+}
+
+export function removeConstraint(layerUuid: UUID, uuid: UUID): void {
+  resolveConstraint(layerUuid, uuid).destroy();
+  resolveLayerContext(layerUuid).constraints.delete(uuid);
 }
 
 export function updateConstraint(constraint: EAnyConstraint): void {
@@ -95,55 +107,62 @@ export function updateConstraint(constraint: EAnyConstraint): void {
 
   switch (constraint.type) {
     case EConstraintType.ASPECT: {
-      const c = resolveConstraint(layerUuid, constraint.uuid) as UIAspectConstraint;
-      c.name = constraint.name;
-      c.aspect = constraint.aspect;
+      const constraint = resolveConstraint(layerUuid, constraint.uuid) as UIAspectConstraint;
+      constraint.name = constraint.name;
+      constraint.aspect = constraint.aspect;
       break;
     }
     case EConstraintType.DISTANCE_HORIZONTAL: {
-      const c = resolveConstraint(layerUuid, constraint.uuid) as UIHorizontalDistanceConstraint;
-      c.name = constraint.name;
-      c.anchorA = constraint.anchorA;
-      c.anchorB = constraint.anchorB;
-      c.distance = constraint.distance;
+      const constraint = resolveConstraint(
+        layerUuid,
+        constraint.uuid,
+      ) as UIHorizontalDistanceConstraint;
+      constraint.name = constraint.name;
+      constraint.anchorA = constraint.anchorA;
+      constraint.anchorB = constraint.anchorB;
+      constraint.distance = constraint.distance;
       break;
     }
     case EConstraintType.DISTANCE_VERTICAL: {
-      const c = resolveConstraint(layerUuid, constraint.uuid) as UIVerticalDistanceConstraint;
-      c.name = constraint.name;
-      c.anchorA = constraint.anchorA;
-      c.anchorB = constraint.anchorB;
-      c.distance = constraint.distance;
+      const constraint = resolveConstraint(
+        layerUuid,
+        constraint.uuid,
+      ) as UIVerticalDistanceConstraint;
+      constraint.name = constraint.name;
+      constraint.anchorA = constraint.anchorA;
+      constraint.anchorB = constraint.anchorB;
+      constraint.distance = constraint.distance;
       break;
     }
     case EConstraintType.PROPORTION_HORIZONTAL: {
-      const c = resolveConstraint(layerUuid, constraint.uuid) as UIHorizontalProportionConstraint;
-      c.name = constraint.name;
-      c.proportion = constraint.proportion;
+      const constraint = resolveConstraint(
+        layerUuid,
+        constraint.uuid,
+      ) as UIHorizontalProportionConstraint;
+      constraint.name = constraint.name;
+      constraint.proportion = constraint.proportion;
       break;
     }
     case EConstraintType.PROPORTION_VERTICAL: {
-      const c = resolveConstraint(layerUuid, constraint.uuid) as UIVerticalProportionConstraint;
-      c.name = constraint.name;
-      c.proportion = constraint.proportion;
+      const constraint = resolveConstraint(
+        layerUuid,
+        constraint.uuid,
+      ) as UIVerticalProportionConstraint;
+      constraint.name = constraint.name;
+      constraint.proportion = constraint.proportion;
       break;
     }
     case EConstraintType.SIZE_HORIZONTAL: {
-      const c = resolveConstraint(layerUuid, constraint.uuid) as UIWidthConstraint;
-      c.name = constraint.name;
-      c.width = constraint.size;
+      const constraint = resolveConstraint(layerUuid, constraint.uuid) as UIWidthConstraint;
+      constraint.name = constraint.name;
+      constraint.width = constraint.size;
       break;
     }
     case EConstraintType.SIZE_VERTICAL: {
-      const c = resolveConstraint(layerUuid, constraint.uuid) as UIHeightConstraint;
-      c.name = constraint.name;
-      c.height = constraint.size;
+      const constraint = resolveConstraint(layerUuid, constraint.uuid) as UIHeightConstraint;
+      constraint.name = constraint.name;
+      constraint.height = constraint.size;
       break;
     }
   }
-}
-
-export function removeConstraint(layerUuid: string, constraintUuid: string): void {
-  resolveConstraint(layerUuid, constraintUuid).destroy();
-  resolveLayerContext(layerUuid).constraints.delete(constraintUuid);
 }

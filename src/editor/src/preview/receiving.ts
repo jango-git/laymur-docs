@@ -10,13 +10,8 @@ import type {
 import type { EStoreDeltaElement, EStoreDeltaElementList } from "../document/signals/elements";
 import type { EStoreDeltaLayer, EStoreDeltaLayerList } from "../document/signals/layers";
 import type { EDocument } from "../document/types";
-import {
-  ASSET_DATABASE,
-  LAYER_DATABASE,
-  loadAsset,
-  resetLayerContextActive,
-} from "./miscellaneous";
-import { removeAsset, updateAsset } from "./receiving.assets";
+import { ASSET_DATABASE, LAYER_DATABASE, resetLayerContextActive } from "./miscellaneous";
+import { addAsset, removeAsset, updateAsset } from "./receiving.assets";
 import { addConstraint, removeConstraint, updateConstraint } from "./receiving.constraints";
 import { addElement, removeElement, updateElement } from "./receiving.elements";
 import { addLayerContext, removeLayerContext, updateLayer } from "./receiving.layers";
@@ -93,7 +88,7 @@ async function handleMessage(event: MessageEvent<EAnyBridgeMessage>): Promise<vo
   }
 }
 
-// ── Setup ────────────────────────────────────────────────────────────────────
+// Setup
 
 async function handleMessageSetup(payload: EDocument): Promise<void> {
   SEQUENCE_EPOCH += 1;
@@ -123,7 +118,7 @@ async function handleMessageSetup(payload: EDocument): Promise<void> {
   ASSET_DATABASE.clear();
 
   for (const asset of payload.assets) {
-    await loadAsset(asset);
+    await addAsset(asset);
   }
 
   for (const layerContext of payload.layerContexts) {
@@ -131,12 +126,12 @@ async function handleMessageSetup(payload: EDocument): Promise<void> {
   }
 }
 
-// ── Assets ───────────────────────────────────────────────────────────────────
+// Assets
 
 async function handleMessageAssetsListChanged(payload: EStoreDeltaAssetList): Promise<void> {
   switch (payload.operation) {
     case EStoreDeltaOperation.ADD:
-      await loadAsset(payload.asset);
+      await addAsset(payload.asset);
       break;
     case EStoreDeltaOperation.REMOVE:
       removeAsset(payload.uuid);
@@ -150,7 +145,7 @@ async function handleMessageAssetsItemChanged(payload: EStoreDeltaAsset): Promis
   await updateAsset(payload.asset);
 }
 
-// ── Layers ───────────────────────────────────────────────────────────────────
+// Layers
 
 function handleMessageLayersListChanged(payload: EStoreDeltaLayerList): void {
   switch (payload.operation) {

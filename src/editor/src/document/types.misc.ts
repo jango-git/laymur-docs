@@ -3,7 +3,14 @@ export interface EColor {
   alpha: number; // 0-1
 }
 
-export type UUID = string;
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export type EAssetUUID = string & { __brand: "EAssetUUID" };
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export type ELayerUUID = string & { __brand: "ELayerUUID" };
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export type EElementUUID = string & { __brand: "EElementUUID" };
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export type EConstraintUUID = string & { __brand: "EConstraintUUID" };
 
 export enum EResizePolicyType {
   COVER = "COVER",

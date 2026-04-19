@@ -18,9 +18,11 @@ import type {
 import type { UILayerDebug } from "laymur/debug";
 import type { Texture } from "three";
 
-export type UILayer = UIFullscreenLayer;
+export type EAssetDataType = Texture | FontFace;
 
-export type UIAnyElement =
+export type EAnyUILayer = UIFullscreenLayer;
+
+export type EAnyUIElement =
   | UIAnimatedImage
   | UIGraphics
   | UIImage
@@ -29,7 +31,7 @@ export type UIAnyElement =
   | UIScene
   | UIText;
 
-export type UIAnyConstraint =
+export type EAnyUIConstraint =
   | UIAspectConstraint
   | UIHorizontalDistanceConstraint
   | UIVerticalDistanceConstraint
@@ -38,11 +40,9 @@ export type UIAnyConstraint =
   | UIWidthConstraint
   | UIHeightConstraint;
 
-export interface UILayerContext {
-  layer: UILayer;
+export interface EPreviewLayerContext {
+  layer: EAnyUILayer;
   debug: UILayerDebug;
-  elements: Map<string, UIAnyElement>;
-  constraints: Map<string, UIAnyConstraint>;
+  elements: Map<string, EAnyUIElement>;
+  constraints: Map<string, EAnyUIConstraint>;
 }
-
-export type EAssetRawDataType = Texture | FontFace;

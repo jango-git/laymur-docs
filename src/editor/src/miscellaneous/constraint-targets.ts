@@ -1,9 +1,10 @@
 import { STORE } from "../document/store";
 import type { EAnyElement } from "../document/types.elements";
+import type { UUID } from "../document/types.misc";
 import { UI_STATE } from "../ui-state/EUIState";
 
 export interface EConstraintTarget {
-  uuid: string;
+  uuid: UUID;
   name: string;
   dataURL: string;
 }
@@ -13,7 +14,7 @@ const ELEMENT_THUMBNAIL =
 
 function toConstraintTargets(
   elements: EAnyElement[],
-  layer?: { uuid: string; name: string },
+  layer?: { uuid: UUID; name: string },
 ): EConstraintTarget[] {
   const result: EConstraintTarget[] = elements.map((element) => ({
     uuid: element.uuid,
