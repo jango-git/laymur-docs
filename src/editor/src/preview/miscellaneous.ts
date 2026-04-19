@@ -30,12 +30,12 @@ import {
   ETextFontWeight,
   ETextResizeMode,
 } from "../document/types.misc";
-import type { EAssetRawDataType, LayerContext, UIAnyConstraint, UIAnyElement } from "./types";
+import type { EAssetRawDataType, UIAnyConstraint, UIAnyElement, UILayerContext } from "./types";
 
-export const LAYER_DATABASE = new Map<string, LayerContext>();
+export const LAYER_DATABASE = new Map<string, UILayerContext>();
 export const ASSET_DATABASE = new Map<string, EAssetRawDataType>();
 
-let LAYER_ACTIVE: LayerContext | undefined;
+let LAYER_ACTIVE: UILayerContext | undefined;
 
 const TEXTURE_LOADER = new TextureLoader();
 
@@ -56,7 +56,7 @@ export function resetLayerContextActive(): void {
   LAYER_ACTIVE = undefined;
 }
 
-export function getLayerContextActive(): LayerContext | undefined {
+export function getLayerContextActive(): UILayerContext | undefined {
   return LAYER_ACTIVE;
 }
 
@@ -114,7 +114,7 @@ export function buildMaskFunction(
   }
 }
 
-export function resolveLayerContext(uuid: string): LayerContext {
+export function resolveLayerContext(uuid: string): UILayerContext {
   const layerData = LAYER_DATABASE.get(uuid);
   if (!layerData) {
     throw new Error(`Layer not found: ${uuid}`);
@@ -323,6 +323,7 @@ interface TextContent {
     strokeThickness: number;
   }>;
 }
+
 export function buildTextContent(chunks: ETextChunk[]): TextContent[] {
   return chunks.map(({ text, style }): TextContent => {
     return {

@@ -1,5 +1,5 @@
 import { EAssetControl } from "../../../controls/EAssetControl/EAssetControl";
-import type { EStoreDeltaElement } from "../../../document/signals";
+import type { EStoreDeltaElement } from "../../../document/signals/elements";
 import { STORE } from "../../../document/store";
 import type { EImageAsset } from "../../../document/types.assets";
 import type { EImageElement } from "../../../document/types.elements";

@@ -5,7 +5,7 @@ import type { EAnyAsset } from "../types.assets";
 import type { UUID } from "../types.misc";
 import type { EStoreDeltaOperation } from "./index";
 
-export type EStoreDeltaAssets =
+export type EStoreDeltaAssetList =
   | { operation: EStoreDeltaOperation.ADD; asset: EAnyAsset }
   | { operation: EStoreDeltaOperation.REMOVE; uuid: UUID }
   | { operation: EStoreDeltaOperation.REORDER; uuids: UUID[] };
@@ -15,10 +15,10 @@ export interface EStoreDeltaAsset {
 }
 
 export class EStoreSignalsAssets {
-  private readonly listInternal = new Ferrsign1<EStoreDeltaAssets>();
+  private readonly listInternal = new Ferrsign1<EStoreDeltaAssetList>();
   private readonly itemInternal = new Ferrsign1<EStoreDeltaAsset>();
 
-  public get list(): FerrsignView1<EStoreDeltaAssets> {
+  public get list(): FerrsignView1<EStoreDeltaAssetList> {
     return this.listInternal;
   }
 
@@ -26,7 +26,7 @@ export class EStoreSignalsAssets {
     return this.itemInternal;
   }
 
-  protected emitList(delta: EStoreDeltaAssets): void {
+  protected emitList(delta: EStoreDeltaAssetList): void {
     consoleDebug(`[EStoreSignalsAssets] emit list:`, delta);
     this.listInternal.emit(delta);
   }

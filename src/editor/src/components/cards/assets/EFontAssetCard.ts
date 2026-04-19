@@ -1,6 +1,7 @@
-import type { EStoreDeltaAsset } from "../../../document/signals";
+import type { EStoreDeltaAsset } from "../../../document/signals/assets";
 import { STORE } from "../../../document/store";
-import { EAssetType, type EFontAsset } from "../../../document/types.assets";
+import type { EFontAsset } from "../../../document/types.assets";
+import { EAssetType } from "../../../document/types.assets";
 import type { UUID } from "../../../document/types.misc";
 
 export class EFontAssetCard {

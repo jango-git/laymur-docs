@@ -1,9 +1,9 @@
-import { consoleDebug } from "../../../miscellaneous/debug.print";
-import type { EStoreDeltaAssets } from "../../../document/signals";
 import { EStoreDeltaOperation } from "../../../document/signals";
+import type { EStoreDeltaAssetList } from "../../../document/signals/assets";
 import { STORE } from "../../../document/store";
 import type { EAnyAsset } from "../../../document/types.assets";
 import { EAssetType } from "../../../document/types.assets";
+import { consoleDebug } from "../../../miscellaneous/debug.print";
 import { EFontAssetCard } from "../../cards/assets/EFontAssetCard";
 import { EImageAssetCard } from "../../cards/assets/EImageAssetCard";
 import { EExportJSAction } from "./actions/EExportJSAction";
@@ -171,7 +171,7 @@ export class EProjectTab {
     }
   }
 
-  private readonly onAssetsListChange = (delta: EStoreDeltaAssets): void => {
+  private readonly onAssetsListChange = (delta: EStoreDeltaAssetList): void => {
     consoleDebug("[EProjectTab] onAssetsListChange:", delta);
     if (delta.operation === EStoreDeltaOperation.ADD) {
       this.addCard(delta.asset);

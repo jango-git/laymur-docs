@@ -1,6 +1,6 @@
 import { consoleDebug } from "../../miscellaneous/debug.print";
-import type { EStoreSignalsLayers } from "../signals";
 import { EStoreDeltaOperation } from "../signals";
+import type { EStoreSignalsLayers } from "../signals/layers";
 import type { EDocument, ELayerContext, PartialExceptUUIDField } from "../types";
 import { clone } from "../types";
 import type { ELayerFullscreen } from "../types.layers";

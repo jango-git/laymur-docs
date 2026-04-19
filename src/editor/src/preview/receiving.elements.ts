@@ -25,7 +25,7 @@ import {
   resolveElement,
   resolveLayerContext,
   resolveTextureAsset,
-} from "./internal";
+} from "./miscellaneous";
 
 export function addElement(layerUuid: string, element: EAnyElement): void {
   ensureUniqueElement(element.uuid);

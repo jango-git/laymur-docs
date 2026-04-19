@@ -1,10 +1,10 @@
-import { consoleDebug } from "../../../miscellaneous/debug.print";
 import { ESelectControl } from "../../../controls/ESelectControl/ESelectControl";
-import type { EStoreDeltaElements } from "../../../document/signals";
 import { EStoreDeltaOperation } from "../../../document/signals";
+import type { EStoreDeltaElementList } from "../../../document/signals/elements";
 import { STORE } from "../../../document/store";
 import type { EAnyElement, EElementType } from "../../../document/types.elements";
 import type { UUID } from "../../../document/types.misc";
+import { consoleDebug } from "../../../miscellaneous/debug.print";
 import { makeSortable } from "../../../miscellaneous/make-sortable";
 import { UI_STATE } from "../../../ui-state/EUIState";
 import type { EAnyElementBuilder } from "../../builders/elements/types";
@@ -124,7 +124,7 @@ export class EElementsTab {
     this.onActiveLayerChanged(undefined);
   };
 
-  private readonly onCardListChanged = (delta: EStoreDeltaElements): void => {
+  private readonly onCardListChanged = (delta: EStoreDeltaElementList): void => {
     consoleDebug("[EElementsTab] onCardListChanged:", delta);
     if (delta.layerUuid !== UI_STATE.activeLayerUuid) {
       return;

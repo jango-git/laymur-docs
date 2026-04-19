@@ -1,13 +1,10 @@
+import type { EStoreDeltaAsset, EStoreDeltaAssetList } from "../document/signals/assets";
 import type {
-  EStoreDeltaAsset,
-  EStoreDeltaAssets,
   EStoreDeltaConstraint,
-  EStoreDeltaConstraints,
-  EStoreDeltaElement,
-  EStoreDeltaElements,
-  EStoreDeltaLayer,
-  EStoreDeltaLayerList,
-} from "../document/signals";
+  EStoreDeltaConstraintList,
+} from "../document/signals/constraints";
+import type { EStoreDeltaElement, EStoreDeltaElementList } from "../document/signals/elements";
+import type { EStoreDeltaLayer, EStoreDeltaLayerList } from "../document/signals/layers";
 import type { EDocument } from "../document/types";
 
 export enum EBridgeMessageType {
@@ -34,7 +31,7 @@ export interface EBridgeMessageSetup extends EBridgeMessage {
 
 export interface EBridgeMessageAssetsListChanged extends EBridgeMessage {
   type: EBridgeMessageType.ASSETS_LIST_CHANGED;
-  payload: EStoreDeltaAssets;
+  payload: EStoreDeltaAssetList;
 }
 
 export interface EBridgeMessageAssetsItemChanged extends EBridgeMessage {
@@ -54,7 +51,7 @@ export interface EBridgeMessageLayersItemChanged extends EBridgeMessage {
 
 export interface EBridgeMessageElementsListChanged extends EBridgeMessage {
   type: EBridgeMessageType.ELEMENTS_LIST_CHANGED;
-  payload: EStoreDeltaElements;
+  payload: EStoreDeltaElementList;
 }
 
 export interface EBridgeMessageElementsItemChanged extends EBridgeMessage {
@@ -64,7 +61,7 @@ export interface EBridgeMessageElementsItemChanged extends EBridgeMessage {
 
 export interface EBridgeMessageConstraintsListChanged extends EBridgeMessage {
   type: EBridgeMessageType.CONSTRAINTS_LIST_CHANGED;
-  payload: EStoreDeltaConstraints;
+  payload: EStoreDeltaConstraintList;
 }
 
 export interface EBridgeMessageConstraintsItemChanged extends EBridgeMessage {

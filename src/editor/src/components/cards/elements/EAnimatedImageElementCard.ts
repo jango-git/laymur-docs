@@ -2,7 +2,7 @@ import { EArrayControl } from "../../../controls/EArrayControl/EArrayControl";
 import { EBoolControl } from "../../../controls/EBoolControl/EBoolControl";
 import { ENumberControl } from "../../../controls/ENumberControl/ENumberControl";
 import { ESelectControl } from "../../../controls/ESelectControl/ESelectControl";
-import type { EStoreDeltaElement } from "../../../document/signals";
+import type { EStoreDeltaElement } from "../../../document/signals/elements";
 import { STORE } from "../../../document/store";
 import type { EAnimatedImageElement } from "../../../document/types.elements";
 import { EElementType } from "../../../document/types.elements";

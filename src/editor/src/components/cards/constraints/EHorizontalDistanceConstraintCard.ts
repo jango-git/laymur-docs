@@ -1,7 +1,7 @@
 import { EAssetControl } from "../../../controls/EAssetControl/EAssetControl";
 import { ENumberControl } from "../../../controls/ENumberControl/ENumberControl";
 import { EVec2Control } from "../../../controls/EVec2Control/EVec2Control";
-import type { EStoreDeltaConstraint } from "../../../document/signals";
+import type { EStoreDeltaConstraint } from "../../../document/signals/constraints";
 import { STORE } from "../../../document/store";
 import type { EHorizontalDistanceConstraint } from "../../../document/types.constraints";
 import { EConstraintType } from "../../../document/types.constraints";

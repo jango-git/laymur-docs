@@ -1,11 +1,11 @@
-import { consoleDebug } from "../../../miscellaneous/debug.print";
 import { ESelectControl } from "../../../controls/ESelectControl/ESelectControl";
-import type { EStoreDeltaLayerList } from "../../../document/signals";
 import { EStoreDeltaOperation } from "../../../document/signals";
+import type { EStoreDeltaLayerList } from "../../../document/signals/layers";
 import { STORE } from "../../../document/store";
 import type { ELayerContext } from "../../../document/types";
 import { ELayerType } from "../../../document/types.layers";
 import type { UUID } from "../../../document/types.misc";
+import { consoleDebug } from "../../../miscellaneous/debug.print";
 import { makeSortable } from "../../../miscellaneous/make-sortable";
 import { EFullscreenLayerBuilder } from "../../builders/layers/EFullscreenLayerBuilder";
 import { EFullscreenLayerCard } from "../../cards/layers/EFullscreenLayerCard";

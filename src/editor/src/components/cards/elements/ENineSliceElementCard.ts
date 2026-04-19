@@ -1,7 +1,7 @@
 import { EAssetControl } from "../../../controls/EAssetControl/EAssetControl";
 import { ESelectControl } from "../../../controls/ESelectControl/ESelectControl";
 import { EVec2Control } from "../../../controls/EVec2Control/EVec2Control";
-import type { EStoreDeltaElement } from "../../../document/signals";
+import type { EStoreDeltaElement } from "../../../document/signals/elements";
 import { STORE } from "../../../document/store";
 import type { EImageAsset } from "../../../document/types.assets";
 import type { ENineSliceElement } from "../../../document/types.elements";

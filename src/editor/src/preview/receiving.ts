@@ -1,19 +1,21 @@
 import { Texture } from "three";
 import type { EAnyBridgeMessage } from "../bridge/types";
 import { EBridgeMessageType } from "../bridge/types";
-import type {
-  EStoreDeltaAsset,
-  EStoreDeltaAssets,
-  EStoreDeltaConstraint,
-  EStoreDeltaConstraints,
-  EStoreDeltaElement,
-  EStoreDeltaElements,
-  EStoreDeltaLayer,
-  EStoreDeltaLayerList,
-} from "../document/signals";
 import { EStoreDeltaOperation } from "../document/signals";
+import type { EStoreDeltaAsset, EStoreDeltaAssetList } from "../document/signals/assets";
+import type {
+  EStoreDeltaConstraint,
+  EStoreDeltaConstraintList,
+} from "../document/signals/constraints";
+import type { EStoreDeltaElement, EStoreDeltaElementList } from "../document/signals/elements";
+import type { EStoreDeltaLayer, EStoreDeltaLayerList } from "../document/signals/layers";
 import type { EDocument } from "../document/types";
-import { ASSET_DATABASE, LAYER_DATABASE, loadAsset, resetLayerContextActive } from "./internal";
+import {
+  ASSET_DATABASE,
+  LAYER_DATABASE,
+  loadAsset,
+  resetLayerContextActive,
+} from "./miscellaneous";
 import { removeAsset, updateAsset } from "./receiving.assets";
 import { addConstraint, removeConstraint, updateConstraint } from "./receiving.constraints";
 import { addElement, removeElement, updateElement } from "./receiving.elements";
@@ -131,7 +133,7 @@ async function handleMessageSetup(payload: EDocument): Promise<void> {
 
 // ── Assets ───────────────────────────────────────────────────────────────────
 
-async function handleMessageAssetsListChanged(payload: EStoreDeltaAssets): Promise<void> {
+async function handleMessageAssetsListChanged(payload: EStoreDeltaAssetList): Promise<void> {
   switch (payload.operation) {
     case EStoreDeltaOperation.ADD:
       await loadAsset(payload.asset);
@@ -169,7 +171,7 @@ function handleMessageLayersItemChanged(payload: EStoreDeltaLayer): void {
 
 // Elements
 
-function handleMessageElementsListChanged(payload: EStoreDeltaElements): void {
+function handleMessageElementsListChanged(payload: EStoreDeltaElementList): void {
   switch (payload.operation) {
     case EStoreDeltaOperation.ADD:
       addElement(payload.layerUuid, payload.element);
@@ -188,7 +190,7 @@ function handleMessageElementsItemChanged(payload: EStoreDeltaElement): void {
 
 // Constraints
 
-function handleMessageConstraintsListChanged(payload: EStoreDeltaConstraints): void {
+function handleMessageConstraintsListChanged(payload: EStoreDeltaConstraintList): void {
   switch (payload.operation) {
     case EStoreDeltaOperation.ADD:
       addConstraint(payload.layerUuid, payload.constraint);

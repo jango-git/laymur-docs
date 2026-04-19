@@ -1,6 +1,6 @@
 import { Clock, WebGLRenderer } from "three";
 import type { EAnyBridgeMessage } from "../bridge/types";
-import { getLayerContextActive } from "./internal";
+import { getLayerContextActive } from "./miscellaneous";
 import { receiveMessage } from "./receiving";
 
 const CLOCK = new Clock();

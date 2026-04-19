@@ -1,6 +1,6 @@
 import { consoleDebug } from "../../miscellaneous/debug.print";
-import type { EStoreSignalsAssets } from "../signals";
 import { EStoreDeltaOperation } from "../signals";
+import type { EStoreSignalsAssets } from "../signals/assets";
 import type { EDocument, PartialExceptUUIDField } from "../types";
 import { clone } from "../types";
 import type { EAnyAsset, EFontAsset, EImageAsset } from "../types.assets";

@@ -1,6 +1,6 @@
 import { EArrayControl } from "../../../controls/EArrayControl/EArrayControl";
 import { EVec2Control } from "../../../controls/EVec2Control/EVec2Control";
-import type { EStoreDeltaElement } from "../../../document/signals";
+import type { EStoreDeltaElement } from "../../../document/signals/elements";
 import { STORE } from "../../../document/store";
 import type { EGraphicsElement } from "../../../document/types.elements";
 import { EElementType } from "../../../document/types.elements";

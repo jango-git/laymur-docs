@@ -1,6 +1,6 @@
 import { EAssetControl } from "../../../controls/EAssetControl/EAssetControl";
 import { ENumberControl } from "../../../controls/ENumberControl/ENumberControl";
-import type { EStoreDeltaConstraint } from "../../../document/signals";
+import type { EStoreDeltaConstraint } from "../../../document/signals/constraints";
 import { STORE } from "../../../document/store";
 import type { EHorizontalSizeConstraint } from "../../../document/types.constraints";
 import { EConstraintType } from "../../../document/types.constraints";

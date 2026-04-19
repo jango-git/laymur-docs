@@ -1,6 +1,6 @@
 import { consoleDebug } from "../../miscellaneous/debug.print";
-import type { EStoreSignalsElements } from "../signals";
 import { EStoreDeltaOperation } from "../signals";
+import type { EStoreSignalsElements } from "../signals/elements";
 import type { EDocument, ELayerContext, PartialExceptUUIDField } from "../types";
 import { clone } from "../types";
 import type {

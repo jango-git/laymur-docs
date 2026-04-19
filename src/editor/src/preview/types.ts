@@ -38,7 +38,7 @@ export type UIAnyConstraint =
   | UIWidthConstraint
   | UIHeightConstraint;
 
-export interface LayerContext {
+export interface UILayerContext {
   layer: UILayer;
   debug: UILayerDebug;
   elements: Map<string, UIAnyElement>;

@@ -10,10 +10,10 @@ import {
   resetLayerContextActive,
   resolveLayerContext,
   setLayerContextActive,
-} from "./internal";
+} from "./miscellaneous";
 import { addConstraint } from "./receiving.constraints";
 import { addElement } from "./receiving.elements";
-import type { LayerContext } from "./types";
+import type { UILayerContext } from "./types";
 
 export function addLayerContext(docLayerContext: EDocLayerContext): void {
   const { layer, elements, constraints } = docLayerContext;
@@ -23,7 +23,7 @@ export function addLayerContext(docLayerContext: EDocLayerContext): void {
     resizePolicy: buildResizePolicy(layer.resizePolicy, layer.resizePolicyParameters),
   });
 
-  const layerCtx: LayerContext = {
+  const layerCtx: UILayerContext = {
     layer: uiLayer,
     debug: new UILayerDebug(uiLayer),
     elements: new Map(),

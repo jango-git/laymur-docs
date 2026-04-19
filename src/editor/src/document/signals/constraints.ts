@@ -5,7 +5,7 @@ import type { EAnyConstraint } from "../types.constraints";
 import type { UUID } from "../types.misc";
 import type { EStoreDeltaOperation } from "./index";
 
-export type EStoreDeltaConstraints =
+export type EStoreDeltaConstraintList =
   | { operation: EStoreDeltaOperation.ADD; layerUuid: UUID; constraint: EAnyConstraint }
   | { operation: EStoreDeltaOperation.REMOVE; layerUuid: UUID; uuid: UUID }
   | { operation: EStoreDeltaOperation.REORDER; layerUuid: UUID; uuids: UUID[] };
@@ -15,10 +15,10 @@ export interface EStoreDeltaConstraint {
 }
 
 export class EStoreSignalsConstraints {
-  private readonly listInternal = new Ferrsign1<EStoreDeltaConstraints>();
+  private readonly listInternal = new Ferrsign1<EStoreDeltaConstraintList>();
   private readonly itemInternal = new Ferrsign1<EStoreDeltaConstraint>();
 
-  public get list(): FerrsignView1<EStoreDeltaConstraints> {
+  public get list(): FerrsignView1<EStoreDeltaConstraintList> {
     return this.listInternal;
   }
 
@@ -26,7 +26,7 @@ export class EStoreSignalsConstraints {
     return this.itemInternal;
   }
 
-  protected emitList(delta: EStoreDeltaConstraints): void {
+  protected emitList(delta: EStoreDeltaConstraintList): void {
     consoleDebug(`[EStoreSignalsConstraints] emit list:`, delta);
     this.listInternal.emit(delta);
   }

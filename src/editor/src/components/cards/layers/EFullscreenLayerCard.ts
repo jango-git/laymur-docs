@@ -1,6 +1,6 @@
 import { ENumberControl } from "../../../controls/ENumberControl/ENumberControl";
 import { ESelectControl } from "../../../controls/ESelectControl/ESelectControl";
-import type { EStoreDeltaLayer } from "../../../document/signals";
+import type { EStoreDeltaLayer } from "../../../document/signals/layers";
 import { STORE } from "../../../document/store";
 import type { ELayerFullscreen } from "../../../document/types.layers";
 import { ELayerType } from "../../../document/types.layers";

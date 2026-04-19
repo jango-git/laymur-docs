@@ -15,7 +15,7 @@ import {
   resolveConstraint,
   resolveElement,
   resolveLayerContext,
-} from "./internal";
+} from "./miscellaneous";
 
 export function addConstraint(layerUuid: string, constraint: EAnyConstraint): void {
   ensureUniqueConstraint(constraint.uuid);

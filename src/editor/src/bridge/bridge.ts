@@ -1,13 +1,10 @@
+import type { EStoreDeltaAsset, EStoreDeltaAssetList } from "../document/signals/assets";
 import type {
-  EStoreDeltaAsset,
-  EStoreDeltaAssets,
   EStoreDeltaConstraint,
-  EStoreDeltaConstraints,
-  EStoreDeltaElement,
-  EStoreDeltaElements,
-  EStoreDeltaLayer,
-  EStoreDeltaLayerList,
-} from "../document/signals";
+  EStoreDeltaConstraintList,
+} from "../document/signals/constraints";
+import type { EStoreDeltaElement, EStoreDeltaElementList } from "../document/signals/elements";
+import type { EStoreDeltaLayer, EStoreDeltaLayerList } from "../document/signals/layers";
 import { STORE } from "../document/store";
 import type { EDocument } from "../document/types";
 import type { EAnyBridgeMessage } from "./types";
@@ -44,7 +41,7 @@ export class EBridge {
     this.sendMessage({ type: EBridgeMessageType.SETUP, payload });
   };
 
-  private readonly onAssetsListChanged = (payload: EStoreDeltaAssets): void => {
+  private readonly onAssetsListChanged = (payload: EStoreDeltaAssetList): void => {
     this.sendMessage({ type: EBridgeMessageType.ASSETS_LIST_CHANGED, payload });
   };
 
@@ -60,7 +57,7 @@ export class EBridge {
     this.sendMessage({ type: EBridgeMessageType.LAYERS_ITEM_CHANGED, payload });
   };
 
-  private readonly onElementsListChanged = (payload: EStoreDeltaElements): void => {
+  private readonly onElementsListChanged = (payload: EStoreDeltaElementList): void => {
     this.sendMessage({ type: EBridgeMessageType.ELEMENTS_LIST_CHANGED, payload });
   };
 
@@ -68,7 +65,7 @@ export class EBridge {
     this.sendMessage({ type: EBridgeMessageType.ELEMENTS_ITEM_CHANGED, payload });
   };
 
-  private readonly onConstraintsListChanged = (payload: EStoreDeltaConstraints): void => {
+  private readonly onConstraintsListChanged = (payload: EStoreDeltaConstraintList): void => {
     this.sendMessage({ type: EBridgeMessageType.CONSTRAINTS_LIST_CHANGED, payload });
   };
 

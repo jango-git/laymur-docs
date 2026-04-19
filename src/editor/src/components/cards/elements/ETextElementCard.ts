@@ -1,7 +1,7 @@
 import { EArrayControl } from "../../../controls/EArrayControl/EArrayControl";
 import { ENumberControl } from "../../../controls/ENumberControl/ENumberControl";
 import { ESelectControl } from "../../../controls/ESelectControl/ESelectControl";
-import type { EStoreDeltaElement } from "../../../document/signals";
+import type { EStoreDeltaElement } from "../../../document/signals/elements";
 import { STORE } from "../../../document/store";
 import type { ETextElement } from "../../../document/types.elements";
 import { EElementType } from "../../../document/types.elements";

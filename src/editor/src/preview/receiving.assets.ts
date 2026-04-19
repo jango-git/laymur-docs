@@ -10,7 +10,7 @@ import {
   loadTexture,
   resolveFontAsset,
   resolveTextureAsset,
-} from "./internal";
+} from "./miscellaneous";
 
 export async function updateAsset(asset: EAnyAsset): Promise<void> {
   if (asset.type === EAssetType.FONT) {

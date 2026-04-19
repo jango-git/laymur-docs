@@ -1,6 +1,7 @@
 import { consoleDebug } from "../../miscellaneous/debug.print";
 import type { EStoreSignals } from "../signals";
-import { clone, type EDocument } from "../types";
+import type { EDocument } from "../types";
+import { clone } from "../types";
 import { EStoreCommandsAssets } from "./assets";
 import { EStoreCommandsConstraints } from "./constraints";
 import { EStoreCommandsElements } from "./elements";

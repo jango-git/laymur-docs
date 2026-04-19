@@ -7,15 +7,6 @@ import { EStoreSignalsConstraints } from "./constraints";
 import { EStoreSignalsElements } from "./elements";
 import { EStoreSignalsLayers } from "./layers";
 
-export { EStoreDeltaAsset, EStoreDeltaAssets, EStoreSignalsAssets } from "./assets";
-export {
-  EStoreDeltaConstraint,
-  EStoreDeltaConstraints,
-  EStoreSignalsConstraints,
-} from "./constraints";
-export { EStoreDeltaElement, EStoreDeltaElements, EStoreSignalsElements } from "./elements";
-export { EStoreDeltaLayer, EStoreDeltaLayerList, EStoreSignalsLayers } from "./layers";
-
 export enum EStoreDeltaOperation {
   ADD = "ADD",
   REMOVE = "REMOVE",
