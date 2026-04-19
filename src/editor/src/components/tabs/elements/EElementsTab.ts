@@ -3,7 +3,7 @@ import { EStoreDeltaOperation } from "../../../document/signals";
 import type { EStoreDeltaElementList } from "../../../document/signals/elements";
 import { STORE } from "../../../document/store";
 import type { EAnyElement, EElementType } from "../../../document/types.elements";
-import type { UUID } from "../../../document/types.misc";
+import type { EElementUUID, ELayerUUID } from "../../../document/types.misc";
 import { consoleDebug } from "../../../miscellaneous/debug.print";
 import { makeSortable } from "../../../miscellaneous/make-sortable";
 import { UI_STATE } from "../../../ui-state/EUIState";
@@ -13,8 +13,8 @@ import { DEFAULT_BUILDER_TYPE, ELEMENT_REGISTRY } from "./registry";
 
 export class EElementsTab {
   private readonly cardsContentDiv: HTMLDivElement;
-  private readonly cardUuidToCardContainer = new Map<UUID, HTMLElement>();
-  private currentLayerUuid: UUID | undefined;
+  private readonly cardUuidToCardContainer = new Map<EElementUUID, HTMLElement>();
+  private currentLayerUuid: ELayerUUID | undefined;
 
   private readonly builderContainers = new Map<EElementType, HTMLElement>();
   private readonly builders = new Map<EElementType, EAnyElementBuilder>();
@@ -79,7 +79,7 @@ export class EElementsTab {
       );
       const [moved] = uuids.splice(fromIndex, 1);
       uuids.splice(toIndex, 0, moved);
-      STORE.commands.elements.reorder(this.currentLayerUuid, uuids);
+      STORE.commands.elements.reorder(this.currentLayerUuid, uuids as EElementUUID[]);
     });
 
     const activeLayerUuid = UI_STATE.activeLayerUuid;
@@ -105,12 +105,12 @@ export class EElementsTab {
     this.cardUuidToCardContainer.set(element.uuid, container);
   }
 
-  private removeCard(uuid: UUID): void {
+  private removeCard(uuid: EElementUUID): void {
     this.cardUuidToCardContainer.get(uuid)?.remove();
     this.cardUuidToCardContainer.delete(uuid);
   }
 
-  private reorderCards(uuids: UUID[]): void {
+  private reorderCards(uuids: EElementUUID[]): void {
     for (const uuid of uuids) {
       const card = this.cardUuidToCardContainer.get(uuid);
       if (card !== undefined) {
@@ -143,7 +143,7 @@ export class EElementsTab {
     }
   };
 
-  private readonly onActiveLayerChanged = (uuid?: UUID): void => {
+  private readonly onActiveLayerChanged = (uuid?: ELayerUUID): void => {
     consoleDebug("[EElementsTab] onActiveLayerChanged:", uuid);
     for (const cardContainer of this.cardUuidToCardContainer.values()) {
       cardContainer.remove();

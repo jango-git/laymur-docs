@@ -5,7 +5,7 @@ import type { EStoreDeltaElement } from "../../../document/signals/elements";
 import { STORE } from "../../../document/store";
 import type { ETextElement } from "../../../document/types.elements";
 import { EElementType } from "../../../document/types.elements";
-import type { EColor, ETextChunk, UUID } from "../../../document/types.misc";
+import type { EColor, EElementUUID, ELayerUUID, ETextChunk } from "../../../document/types.misc";
 import { ETextResizeMode } from "../../../document/types.misc";
 import { LARGE } from "../../../miscellaneous/math";
 import { makeRow, makeSectionHeader } from "../../../miscellaneous/rows";
@@ -17,7 +17,7 @@ export class ETextElementCard extends EElementCard {
   private readonly maxLineWidthControl: ENumberControl;
   private readonly contentControl: EArrayControl<ETextChunk>;
 
-  constructor(container: HTMLElement, uuid: UUID, layerUuid: UUID) {
+  constructor(container: HTMLElement, uuid: EElementUUID, layerUuid: ELayerUUID) {
     super(container, uuid, layerUuid, "Text");
 
     this.nameControl.signalValueChanged.on(this.onNameChanged);

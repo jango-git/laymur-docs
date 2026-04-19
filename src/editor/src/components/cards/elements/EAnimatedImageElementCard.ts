@@ -6,20 +6,20 @@ import type { EStoreDeltaElement } from "../../../document/signals/elements";
 import { STORE } from "../../../document/store";
 import type { EAnimatedImageElement } from "../../../document/types.elements";
 import { EElementType } from "../../../document/types.elements";
-import type { EColor, UUID } from "../../../document/types.misc";
+import type { EAssetUUID, EColor, EElementUUID, ELayerUUID } from "../../../document/types.misc";
 import { EAnimatedImageLoopMode } from "../../../document/types.misc";
 import { makeRow } from "../../../miscellaneous/rows";
 import { LOOP_MODE_OPTIONS, sequenceTemplate } from "./EAnimatedImageElementCard.Internal";
 import { EElementCard } from "./EElementCard";
 
 export class EAnimatedImageElementCard extends EElementCard {
-  private readonly sequenceControl: EArrayControl<UUID>;
+  private readonly sequenceControl: EArrayControl<EAssetUUID>;
   private readonly frameRateControl: ENumberControl;
   private readonly timeScaleControl: ENumberControl;
   private readonly loopModeControl: ESelectControl<EAnimatedImageLoopMode>;
   private readonly playByDefaultControl: EBoolControl;
 
-  constructor(container: HTMLElement, uuid: UUID, layerUuid: UUID) {
+  constructor(container: HTMLElement, uuid: EElementUUID, layerUuid: ELayerUUID) {
     super(container, uuid, layerUuid, "Animated Image");
 
     this.frameRateControl = new ENumberControl(makeRow(this.bodyRoot, "Frame Rate"), {
@@ -50,7 +50,7 @@ export class EAnimatedImageElementCard extends EElementCard {
       value: true,
     });
 
-    this.sequenceControl = new EArrayControl<UUID>(
+    this.sequenceControl = new EArrayControl<EAssetUUID>(
       makeRow(this.bodyRoot, "Sequence"),
       sequenceTemplate,
     );
@@ -108,7 +108,7 @@ export class EAnimatedImageElementCard extends EElementCard {
     STORE.commands.elements.writeAnimatedImage({ uuid: this.uuid, playByDefault });
   };
 
-  private readonly onSequenceChanged = (sequence: UUID[]): void => {
+  private readonly onSequenceChanged = (sequence: EAssetUUID[]): void => {
     STORE.commands.elements.writeAnimatedImage({ uuid: this.uuid, sequence });
   };
 

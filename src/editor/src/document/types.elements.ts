@@ -1,13 +1,14 @@
 import type {
   EAnimatedImageLoopMode,
   EAnyGraphicsDrawCommand,
+  EAssetUUID,
   EColor,
+  EElementUUID,
   ENineSliceRegionMode,
   EProgressMaskFunction,
   ESceneUpdateMode,
   ETextChunk,
   ETextResizeMode,
-  UUID,
 } from "./types.misc";
 
 export enum EElementType {
@@ -21,7 +22,7 @@ export enum EElementType {
 }
 
 interface EElement {
-  uuid: UUID;
+  uuid: EElementUUID;
   type: EElementType;
   name: string;
   color: EColor;
@@ -29,7 +30,7 @@ interface EElement {
 
 export interface EAnimatedImageElement extends EElement {
   type: EElementType.ANIMATED_IMAGE;
-  sequence: UUID[];
+  sequence: EAssetUUID[];
   frameRate: number;
   timeScale: number;
   loopMode: EAnimatedImageLoopMode;
@@ -44,12 +45,12 @@ export interface EGraphicsElement extends EElement {
 
 export interface EImageElement extends EElement {
   type: EElementType.IMAGE;
-  texture: UUID;
+  texture: EAssetUUID;
 }
 
 export interface ENineSliceElement extends EElement {
   type: EElementType.NINE_SLICE;
-  texture: UUID;
+  texture: EAssetUUID;
   sliceBorders: [number, number, number, number];
   sliceRegions: [number, number, number, number];
   regionMode: ENineSliceRegionMode;
@@ -57,7 +58,7 @@ export interface ENineSliceElement extends EElement {
 
 export interface EProgressElement extends EElement {
   type: EElementType.PROGRESS;
-  texture: UUID;
+  texture: EAssetUUID;
   maskFunction: EProgressMaskFunction;
   progress: number;
 }

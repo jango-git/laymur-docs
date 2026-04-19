@@ -3,7 +3,7 @@ import { Texture } from "three";
 import { clone } from "../document/types";
 import type { EAnyAsset } from "../document/types.assets";
 import { EAssetType } from "../document/types.assets";
-import type { UUID } from "../document/types.misc";
+import type { EAssetUUID } from "../document/types.misc";
 import {
   ASSET_DATABASE,
   ensureUniqueAsset,
@@ -27,7 +27,7 @@ export async function addAsset(asset: EAnyAsset): Promise<void> {
   }
 }
 
-export function removeAsset(uuid: UUID): void {
+export function removeAsset(uuid: EAssetUUID): void {
   const asset = ASSET_DATABASE.get(uuid);
   if (!asset) {
     throw new Error(`Asset not found: ${uuid}`);

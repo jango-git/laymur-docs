@@ -18,6 +18,7 @@ import {
   ETextFontWeight,
   ETextResizeMode,
 } from "../../../document/types.misc";
+import { generateAssetUUID } from "../../../miscellaneous/generate-uuid";
 import { makeRow } from "../../../miscellaneous/rows";
 
 const ALIGN_OPTIONS: ESelectControlOption<ETextAlign>[] = [
@@ -47,7 +48,7 @@ export const RESIZE_MODE_OPTIONS: ESelectControlOption<ETextResizeMode>[] = [
 const DEFAULT_CHUNK_STYLE: ETextChunk["style"] = {
   color: { color: "#ffffff", alpha: 255 },
   align: ETextAlign.LEFT,
-  font: "",
+  font: generateAssetUUID(),
   fontSize: 16,
   fontStyle: ETextFontStyle.NORMAL,
   fontWeight: ETextFontWeight.NORMAL,
@@ -204,7 +205,7 @@ export const contentTemplate: EArrayControlTemplate<ETextChunk> = {
         style: {
           color: colorCtrl.value,
           align: alignCtrl.value,
-          font: fontCtrl.value?.uuid ?? "",
+          font: fontCtrl.value?.uuid ?? generateAssetUUID(),
           fontSize: fontSizeCtrl.value,
           fontStyle: fontStyleCtrl.value,
           fontWeight: fontWeightCtrl.value,

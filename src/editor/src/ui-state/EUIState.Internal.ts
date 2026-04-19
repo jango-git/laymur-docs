@@ -1,4 +1,4 @@
-import type { UUID } from "../document/types.misc";
+import type { ELayerUUID } from "../document/types.misc";
 
 export interface EUIDebugState {
   showAspect: boolean;
@@ -11,6 +11,6 @@ export interface EUIDebugState {
 }
 
 export interface EUIStateData {
-  activeLayer?: UUID;
+  activeLayer?: ELayerUUID;
   debug: EUIDebugState;
 }

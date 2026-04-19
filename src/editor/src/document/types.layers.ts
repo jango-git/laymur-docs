@@ -1,11 +1,11 @@
-import type { EResizePolicyType, UUID } from "./types.misc";
+import type { ELayerUUID, EResizePolicyType } from "./types.misc";
 
 export enum ELayerType {
   FULLSCREEN = "FULLSCREEN",
 }
 
 interface ELayer {
-  uuid: UUID;
+  uuid: ELayerUUID;
   type: ELayerType;
   name: string;
 }

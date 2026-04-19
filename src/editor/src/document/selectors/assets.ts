@@ -2,7 +2,7 @@ import type { EDocument } from "../types";
 import { clone } from "../types";
 import type { EAnyAsset, EFontAsset, EImageAsset } from "../types.assets";
 import { EAssetType } from "../types.assets";
-import type { UUID } from "../types.misc";
+import type { EAssetUUID } from "../types.misc";
 
 export class EStoreSelectorsAssets {
   constructor(private readonly data: EDocument) {}
@@ -23,11 +23,11 @@ export class EStoreSelectorsAssets {
     );
   }
 
-  public selectFont(uuid: UUID): EFontAsset | undefined {
+  public selectFont(uuid: EAssetUUID): EFontAsset | undefined {
     return this.selectAllFonts().find((asset): asset is EFontAsset => asset.uuid === uuid);
   }
 
-  public selectImage(uuid: UUID): EImageAsset | undefined {
+  public selectImage(uuid: EAssetUUID): EImageAsset | undefined {
     return this.selectAllImages().find((asset): asset is EImageAsset => asset.uuid === uuid);
   }
 }

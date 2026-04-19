@@ -6,8 +6,9 @@ import { EAssetControl } from "../../../controls/EAssetControl/EAssetControl";
 import type { ESelectControlOption } from "../../../controls/ESelectControl/ESelectControl";
 import { STORE } from "../../../document/store";
 import type { EImageAsset } from "../../../document/types.assets";
-import type { UUID } from "../../../document/types.misc";
+import type { EAssetUUID } from "../../../document/types.misc";
 import { EAnimatedImageLoopMode } from "../../../document/types.misc";
+import { generateAssetUUID } from "../../../miscellaneous/generate-uuid";
 
 export const LOOP_MODE_OPTIONS: ESelectControlOption<EAnimatedImageLoopMode>[] = [
   { label: "None", value: EAnimatedImageLoopMode.NONE },
@@ -15,9 +16,9 @@ export const LOOP_MODE_OPTIONS: ESelectControlOption<EAnimatedImageLoopMode>[] =
   { label: "Ping-Pong", value: EAnimatedImageLoopMode.PING_PONG },
 ];
 
-export const sequenceTemplate: EArrayControlTemplate<UUID> = {
-  createDefault: () => "",
-  buildItem(container, value, onChange): EArrayControlItem<UUID> {
+export const sequenceTemplate: EArrayControlTemplate<EAssetUUID> = {
+  createDefault: () => generateAssetUUID(),
+  buildItem(container, value, onChange): EArrayControlItem<EAssetUUID> {
     const assetControl = new EAssetControl<EImageAsset>(
       container,
       () => STORE.selectors.assets.selectAllImages(),
@@ -25,7 +26,7 @@ export const sequenceTemplate: EArrayControlTemplate<UUID> = {
     );
     assetControl.signalValueChanged.on(() => onChange());
     return {
-      getValue: () => assetControl.value?.uuid ?? "",
+      getValue: () => assetControl.value?.uuid ?? generateAssetUUID(),
       destroy: () => assetControl.destroy(),
     };
   },

@@ -3,7 +3,7 @@ import { EStoreDeltaOperation } from "../../../document/signals";
 import type { EStoreDeltaConstraintList } from "../../../document/signals/constraints";
 import { STORE } from "../../../document/store";
 import type { EAnyConstraint, EConstraintType } from "../../../document/types.constraints";
-import type { UUID } from "../../../document/types.misc";
+import type { EConstraintUUID, ELayerUUID } from "../../../document/types.misc";
 import { consoleDebug } from "../../../miscellaneous/debug.print";
 import { makeSortable } from "../../../miscellaneous/make-sortable";
 import { UI_STATE } from "../../../ui-state/EUIState";
@@ -13,8 +13,8 @@ import { CONSTRAINT_REGISTRY, DEFAULT_BUILDER_TYPE } from "./registry";
 
 export class EConstraintsTab {
   private readonly cardsContentDiv: HTMLDivElement;
-  private readonly cardUuidToCardContainer = new Map<UUID, HTMLElement>();
-  private currentLayerUuid: UUID | undefined;
+  private readonly cardUuidToCardContainer = new Map<EConstraintUUID, HTMLElement>();
+  private currentLayerUuid: ELayerUUID | undefined;
 
   private readonly builderContainers = new Map<EConstraintType, HTMLElement>();
   private readonly builders = new Map<EConstraintType, EAnyConstraintBuilder>();
@@ -79,7 +79,7 @@ export class EConstraintsTab {
       );
       const [moved] = uuids.splice(fromIndex, 1);
       uuids.splice(toIndex, 0, moved);
-      STORE.commands.constraints.reorder(this.currentLayerUuid, uuids);
+      STORE.commands.constraints.reorder(this.currentLayerUuid, uuids as EConstraintUUID[]);
     });
 
     const activeLayerUuid = UI_STATE.activeLayerUuid;
@@ -105,12 +105,12 @@ export class EConstraintsTab {
     this.cardUuidToCardContainer.set(constraint.uuid, container);
   }
 
-  private removeCard(uuid: UUID): void {
+  private removeCard(uuid: EConstraintUUID): void {
     this.cardUuidToCardContainer.get(uuid)?.remove();
     this.cardUuidToCardContainer.delete(uuid);
   }
 
-  private reorderCards(uuids: UUID[]): void {
+  private reorderCards(uuids: EConstraintUUID[]): void {
     for (const uuid of uuids) {
       const card = this.cardUuidToCardContainer.get(uuid);
       if (card !== undefined) {
@@ -143,7 +143,7 @@ export class EConstraintsTab {
     }
   };
 
-  private readonly onActiveLayerChanged = (uuid?: UUID): void => {
+  private readonly onActiveLayerChanged = (uuid?: ELayerUUID): void => {
     consoleDebug("[EConstraintsTab] onActiveLayerChanged:", uuid);
     for (const cardContainer of this.cardUuidToCardContainer.values()) {
       cardContainer.remove();

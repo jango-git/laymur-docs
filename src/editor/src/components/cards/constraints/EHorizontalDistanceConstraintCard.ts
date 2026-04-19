@@ -5,34 +5,40 @@ import type { EStoreDeltaConstraint } from "../../../document/signals/constraint
 import { STORE } from "../../../document/store";
 import type { EHorizontalDistanceConstraint } from "../../../document/types.constraints";
 import { EConstraintType } from "../../../document/types.constraints";
-import type { UUID } from "../../../document/types.misc";
-import type { EConstraintTarget } from "../../../miscellaneous/constraint-targets";
-import { getConstraintTargets } from "../../../miscellaneous/constraint-targets";
+import type { EConstraintUUID, ELayerUUID } from "../../../document/types.misc";
+import type {
+  EElementConstraintTarget,
+  EUniversalConstraintTarget,
+} from "../../../miscellaneous/constraint-targets";
+import {
+  getElementConstraintTargets,
+  getUniversalConstraintTargets,
+} from "../../../miscellaneous/constraint-targets";
 import { LARGE } from "../../../miscellaneous/math";
 import { makeRow } from "../../../miscellaneous/rows";
 import { EConstraintCard } from "./EConstraintCard";
 
 export class EHorizontalDistanceConstraintCard extends EConstraintCard {
-  private readonly elementAControl: EAssetControl<EConstraintTarget>;
-  private readonly elementBControl: EAssetControl<EConstraintTarget>;
+  private readonly elementAControl: EAssetControl<EUniversalConstraintTarget>;
+  private readonly elementBControl: EAssetControl<EElementConstraintTarget>;
   private readonly anchorsControl: EVec2Control;
   private readonly distanceControl: ENumberControl;
 
-  constructor(container: HTMLElement, uuid: UUID, layerUuid: UUID) {
+  constructor(container: HTMLElement, uuid: EConstraintUUID, layerUuid: ELayerUUID) {
     super(container, uuid, layerUuid, "Distance Horizontal");
 
     this.nameControl.signalValueChanged.on(this.onNameChanged);
 
-    this.elementAControl = new EAssetControl<EConstraintTarget>(
+    this.elementAControl = new EAssetControl<EUniversalConstraintTarget>(
       makeRow(this.bodyRoot, "Element A"),
-      getConstraintTargets,
+      getUniversalConstraintTargets,
       { nullable: false },
     );
     this.elementAControl.signalValueChanged.on(this.onElementAChanged);
 
-    this.elementBControl = new EAssetControl<EConstraintTarget>(
+    this.elementBControl = new EAssetControl<EElementConstraintTarget>(
       makeRow(this.bodyRoot, "Element B"),
-      getConstraintTargets,
+      getElementConstraintTargets,
       { nullable: false },
     );
     this.elementBControl.signalValueChanged.on(this.onElementBChanged);
@@ -68,9 +74,12 @@ export class EHorizontalDistanceConstraintCard extends EConstraintCard {
 
   private refresh(constraint: EHorizontalDistanceConstraint): void {
     this.nameControl.value = constraint.name;
-    const targets = getConstraintTargets();
-    this.elementAControl.value = targets.find((e) => e.uuid === constraint.elementA);
-    this.elementBControl.value = targets.find((e) => e.uuid === constraint.elementB);
+    this.elementAControl.value = getUniversalConstraintTargets().find(
+      (e) => e.uuid === constraint.elementA,
+    );
+    this.elementBControl.value = getElementConstraintTargets().find(
+      (e) => e.uuid === constraint.elementB,
+    );
     this.anchorsControl.value = [constraint.anchorA, constraint.anchorB];
     this.distanceControl.value = constraint.distance;
   }
@@ -79,13 +88,13 @@ export class EHorizontalDistanceConstraintCard extends EConstraintCard {
     STORE.commands.constraints.writeHorizontalDistance({ uuid: this.uuid, name });
   };
 
-  private readonly onElementAChanged = (next: EConstraintTarget | undefined): void => {
+  private readonly onElementAChanged = (next: EUniversalConstraintTarget | undefined): void => {
     if (next !== undefined) {
       STORE.commands.constraints.writeHorizontalDistance({ uuid: this.uuid, elementA: next.uuid });
     }
   };
 
-  private readonly onElementBChanged = (next: EConstraintTarget | undefined): void => {
+  private readonly onElementBChanged = (next: EElementConstraintTarget | undefined): void => {
     if (next !== undefined) {
       STORE.commands.constraints.writeHorizontalDistance({ uuid: this.uuid, elementB: next.uuid });
     }

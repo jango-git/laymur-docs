@@ -9,7 +9,7 @@ import {
 } from "laymur";
 import type { EAnyElement } from "../document/types.elements";
 import { EElementType } from "../document/types.elements";
-import type { UUID } from "../document/types.misc";
+import type { EElementUUID, ELayerUUID } from "../document/types.misc";
 import {
   applyDrawSequence,
   buildCSSColor,
@@ -27,7 +27,7 @@ import {
   resolveTextureAsset,
 } from "./miscellaneous";
 
-export function addElement(layerUuid: UUID, data: EAnyElement): void {
+export function addElement(layerUuid: ELayerUUID, data: EAnyElement): void {
   ensureUniqueElement(data.uuid);
   const layerContext = resolveLayerContext(layerUuid);
 
@@ -113,7 +113,7 @@ export function addElement(layerUuid: UUID, data: EAnyElement): void {
   }
 }
 
-export function removeElement(layerUuid: UUID, uuid: UUID): void {
+export function removeElement(layerUuid: ELayerUUID, uuid: EElementUUID): void {
   const element = resolveElement(layerUuid, uuid);
 
   for (const layerContext of LAYER_DATABASE.values()) {

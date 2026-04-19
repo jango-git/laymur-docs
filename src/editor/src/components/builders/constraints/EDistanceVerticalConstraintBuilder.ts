@@ -2,35 +2,46 @@ import { EAssetControl } from "../../../controls/EAssetControl/EAssetControl";
 import { STORE } from "../../../document/store";
 import type { EVerticalDistanceConstraint } from "../../../document/types.constraints";
 import { EConstraintType } from "../../../document/types.constraints";
-import type { EConstraintTarget } from "../../../miscellaneous/constraint-targets";
-import { getConstraintTargets } from "../../../miscellaneous/constraint-targets";
+import type {
+  EElementConstraintTarget,
+  EUniversalConstraintTarget,
+} from "../../../miscellaneous/constraint-targets";
+import {
+  getElementConstraintTargets,
+  getUniversalConstraintTargets,
+} from "../../../miscellaneous/constraint-targets";
+import {
+  generateConstraintUUID,
+  generateElementUUID,
+  generateLayerUUID,
+} from "../../../miscellaneous/generate-uuid";
 import { makeRow } from "../../../miscellaneous/rows";
 import { UI_STATE } from "../../../ui-state/EUIState";
 import { TOAST } from "../../toast/EToast";
 
 export class EDistanceVerticalConstraintBuilder {
-  private readonly elementAControl: EAssetControl<EConstraintTarget>;
-  private readonly elementBControl: EAssetControl<EConstraintTarget>;
+  private readonly elementAControl: EAssetControl<EUniversalConstraintTarget>;
+  private readonly elementBControl: EAssetControl<EElementConstraintTarget>;
 
   constructor(container: HTMLElement) {
-    this.elementAControl = new EAssetControl<EConstraintTarget>(
+    this.elementAControl = new EAssetControl<EUniversalConstraintTarget>(
       makeRow(container, "Element A"),
-      getConstraintTargets,
+      getUniversalConstraintTargets,
     );
 
-    this.elementBControl = new EAssetControl<EConstraintTarget>(
+    this.elementBControl = new EAssetControl<EElementConstraintTarget>(
       makeRow(container, "Element B"),
-      getConstraintTargets,
+      getElementConstraintTargets,
     );
   }
 
   public build(): void {
     const data: EVerticalDistanceConstraint = {
-      uuid: crypto.randomUUID(),
+      uuid: generateConstraintUUID(),
       type: EConstraintType.DISTANCE_VERTICAL,
       name: "",
-      elementA: this.elementAControl.value?.uuid ?? "",
-      elementB: this.elementBControl.value?.uuid ?? "",
+      elementA: this.elementAControl.value?.uuid ?? generateLayerUUID(),
+      elementB: this.elementBControl.value?.uuid ?? generateElementUUID(),
       anchorA: 0,
       anchorB: 0,
       distance: 0,

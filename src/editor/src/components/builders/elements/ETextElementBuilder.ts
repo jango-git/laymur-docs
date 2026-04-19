@@ -4,6 +4,7 @@ import type { ETextElement } from "../../../document/types.elements";
 import { EElementType } from "../../../document/types.elements";
 import { ETextResizeMode } from "../../../document/types.misc";
 import { DEFAULT_ECOLOR } from "../../../miscellaneous/defaults";
+import { generateElementUUID } from "../../../miscellaneous/generate-uuid";
 import { makeRow } from "../../../miscellaneous/rows";
 import { UI_STATE } from "../../../ui-state/EUIState";
 import { TOAST } from "../../toast/EToast";
@@ -17,7 +18,7 @@ export class ETextElementBuilder {
 
   public build(): void {
     const data: ETextElement = {
-      uuid: crypto.randomUUID(),
+      uuid: generateElementUUID(),
       type: EElementType.TEXT,
       name: this.nameControl.value,
       color: DEFAULT_ECOLOR,

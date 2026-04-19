@@ -126,7 +126,7 @@ export interface ETextChunk {
   style: {
     color: EColor;
     align: ETextAlign;
-    font: UUID;
+    font: EAssetUUID;
     fontSize: number;
     fontStyle: ETextFontStyle;
     fontWeight: ETextFontWeight;

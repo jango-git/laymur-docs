@@ -3,6 +3,7 @@ import { STORE } from "../../../document/store";
 import type { ELayerContext } from "../../../document/types";
 import { ELayerType } from "../../../document/types.layers";
 import { EResizePolicyType } from "../../../document/types.misc";
+import { generateLayerUUID } from "../../../miscellaneous/generate-uuid";
 import { UI_STATE } from "../../../ui-state/EUIState";
 import { TOAST } from "../../toast/EToast";
 
@@ -26,7 +27,7 @@ export class EFullscreenLayerBuilder {
   }
 
   public build(): void {
-    const uuid = crypto.randomUUID();
+    const uuid = generateLayerUUID();
     const layerContext: ELayerContext = {
       layer: {
         uuid,

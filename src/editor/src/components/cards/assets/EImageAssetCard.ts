@@ -2,7 +2,7 @@ import type { EStoreDeltaAsset } from "../../../document/signals/assets";
 import { STORE } from "../../../document/store";
 import type { EImageAsset } from "../../../document/types.assets";
 import { EAssetType } from "../../../document/types.assets";
-import type { UUID } from "../../../document/types.misc";
+import type { EAssetUUID } from "../../../document/types.misc";
 
 export class EImageAssetCard {
   private readonly root: HTMLDivElement;

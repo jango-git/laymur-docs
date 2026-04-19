@@ -1,6 +1,6 @@
 import { EStringControl } from "../../../controls/EStringControl/EStringControl";
 import { STORE } from "../../../document/store";
-import type { UUID } from "../../../document/types.misc";
+import type { ELayerUUID } from "../../../document/types.misc";
 import { UI_STATE } from "../../../ui-state/EUIState";
 
 export abstract class ELayerCard {
@@ -11,7 +11,7 @@ export abstract class ELayerCard {
 
   constructor(
     container: HTMLElement,
-    protected readonly uuid: UUID,
+    protected readonly uuid: ELayerUUID,
     typeLabel: string,
   ) {
     this.root = document.createElement("div");

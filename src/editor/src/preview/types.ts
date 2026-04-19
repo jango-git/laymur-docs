@@ -17,6 +17,7 @@ import type {
 } from "laymur";
 import type { UILayerDebug } from "laymur/debug";
 import type { Texture } from "three";
+import type { EConstraintUUID, EElementUUID } from "../document/types.misc";
 
 export type EAssetDataType = Texture | FontFace;
 
@@ -43,6 +44,6 @@ export type EAnyUIConstraint =
 export interface EPreviewLayerContext {
   layer: EAnyUILayer;
   debug: UILayerDebug;
-  elements: Map<string, EAnyUIElement>;
-  constraints: Map<string, EAnyUIConstraint>;
+  elements: Map<EElementUUID, EAnyUIElement>;
+  constraints: Map<EConstraintUUID, EAnyUIConstraint>;
 }

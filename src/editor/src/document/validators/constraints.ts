@@ -8,7 +8,7 @@ import type {
   EVerticalProportionConstraint,
   EVerticalSizeConstraint,
 } from "../types.constraints";
-import type { UUID } from "../types.misc";
+import type { EElementUUID, ELayerUUID } from "../types.misc";
 import { isValidName, isValidPositiveNumber } from "./miscellaneous";
 
 export interface EAspectConstraintError {
@@ -37,7 +37,7 @@ export class EStoreValidatorsConstraints {
   constructor(private readonly data: EDocument) {}
 
   public aspect(
-    layer: UUID | undefined,
+    layer: ELayerUUID | undefined,
     constraint: Partial<Omit<EAspectConstraint, "type">>,
     softValidation = false,
   ): EAspectConstraintError | undefined {
@@ -49,7 +49,7 @@ export class EStoreValidatorsConstraints {
       return { message: `layer with UUID ${layer} must exist`, field: "layer" };
     }
 
-    const elementError = this.validateSingleElement(layer, layerContext, constraint.element);
+    const elementError = this.validateSingleElement(layerContext, constraint.element);
     if (elementError !== undefined) {
       return elementError;
     }
@@ -72,7 +72,7 @@ export class EStoreValidatorsConstraints {
   }
 
   public sizeHorizontal(
-    layer: UUID | undefined,
+    layer: ELayerUUID | undefined,
     constraint: Partial<Omit<EHorizontalSizeConstraint, "type">>,
     softValidation = false,
   ): ESizeConstraintError | undefined {
@@ -84,7 +84,7 @@ export class EStoreValidatorsConstraints {
       return { message: `layer with UUID ${layer} must exist`, field: "layer" };
     }
 
-    const elementError = this.validateSingleElement(layer, layerContext, constraint.element);
+    const elementError = this.validateSingleElement(layerContext, constraint.element);
     if (elementError !== undefined) {
       return elementError;
     }
@@ -107,7 +107,7 @@ export class EStoreValidatorsConstraints {
   }
 
   public sizeVertical(
-    layer: UUID | undefined,
+    layer: ELayerUUID | undefined,
     constraint: Partial<Omit<EVerticalSizeConstraint, "type">>,
     softValidation = false,
   ): ESizeConstraintError | undefined {
@@ -115,7 +115,7 @@ export class EStoreValidatorsConstraints {
   }
 
   public distanceHorizontal(
-    layer: UUID | undefined,
+    layer: ELayerUUID | undefined,
     constraint: Partial<Omit<EHorizontalDistanceConstraint, "type">>,
     softValidation = false,
   ): EDistanceConstraintError | undefined {
@@ -157,7 +157,7 @@ export class EStoreValidatorsConstraints {
   }
 
   public distanceVertical(
-    layer: UUID | undefined,
+    layer: ELayerUUID | undefined,
     constraint: Partial<Omit<EVerticalDistanceConstraint, "type">>,
     softValidation = false,
   ): EDistanceConstraintError | undefined {
@@ -165,7 +165,7 @@ export class EStoreValidatorsConstraints {
   }
 
   public proportionHorizontal(
-    layer: UUID | undefined,
+    layer: ELayerUUID | undefined,
     constraint: Partial<Omit<EHorizontalProportionConstraint, "type">>,
     softValidation = false,
   ): EProportionConstraintError | undefined {
@@ -204,7 +204,7 @@ export class EStoreValidatorsConstraints {
   }
 
   public proportionVertical(
-    layer: UUID | undefined,
+    layer: ELayerUUID | undefined,
     constraint: Partial<Omit<EVerticalProportionConstraint, "type">>,
     softValidation = false,
   ): EProportionConstraintError | undefined {
@@ -212,15 +212,11 @@ export class EStoreValidatorsConstraints {
   }
 
   private validateSingleElement(
-    layer: UUID,
     layerContext: ELayerContext,
-    element: UUID | undefined,
+    element: EElementUUID | undefined,
   ): { message: string; field: "element" } | undefined {
     if (element === undefined) {
       return { message: "element is required", field: "element" };
-    }
-    if (element === layer) {
-      return { message: "element cannot be a layer", field: "element" };
     }
     if (!layerContext.elements.some((candidate) => candidate.uuid === element)) {
       return { message: "element must be on the same layer", field: "element" };
@@ -229,8 +225,8 @@ export class EStoreValidatorsConstraints {
 
   private validateTwoElements(
     layerContext: ELayerContext,
-    elementA: UUID | undefined,
-    elementB: UUID | undefined,
+    elementA: ELayerUUID | EElementUUID | undefined,
+    elementB: ELayerUUID | EElementUUID | undefined,
   ): { message: string; field: "elementA" | "elementB" } | undefined {
     if (elementA === undefined) {
       return { message: "elementA is required", field: "elementA" };
@@ -265,11 +261,14 @@ export class EStoreValidatorsConstraints {
     }
   }
 
-  private getLayerContext(layer: UUID): ELayerContext | undefined {
+  private getLayerContext(layer: ELayerUUID): ELayerContext | undefined {
     return this.data.layerContexts.find((layerContext) => layerContext.layer.uuid === layer);
   }
 
-  private isValidLayerOrElement(layerContext: ELayerContext, uuid: UUID): boolean {
+  private isValidLayerOrElement(
+    layerContext: ELayerContext,
+    uuid: ELayerUUID | EElementUUID,
+  ): boolean {
     return (
       layerContext.elements.some((element) => element.uuid === uuid) ||
       this.data.layerContexts.some((context) => context.layer.uuid === uuid)

@@ -2,7 +2,7 @@ import { UIFullscreenLayer } from "laymur";
 import { UILayerDebug } from "laymur/debug";
 import type { ELayerContext } from "../document/types";
 import type { EAnyLayer } from "../document/types.layers";
-import type { UUID } from "../document/types.misc";
+import type { ELayerUUID } from "../document/types.misc";
 import {
   LAYER_DATABASE,
   buildResizePolicy,
@@ -41,7 +41,7 @@ export function addLayerContext(layerContext: ELayerContext): void {
   }
 }
 
-export function removeLayerContext(uuid: UUID): void {
+export function removeLayerContext(uuid: ELayerUUID): void {
   const layerContext = resolveLayerContext(uuid);
 
   if (isLayerContextActive(uuid)) {

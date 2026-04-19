@@ -3,8 +3,9 @@ import type { EStoreDeltaAssetList } from "../../../document/signals/assets";
 import { STORE } from "../../../document/store";
 import type { EAnyAsset } from "../../../document/types.assets";
 import { EAssetType } from "../../../document/types.assets";
-import type { UUID } from "../../../document/types.misc";
+import type { EAssetUUID } from "../../../document/types.misc";
 import { consoleDebug } from "../../../miscellaneous/debug.print";
+import { generateAssetUUID } from "../../../miscellaneous/generate-uuid";
 import { EFontAssetCard } from "../../cards/assets/EFontAssetCard";
 import { EImageAssetCard } from "../../cards/assets/EImageAssetCard";
 import { EExportJSAction } from "./actions/EExportJSAction";
@@ -131,7 +132,7 @@ export class EProjectTab {
     this.cardMap.set(asset.uuid, this.cardList.lastElementChild as HTMLElement);
   }
 
-  private removeCard(uuid: UUID): void {
+  private removeCard(uuid: EAssetUUID): void {
     this.cardMap.get(uuid)?.remove();
     this.cardMap.delete(uuid);
   }
@@ -144,7 +145,7 @@ export class EProjectTab {
       const reader = new FileReader();
       reader.onload = (): void => {
         STORE.commands.assets.add({
-          uuid: crypto.randomUUID(),
+          uuid: generateAssetUUID(),
           type: EAssetType.IMAGE,
           name: file.name,
           dataURL: reader.result as string,
@@ -162,7 +163,7 @@ export class EProjectTab {
       const reader = new FileReader();
       reader.onload = (): void => {
         STORE.commands.assets.add({
-          uuid: crypto.randomUUID(),
+          uuid: generateAssetUUID(),
           type: EAssetType.FONT,
           name: file.name,
           dataURL: reader.result as string,

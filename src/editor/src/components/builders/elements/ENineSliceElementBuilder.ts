@@ -6,6 +6,7 @@ import type { ENineSliceElement } from "../../../document/types.elements";
 import { EElementType } from "../../../document/types.elements";
 import { ENineSliceRegionMode } from "../../../document/types.misc";
 import { DEFAULT_ECOLOR } from "../../../miscellaneous/defaults";
+import { generateAssetUUID, generateElementUUID } from "../../../miscellaneous/generate-uuid";
 import { makeRow } from "../../../miscellaneous/rows";
 import { UI_STATE } from "../../../ui-state/EUIState";
 import { TOAST } from "../../toast/EToast";
@@ -26,11 +27,11 @@ export class ENineSliceElementBuilder {
 
   public build(): void {
     const data: ENineSliceElement = {
-      uuid: crypto.randomUUID(),
+      uuid: generateElementUUID(),
       type: EElementType.NINE_SLICE,
       name: this.nameControl.value,
       color: DEFAULT_ECOLOR,
-      texture: this.textureControl.value?.uuid ?? "",
+      texture: this.textureControl.value?.uuid ?? generateAssetUUID(),
       sliceBorders: [0.1, 0.1, 0.1, 0.1],
       sliceRegions: [100, 100, 100, 100],
       regionMode: ENineSliceRegionMode.WORLD,

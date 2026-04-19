@@ -14,7 +14,7 @@ import type {
   ETextElement,
 } from "../types.elements";
 import { EElementType } from "../types.elements";
-import type { UUID } from "../types.misc";
+import type { EElementUUID, ELayerUUID } from "../types.misc";
 
 export class EStoreCommandsElements {
   constructor(
@@ -22,7 +22,7 @@ export class EStoreCommandsElements {
     private readonly signals: EStoreSignalsElements,
   ) {}
 
-  public add(layerUuid: UUID, element: EAnyElement): void {
+  public add(layerUuid: ELayerUUID, element: EAnyElement): void {
     const stored = clone(element);
     this.getContext(layerUuid).elements.push(stored);
     consoleDebug("[EStoreCommandsElements] command 'add' was evaluated", element);
@@ -33,7 +33,7 @@ export class EStoreCommandsElements {
     });
   }
 
-  public remove(layerUuid: UUID, uuid: UUID): void {
+  public remove(layerUuid: ELayerUUID, uuid: EElementUUID): void {
     const layerContext = this.getContext(layerUuid);
     const index = layerContext.elements.findIndex((element) => element.uuid === uuid);
     if (index === -1) {
@@ -44,7 +44,7 @@ export class EStoreCommandsElements {
     this.signals["emitList"]({ operation: EStoreDeltaOperation.REMOVE, layerUuid, uuid });
   }
 
-  public reorder(layerUuid: UUID, uuids: UUID[]): void {
+  public reorder(layerUuid: ELayerUUID, uuids: EElementUUID[]): void {
     const layerContext = this.getContext(layerUuid);
     const uuidsCopy = clone(uuids);
     layerContext.elements.sort(
@@ -215,7 +215,7 @@ export class EStoreCommandsElements {
     this.signals["emitItem"]({ element: clone(element) });
   }
 
-  private getContext(layerUuid: UUID): ELayerContext {
+  private getContext(layerUuid: ELayerUUID): ELayerContext {
     const layerContext = this.data.layerContexts.find(
       (context) => context.layer.uuid === layerUuid,
     );
@@ -225,7 +225,7 @@ export class EStoreCommandsElements {
     return layerContext;
   }
 
-  private get<T extends EAnyElement>(uuid: UUID, type: EElementType): T {
+  private get<T extends EAnyElement>(uuid: EElementUUID, type: EElementType): T {
     for (const { elements } of this.data.layerContexts) {
       for (const element of elements) {
         if (element.type === type && element.uuid === uuid) {

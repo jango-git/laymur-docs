@@ -4,24 +4,24 @@ import type { EStoreDeltaConstraint } from "../../../document/signals/constraint
 import { STORE } from "../../../document/store";
 import type { EAspectConstraint } from "../../../document/types.constraints";
 import { EConstraintType } from "../../../document/types.constraints";
-import type { UUID } from "../../../document/types.misc";
-import type { EConstraintTarget } from "../../../miscellaneous/constraint-targets";
-import { getConstraintElements } from "../../../miscellaneous/constraint-targets";
+import type { EConstraintUUID, ELayerUUID } from "../../../document/types.misc";
+import type { EElementConstraintTarget } from "../../../miscellaneous/constraint-targets";
+import { getElementConstraintTargets } from "../../../miscellaneous/constraint-targets";
 import { makeRow } from "../../../miscellaneous/rows";
 import { EConstraintCard } from "./EConstraintCard";
 
 export class EAspectConstraintCard extends EConstraintCard {
-  private readonly elementControl: EAssetControl<EConstraintTarget>;
+  private readonly elementControl: EAssetControl<EElementConstraintTarget>;
   private readonly aspectControl: ENumberControl;
 
-  constructor(container: HTMLElement, uuid: UUID, layerUuid: UUID) {
+  constructor(container: HTMLElement, uuid: EConstraintUUID, layerUuid: ELayerUUID) {
     super(container, uuid, layerUuid, "Aspect");
 
     this.nameControl.signalValueChanged.on(this.onNameChanged);
 
-    this.elementControl = new EAssetControl<EConstraintTarget>(
+    this.elementControl = new EAssetControl<EElementConstraintTarget>(
       makeRow(this.bodyRoot, "Element"),
-      getConstraintElements,
+      getElementConstraintTargets,
       { nullable: false },
     );
     this.elementControl.signalValueChanged.on(this.onElementChanged);
@@ -46,7 +46,7 @@ export class EAspectConstraintCard extends EConstraintCard {
 
   private refresh(constraint: EAspectConstraint): void {
     this.nameControl.value = constraint.name;
-    const elements = getConstraintElements();
+    const elements = getElementConstraintTargets();
     this.elementControl.value = elements.find((e) => e.uuid === constraint.element);
     this.aspectControl.value = constraint.aspect;
   }
@@ -55,7 +55,7 @@ export class EAspectConstraintCard extends EConstraintCard {
     STORE.commands.constraints.writeAspect({ uuid: this.uuid, name });
   };
 
-  private readonly onElementChanged = (next: EConstraintTarget | undefined): void => {
+  private readonly onElementChanged = (next: EElementConstraintTarget | undefined): void => {
     if (next !== undefined) {
       STORE.commands.constraints.writeAspect({ uuid: this.uuid, element: next.uuid });
     }

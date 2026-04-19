@@ -3,6 +3,7 @@ import { STORE } from "../../../document/store";
 import type { EGraphicsElement } from "../../../document/types.elements";
 import { EElementType } from "../../../document/types.elements";
 import { DEFAULT_ECOLOR } from "../../../miscellaneous/defaults";
+import { generateElementUUID } from "../../../miscellaneous/generate-uuid";
 import { makeRow } from "../../../miscellaneous/rows";
 import { UI_STATE } from "../../../ui-state/EUIState";
 import { TOAST } from "../../toast/EToast";
@@ -16,7 +17,7 @@ export class EGraphicsElementBuilder {
 
   public build(): void {
     const data: EGraphicsElement = {
-      uuid: crypto.randomUUID(),
+      uuid: generateElementUUID(),
       type: EElementType.GRAPHICS,
       name: this.nameControl.value,
       color: DEFAULT_ECOLOR,

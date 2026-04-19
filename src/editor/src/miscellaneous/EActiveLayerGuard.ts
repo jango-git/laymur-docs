@@ -5,6 +5,7 @@ import { ELayerType } from "../document/types.layers";
 import { EResizePolicyType } from "../document/types.misc";
 import { UI_STATE } from "../ui-state/EUIState";
 import { consoleDebug } from "./debug.print";
+import { generateLayerUUID } from "./generate-uuid";
 
 export class EActiveLayerGuard {
   constructor() {
@@ -34,7 +35,7 @@ export class EActiveLayerGuard {
       consoleDebug("[EActiveLayerGuard] no layers found, creating a default layer");
       STORE.commands.layers.add({
         layer: {
-          uuid: crypto.randomUUID(),
+          uuid: generateLayerUUID(),
           type: ELayerType.FULLSCREEN,
           name: "Gameplay",
           resizePolicy: EResizePolicyType.FIXED_HEIGHT,

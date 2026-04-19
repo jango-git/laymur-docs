@@ -2,28 +2,29 @@ import { EAssetControl } from "../../../controls/EAssetControl/EAssetControl";
 import { STORE } from "../../../document/store";
 import type { EAspectConstraint } from "../../../document/types.constraints";
 import { EConstraintType } from "../../../document/types.constraints";
-import type { EConstraintTarget } from "../../../miscellaneous/constraint-targets";
-import { getConstraintTargets } from "../../../miscellaneous/constraint-targets";
+import type { EElementConstraintTarget } from "../../../miscellaneous/constraint-targets";
+import { getElementConstraintTargets } from "../../../miscellaneous/constraint-targets";
+import { generateConstraintUUID, generateElementUUID } from "../../../miscellaneous/generate-uuid";
 import { makeRow } from "../../../miscellaneous/rows";
 import { UI_STATE } from "../../../ui-state/EUIState";
 import { TOAST } from "../../toast/EToast";
 
 export class EAspectConstraintBuilder {
-  private readonly elementControl: EAssetControl<EConstraintTarget>;
+  private readonly elementControl: EAssetControl<EElementConstraintTarget>;
 
   constructor(container: HTMLElement) {
-    this.elementControl = new EAssetControl<EConstraintTarget>(
+    this.elementControl = new EAssetControl<EElementConstraintTarget>(
       makeRow(container, "Element"),
-      getConstraintTargets,
+      getElementConstraintTargets,
     );
   }
 
   public build(): void {
     const data: EAspectConstraint = {
-      uuid: crypto.randomUUID(),
+      uuid: generateConstraintUUID(),
       type: EConstraintType.ASPECT,
       name: "",
-      element: this.elementControl.value?.uuid ?? "",
+      element: this.elementControl.value?.uuid ?? generateElementUUID(),
       aspect: 1,
     };
 

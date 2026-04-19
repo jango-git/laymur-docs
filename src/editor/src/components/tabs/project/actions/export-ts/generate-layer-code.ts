@@ -2,7 +2,7 @@ import type { EAnyConstraint } from "../../../../../document/types.constraints";
 import type { EAnyElement } from "../../../../../document/types.elements";
 import type { EAnyLayer } from "../../../../../document/types.layers";
 import { ELayerType } from "../../../../../document/types.layers";
-import type { UUID } from "../../../../../document/types.misc";
+import type { EElementUUID, ELayerUUID } from "../../../../../document/types.misc";
 import { generateConstraintStatement } from "./generate-constraint-statement";
 import { generateElementDeclaration } from "./generate-element-declaration";
 import { generateResizePolicyCode } from "./generate-resize-policy";
@@ -38,7 +38,7 @@ export function generateLayerCode(
     elementNames.set(element.uuid, name);
   }
 
-  const ref = (uuid: UUID): string => {
+  const ref = (uuid: ELayerUUID | EElementUUID): string => {
     if (uuid === layer.uuid) {
       return "this";
     }

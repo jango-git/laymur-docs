@@ -4,32 +4,38 @@ import type { EStoreDeltaConstraint } from "../../../document/signals/constraint
 import { STORE } from "../../../document/store";
 import type { EVerticalProportionConstraint } from "../../../document/types.constraints";
 import { EConstraintType } from "../../../document/types.constraints";
-import type { UUID } from "../../../document/types.misc";
-import type { EConstraintTarget } from "../../../miscellaneous/constraint-targets";
-import { getConstraintTargets } from "../../../miscellaneous/constraint-targets";
+import type { EConstraintUUID, ELayerUUID } from "../../../document/types.misc";
+import type {
+  EElementConstraintTarget,
+  EUniversalConstraintTarget,
+} from "../../../miscellaneous/constraint-targets";
+import {
+  getElementConstraintTargets,
+  getUniversalConstraintTargets,
+} from "../../../miscellaneous/constraint-targets";
 import { makeRow } from "../../../miscellaneous/rows";
 import { EConstraintCard } from "./EConstraintCard";
 
 export class EVerticalProportionConstraintCard extends EConstraintCard {
-  private readonly elementAControl: EAssetControl<EConstraintTarget>;
-  private readonly elementBControl: EAssetControl<EConstraintTarget>;
+  private readonly elementAControl: EAssetControl<EUniversalConstraintTarget>;
+  private readonly elementBControl: EAssetControl<EElementConstraintTarget>;
   private readonly proportionControl: ENumberControl;
 
-  constructor(container: HTMLElement, uuid: UUID, layerUuid: UUID) {
+  constructor(container: HTMLElement, uuid: EConstraintUUID, layerUuid: ELayerUUID) {
     super(container, uuid, layerUuid, "Proportion Vertical");
 
     this.nameControl.signalValueChanged.on(this.onNameChanged);
 
-    this.elementAControl = new EAssetControl<EConstraintTarget>(
+    this.elementAControl = new EAssetControl<EUniversalConstraintTarget>(
       makeRow(this.bodyRoot, "Element A"),
-      getConstraintTargets,
+      getUniversalConstraintTargets,
       { nullable: false },
     );
     this.elementAControl.signalValueChanged.on(this.onElementAChanged);
 
-    this.elementBControl = new EAssetControl<EConstraintTarget>(
+    this.elementBControl = new EAssetControl<EElementConstraintTarget>(
       makeRow(this.bodyRoot, "Element B"),
-      getConstraintTargets,
+      getElementConstraintTargets,
       { nullable: false },
     );
     this.elementBControl.signalValueChanged.on(this.onElementBChanged);
@@ -56,9 +62,12 @@ export class EVerticalProportionConstraintCard extends EConstraintCard {
 
   private refresh(constraint: EVerticalProportionConstraint): void {
     this.nameControl.value = constraint.name;
-    const targets = getConstraintTargets();
-    this.elementAControl.value = targets.find((e) => e.uuid === constraint.elementA);
-    this.elementBControl.value = targets.find((e) => e.uuid === constraint.elementB);
+    this.elementAControl.value = getUniversalConstraintTargets().find(
+      (e) => e.uuid === constraint.elementA,
+    );
+    this.elementBControl.value = getElementConstraintTargets().find(
+      (e) => e.uuid === constraint.elementB,
+    );
     this.proportionControl.value = constraint.proportion;
   }
 
@@ -66,13 +75,13 @@ export class EVerticalProportionConstraintCard extends EConstraintCard {
     STORE.commands.constraints.writeVerticalProportion({ uuid: this.uuid, name });
   };
 
-  private readonly onElementAChanged = (next: EConstraintTarget | undefined): void => {
+  private readonly onElementAChanged = (next: EUniversalConstraintTarget | undefined): void => {
     if (next !== undefined) {
       STORE.commands.constraints.writeVerticalProportion({ uuid: this.uuid, elementA: next.uuid });
     }
   };
 
-  private readonly onElementBChanged = (next: EConstraintTarget | undefined): void => {
+  private readonly onElementBChanged = (next: EElementConstraintTarget | undefined): void => {
     if (next !== undefined) {
       STORE.commands.constraints.writeVerticalProportion({ uuid: this.uuid, elementB: next.uuid });
     }

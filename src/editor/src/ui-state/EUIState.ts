@@ -1,10 +1,10 @@
 import type { FerrsignView1 } from "ferrsign";
 import { Ferrsign1 } from "ferrsign";
-import type { EStoreDeltaLayerList } from "../document/signals";
 import { EStoreDeltaOperation } from "../document/signals";
+import type { EStoreDeltaLayerList } from "../document/signals/layers";
 import { STORE } from "../document/store";
 import { clone } from "../document/types";
-import type { UUID } from "../document/types.misc";
+import type { ELayerUUID } from "../document/types.misc";
 import { consoleDebug } from "../miscellaneous/debug.print";
 import type { EUIDebugState, EUIStateData } from "./EUIState.Internal";
 
@@ -22,7 +22,7 @@ export class EUIState {
     },
   };
 
-  private readonly signalActiveLayerChangedInternal = new Ferrsign1<UUID | undefined>();
+  private readonly signalActiveLayerChangedInternal = new Ferrsign1<ELayerUUID | undefined>();
   private readonly signalDebugChangedInternal = new Ferrsign1<Partial<EUIDebugState>>();
 
   constructor() {
@@ -30,7 +30,7 @@ export class EUIState {
     STORE.signals.setup.on(this.onSetup);
   }
 
-  public get signalActiveLayerChanged(): FerrsignView1<UUID | undefined> {
+  public get signalActiveLayerChanged(): FerrsignView1<ELayerUUID | undefined> {
     return this.signalActiveLayerChangedInternal;
   }
 
@@ -38,14 +38,14 @@ export class EUIState {
     return this.signalDebugChangedInternal;
   }
 
-  public get forceActiveLayerUuid(): UUID {
+  public get forceActiveLayerUuid(): ELayerUUID {
     if (this.data.activeLayer === undefined) {
       throw new Error(`[EUIState.forceCurrentLayerUuid] Current layer uuid is undefined`);
     }
     return this.data.activeLayer;
   }
 
-  public get activeLayerUuid(): UUID | undefined {
+  public get activeLayerUuid(): ELayerUUID | undefined {
     return this.data.activeLayer;
   }
 
@@ -53,7 +53,7 @@ export class EUIState {
     return clone(this.data.debug);
   }
 
-  public setActiveLayer(uuid?: UUID): void {
+  public setActiveLayer(uuid?: ELayerUUID): void {
     if (uuid !== undefined && STORE.selectors.layers.select(uuid) === undefined) {
       throw new Error(`[EUIState.setCurrentLayer] Layer not found: ${uuid}`);
     }

@@ -10,7 +10,13 @@ import type {
   ESceneElement,
   ETextElement,
 } from "../types.elements";
-import type { EAnyGraphicsDrawCommand, EColor, ETextChunk, UUID } from "../types.misc";
+import type {
+  EAnyGraphicsDrawCommand,
+  EAssetUUID,
+  EColor,
+  ELayerUUID,
+  ETextChunk,
+} from "../types.misc";
 import { EGraphicsDrawCommandType } from "../types.misc";
 import {
   isValidHexColor,
@@ -75,7 +81,7 @@ export class EStoreValidatorsElements {
   constructor(private readonly data: EDocument) {}
 
   public animatedImage(
-    layer: UUID | undefined,
+    layer: ELayerUUID | undefined,
     element: Partial<Omit<EAnimatedImageElement, "type">>,
     softValidation = false,
   ): EAnimatedImageElementError | undefined {
@@ -136,7 +142,7 @@ export class EStoreValidatorsElements {
   }
 
   public graphics(
-    layer: UUID | undefined,
+    layer: ELayerUUID | undefined,
     element: Partial<Omit<EGraphicsElement, "type">>,
     softValidation = false,
   ): EGraphicsElementError | undefined {
@@ -183,7 +189,7 @@ export class EStoreValidatorsElements {
   }
 
   public image(
-    layer: UUID | undefined,
+    layer: ELayerUUID | undefined,
     element: Partial<Omit<EImageElement, "type">>,
     softValidation = false,
   ): EImageElementError | undefined {
@@ -220,7 +226,7 @@ export class EStoreValidatorsElements {
   }
 
   public nineSlice(
-    layer: UUID | undefined,
+    layer: ELayerUUID | undefined,
     element: Partial<Omit<ENineSliceElement, "type">>,
     softValidation = false,
   ): ENineSliceElementError | undefined {
@@ -275,7 +281,7 @@ export class EStoreValidatorsElements {
   }
 
   public progress(
-    layer: UUID | undefined,
+    layer: ELayerUUID | undefined,
     element: Partial<Omit<EProgressElement, "type">>,
     softValidation = false,
   ): EProgressElementError | undefined {
@@ -323,7 +329,7 @@ export class EStoreValidatorsElements {
   }
 
   public scene(
-    layer: UUID | undefined,
+    layer: ELayerUUID | undefined,
     element: Partial<Omit<ESceneElement, "type">>,
     softValidation = false,
   ): ESceneElementError | undefined {
@@ -375,7 +381,7 @@ export class EStoreValidatorsElements {
   }
 
   public text(
-    layer: UUID | undefined,
+    layer: ELayerUUID | undefined,
     element: Partial<Omit<ETextElement, "type">>,
     softValidation = false,
   ): ETextElementError | undefined {
@@ -494,17 +500,17 @@ export class EStoreValidatorsElements {
     );
   }
 
-  private getLayerContext(layer: UUID): ELayerContext | undefined {
+  private getLayerContext(layer: ELayerUUID): ELayerContext | undefined {
     return this.data.layerContexts.find((layerContext) => layerContext.layer.uuid === layer);
   }
 
-  private isImageAssetExists(uuid: UUID): boolean {
+  private isImageAssetExists(uuid: EAssetUUID): boolean {
     return this.data.assets.some(
       (asset): asset is EImageAsset => asset.uuid === uuid && asset.type === EAssetType.IMAGE,
     );
   }
 
-  private isFontAssetExists(uuid: UUID): boolean {
+  private isFontAssetExists(uuid: EAssetUUID): boolean {
     return this.data.assets.some(
       (asset): asset is EFontAsset => asset.uuid === uuid && asset.type === EAssetType.FONT,
     );

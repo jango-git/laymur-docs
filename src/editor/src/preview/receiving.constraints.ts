@@ -9,7 +9,7 @@ import {
 } from "laymur";
 import type { EAnyConstraint } from "../document/types.constraints";
 import { EConstraintType } from "../document/types.constraints";
-import { UUID } from "../document/types.misc";
+import type { EConstraintUUID, ELayerUUID } from "../document/types.misc";
 import {
   ensureUniqueConstraint,
   findLayerUuidForConstraint,
@@ -18,7 +18,7 @@ import {
   resolveLayerContext,
 } from "./miscellaneous";
 
-export function addConstraint(layerUuid: UUID, constraint: EAnyConstraint): void {
+export function addConstraint(layerUuid: ELayerUUID, constraint: EAnyConstraint): void {
   ensureUniqueConstraint(constraint.uuid);
   const layerContext = resolveLayerContext(layerUuid);
 
@@ -97,7 +97,7 @@ export function addConstraint(layerUuid: UUID, constraint: EAnyConstraint): void
   }
 }
 
-export function removeConstraint(layerUuid: UUID, uuid: UUID): void {
+export function removeConstraint(layerUuid: ELayerUUID, uuid: EConstraintUUID): void {
   resolveConstraint(layerUuid, uuid).destroy();
   resolveLayerContext(layerUuid).constraints.delete(uuid);
 }

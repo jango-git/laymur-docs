@@ -1,10 +1,15 @@
 import { STORE } from "../document/store";
-import type { EAnyElement } from "../document/types.elements";
-import type { UUID } from "../document/types.misc";
+import type { EElementUUID, ELayerUUID } from "../document/types.misc";
 import { UI_STATE } from "../ui-state/EUIState";
 
-export interface EConstraintTarget {
-  uuid: UUID;
+export interface EElementConstraintTarget {
+  uuid: EElementUUID;
+  name: string;
+  dataURL: string;
+}
+
+export interface EUniversalConstraintTarget {
+  uuid: EElementUUID | ELayerUUID;
   name: string;
   dataURL: string;
 }
@@ -12,35 +17,28 @@ export interface EConstraintTarget {
 const ELEMENT_THUMBNAIL =
   "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16'><rect width='16' height='16' fill='%23ddd'/></svg>";
 
-function toConstraintTargets(
-  elements: EAnyElement[],
-  layer?: { uuid: UUID; name: string },
-): EConstraintTarget[] {
-  const result: EConstraintTarget[] = elements.map((element) => ({
+export function getElementConstraintTargets(): EElementConstraintTarget[] {
+  const layerUuid = UI_STATE.activeLayerUuid;
+  if (layerUuid === undefined) {
+    return [];
+  }
+
+  return STORE.selectors.elements.selectAll(layerUuid).map((element) => ({
     uuid: element.uuid,
     name: element.name,
     dataURL: ELEMENT_THUMBNAIL,
   }));
-  if (layer !== undefined) {
-    result.push({ uuid: layer.uuid, name: layer.name, dataURL: ELEMENT_THUMBNAIL });
-  }
-  return result;
 }
 
-export function getConstraintElements(): EConstraintTarget[] {
+export function getUniversalConstraintTargets(): EUniversalConstraintTarget[] {
   const layerUuid = UI_STATE.activeLayerUuid;
   if (layerUuid === undefined) {
     return [];
   }
-  return toConstraintTargets(STORE.selectors.elements.selectAll(layerUuid));
-}
-
-export function getConstraintTargets(): EConstraintTarget[] {
-  const layerUuid = UI_STATE.activeLayerUuid;
-  if (layerUuid === undefined) {
-    return [];
-  }
-  const elements = STORE.selectors.elements.selectAll(layerUuid);
+  const constraintTargets = getElementConstraintTargets();
   const layer = STORE.selectors.constraints.selectLayerInfo(layerUuid);
-  return toConstraintTargets(elements, layer);
+  if (layer === undefined) {
+    return constraintTargets;
+  }
+  return [...constraintTargets, { uuid: layer.uuid, name: layer.name, dataURL: ELEMENT_THUMBNAIL }];
 }

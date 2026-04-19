@@ -1,4 +1,4 @@
-import type { UUID } from "./types.misc";
+import type { EConstraintUUID, EElementUUID, ELayerUUID } from "./types.misc";
 
 export enum EConstraintType {
   ASPECT = "ASPECT",
@@ -11,21 +11,21 @@ export enum EConstraintType {
 }
 
 interface EConstraint {
-  uuid: UUID;
+  uuid: EConstraintUUID;
   type: EConstraintType;
   name: string;
 }
 
 export interface EAspectConstraint extends EConstraint {
   type: EConstraintType.ASPECT;
-  element: UUID;
+  element: EElementUUID;
   aspect: number;
 }
 
 export interface EHorizontalDistanceConstraint extends EConstraint {
   type: EConstraintType.DISTANCE_HORIZONTAL;
-  elementA: UUID;
-  elementB: UUID;
+  elementA: ELayerUUID | EElementUUID;
+  elementB: EElementUUID;
   anchorA: number;
   anchorB: number;
   distance: number;
@@ -33,8 +33,8 @@ export interface EHorizontalDistanceConstraint extends EConstraint {
 
 export interface EVerticalDistanceConstraint extends EConstraint {
   type: EConstraintType.DISTANCE_VERTICAL;
-  elementA: UUID;
-  elementB: UUID;
+  elementA: ELayerUUID | EElementUUID;
+  elementB: EElementUUID;
   anchorA: number;
   anchorB: number;
   distance: number;
@@ -42,27 +42,27 @@ export interface EVerticalDistanceConstraint extends EConstraint {
 
 export interface EHorizontalProportionConstraint extends EConstraint {
   type: EConstraintType.PROPORTION_HORIZONTAL;
-  elementA: UUID;
-  elementB: UUID;
+  elementA: ELayerUUID | EElementUUID;
+  elementB: EElementUUID;
   proportion: number;
 }
 
 export interface EVerticalProportionConstraint extends EConstraint {
   type: EConstraintType.PROPORTION_VERTICAL;
-  elementA: UUID;
-  elementB: UUID;
+  elementA: ELayerUUID | EElementUUID;
+  elementB: EElementUUID;
   proportion: number;
 }
 
 export interface EHorizontalSizeConstraint extends EConstraint {
   type: EConstraintType.SIZE_HORIZONTAL;
-  element: UUID;
+  element: EElementUUID;
   size: number;
 }
 
 export interface EVerticalSizeConstraint extends EConstraint {
   type: EConstraintType.SIZE_VERTICAL;
-  element: UUID;
+  element: EElementUUID;
   size: number;
 }
 

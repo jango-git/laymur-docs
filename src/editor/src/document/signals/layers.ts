@@ -3,13 +3,13 @@ import { Ferrsign1 } from "ferrsign";
 import { consoleDebug } from "../../miscellaneous/debug.print";
 import type { ELayerContext } from "../types";
 import type { EAnyLayer } from "../types.layers";
-import type { UUID } from "../types.misc";
+import type { ELayerUUID } from "../types.misc";
 import type { EStoreDeltaOperation } from "./index";
 
 export type EStoreDeltaLayerList =
   | { operation: EStoreDeltaOperation.ADD; layerContext: ELayerContext }
-  | { operation: EStoreDeltaOperation.REMOVE; uuid: UUID }
-  | { operation: EStoreDeltaOperation.REORDER; uuids: UUID[] };
+  | { operation: EStoreDeltaOperation.REMOVE; uuid: ELayerUUID }
+  | { operation: EStoreDeltaOperation.REORDER; uuids: ELayerUUID[] };
 
 export interface EStoreDeltaLayer {
   layer: EAnyLayer;

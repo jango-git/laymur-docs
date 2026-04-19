@@ -2,19 +2,19 @@ import type { EDocument } from "../types";
 import { clone } from "../types";
 import type { EAnyConstraint } from "../types.constraints";
 import { EConstraintType } from "../types.constraints";
-import type { UUID } from "../types.misc";
+import type { EConstraintUUID, EElementUUID, ELayerUUID } from "../types.misc";
 
 export class EStoreSelectorsConstraints {
   constructor(private readonly data: EDocument) {}
 
-  public selectAll(layerUuid: UUID): EAnyConstraint[] {
+  public selectAll(layerUuid: ELayerUUID): EAnyConstraint[] {
     const layerContext = this.data.layerContexts.find(
       (context) => context.layer.uuid === layerUuid,
     );
     return layerContext ? clone(layerContext.constraints) : [];
   }
 
-  public select(uuid: UUID): EAnyConstraint | undefined {
+  public select(uuid: EConstraintUUID): EAnyConstraint | undefined {
     for (const { constraints } of this.data.layerContexts) {
       const result = constraints.find((constraint) => constraint.uuid === uuid);
       if (result) {
@@ -24,7 +24,7 @@ export class EStoreSelectorsConstraints {
     return undefined;
   }
 
-  public selectLinked(elementUuid: UUID): EAnyConstraint[] {
+  public selectLinked(elementUuid: EElementUUID): EAnyConstraint[] {
     const ownerLayerContext = this.data.layerContexts.find((context) =>
       context.elements.some((element) => element.uuid === elementUuid),
     );
@@ -53,7 +53,7 @@ export class EStoreSelectorsConstraints {
     return clone(result);
   }
 
-  public selectLayerInfo(layerUuid: UUID): { uuid: UUID; name: string } | undefined {
+  public selectLayerInfo(layerUuid: ELayerUUID): { uuid: ELayerUUID; name: string } | undefined {
     const layerContext = this.data.layerContexts.find(
       (context) => context.layer.uuid === layerUuid,
     );

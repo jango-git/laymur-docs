@@ -2,13 +2,13 @@ import type { FerrsignView1 } from "ferrsign";
 import { Ferrsign1 } from "ferrsign";
 import { consoleDebug } from "../../miscellaneous/debug.print";
 import type { EAnyElement } from "../types.elements";
-import type { UUID } from "../types.misc";
+import type { EElementUUID, ELayerUUID } from "../types.misc";
 import type { EStoreDeltaOperation } from "./index";
 
 export type EStoreDeltaElementList =
-  | { operation: EStoreDeltaOperation.ADD; layerUuid: UUID; element: EAnyElement }
-  | { operation: EStoreDeltaOperation.REMOVE; layerUuid: UUID; uuid: UUID }
-  | { operation: EStoreDeltaOperation.REORDER; layerUuid: UUID; uuids: UUID[] };
+  | { operation: EStoreDeltaOperation.ADD; layerUuid: ELayerUUID; element: EAnyElement }
+  | { operation: EStoreDeltaOperation.REMOVE; layerUuid: ELayerUUID; uuid: EElementUUID }
+  | { operation: EStoreDeltaOperation.REORDER; layerUuid: ELayerUUID; uuids: EElementUUID[] };
 
 export interface EStoreDeltaElement {
   element: EAnyElement;

@@ -2,13 +2,13 @@ import type { FerrsignView1 } from "ferrsign";
 import { Ferrsign1 } from "ferrsign";
 import { consoleDebug } from "../../miscellaneous/debug.print";
 import type { EAnyConstraint } from "../types.constraints";
-import type { UUID } from "../types.misc";
+import type { EConstraintUUID, ELayerUUID } from "../types.misc";
 import type { EStoreDeltaOperation } from "./index";
 
 export type EStoreDeltaConstraintList =
-  | { operation: EStoreDeltaOperation.ADD; layerUuid: UUID; constraint: EAnyConstraint }
-  | { operation: EStoreDeltaOperation.REMOVE; layerUuid: UUID; uuid: UUID }
-  | { operation: EStoreDeltaOperation.REORDER; layerUuid: UUID; uuids: UUID[] };
+  | { operation: EStoreDeltaOperation.ADD; layerUuid: ELayerUUID; constraint: EAnyConstraint }
+  | { operation: EStoreDeltaOperation.REMOVE; layerUuid: ELayerUUID; uuid: EConstraintUUID }
+  | { operation: EStoreDeltaOperation.REORDER; layerUuid: ELayerUUID; uuids: EConstraintUUID[] };
 
 export interface EStoreDeltaConstraint {
   constraint: EAnyConstraint;

@@ -4,7 +4,7 @@ import type { EStoreDeltaLayerList } from "../../../document/signals/layers";
 import { STORE } from "../../../document/store";
 import type { ELayerContext } from "../../../document/types";
 import { ELayerType } from "../../../document/types.layers";
-import type { UUID } from "../../../document/types.misc";
+import type { ELayerUUID } from "../../../document/types.misc";
 import { consoleDebug } from "../../../miscellaneous/debug.print";
 import { makeSortable } from "../../../miscellaneous/make-sortable";
 import { EFullscreenLayerBuilder } from "../../builders/layers/EFullscreenLayerBuilder";
@@ -12,7 +12,7 @@ import { EFullscreenLayerCard } from "../../cards/layers/EFullscreenLayerCard";
 
 export class ELayersTab {
   private readonly layersContent: HTMLElement;
-  private readonly uuidToCardMap = new Map<UUID, HTMLElement>();
+  private readonly uuidToCardMap = new Map<ELayerUUID, HTMLElement>();
 
   constructor(private readonly container: HTMLElement) {
     {
@@ -62,7 +62,7 @@ export class ELayersTab {
       );
       const [moved] = uuids.splice(fromIndex, 1);
       uuids.splice(toIndex, 0, moved);
-      STORE.commands.layers.reorder(uuids);
+      STORE.commands.layers.reorder(uuids as ELayerUUID[]);
     });
   }
 
@@ -79,12 +79,12 @@ export class ELayersTab {
     this.uuidToCardMap.set(layerContext.layer.uuid, container);
   }
 
-  private removeCard(uuid: UUID): void {
+  private removeCard(uuid: ELayerUUID): void {
     this.uuidToCardMap.get(uuid)?.remove();
     this.uuidToCardMap.delete(uuid);
   }
 
-  private reorderCards(uuids: UUID[]): void {
+  private reorderCards(uuids: ELayerUUID[]): void {
     for (const uuid of uuids) {
       const card = this.uuidToCardMap.get(uuid);
       if (card) {

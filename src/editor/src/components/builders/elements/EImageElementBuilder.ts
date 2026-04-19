@@ -5,6 +5,7 @@ import type { EImageAsset } from "../../../document/types.assets";
 import type { EImageElement } from "../../../document/types.elements";
 import { EElementType } from "../../../document/types.elements";
 import { DEFAULT_ECOLOR } from "../../../miscellaneous/defaults";
+import { generateAssetUUID, generateElementUUID } from "../../../miscellaneous/generate-uuid";
 import { makeRow } from "../../../miscellaneous/rows";
 import { UI_STATE } from "../../../ui-state/EUIState";
 import { TOAST } from "../../toast/EToast";
@@ -23,11 +24,11 @@ export class EImageElementBuilder {
 
   public build(): void {
     const data: EImageElement = {
-      uuid: crypto.randomUUID(),
+      uuid: generateElementUUID(),
       type: EElementType.IMAGE,
       name: this.nameControl.value,
       color: DEFAULT_ECOLOR,
-      texture: this.textureControl.value?.uuid ?? "",
+      texture: this.textureControl.value?.uuid ?? generateAssetUUID(),
     };
 
     const error = STORE.validators.elements.image(UI_STATE.activeLayerUuid, data);

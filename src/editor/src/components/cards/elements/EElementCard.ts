@@ -1,7 +1,7 @@
 import { EColorControl } from "../../../controls/EColorControl/EColorControl";
 import { EStringControl } from "../../../controls/EStringControl/EStringControl";
 import { STORE } from "../../../document/store";
-import type { UUID } from "../../../document/types.misc";
+import type { EElementUUID, ELayerUUID } from "../../../document/types.misc";
 import { makeRow } from "../../../miscellaneous/rows";
 
 export abstract class EElementCard {
@@ -11,8 +11,8 @@ export abstract class EElementCard {
 
   constructor(
     container: HTMLElement,
-    protected readonly uuid: UUID,
-    private readonly layerUuid: UUID,
+    protected readonly uuid: EElementUUID,
+    private readonly layerUuid: ELayerUUID,
     typeLabel: string,
   ) {
     const root = document.createElement("div");

@@ -15,7 +15,15 @@ import {
   UITextResizeMode,
 } from "laymur";
 import { SRGBColorSpace, Texture, TextureLoader } from "three";
-import type { EAnyGraphicsDrawCommand, EColor, ETextChunk, UUID } from "../document/types.misc";
+import type {
+  EAnyGraphicsDrawCommand,
+  EAssetUUID,
+  EColor,
+  EConstraintUUID,
+  EElementUUID,
+  ELayerUUID,
+  ETextChunk,
+} from "../document/types.misc";
 import {
   EAnimatedImageLoopMode,
   EGraphicsDrawCommandType,
@@ -35,8 +43,8 @@ import type {
   EPreviewLayerContext,
 } from "./types";
 
-export const LAYER_DATABASE = new Map<string, EPreviewLayerContext>();
-export const ASSET_DATABASE = new Map<string, EAssetDataType>();
+export const LAYER_DATABASE = new Map<ELayerUUID, EPreviewLayerContext>();
+export const ASSET_DATABASE = new Map<EAssetUUID, EAssetDataType>();
 
 let LAYER_ACTIVE: EPreviewLayerContext | undefined;
 
@@ -58,7 +66,7 @@ export async function loadTexture(dataURL: string): Promise<Texture> {
   });
 }
 
-export function setLayerContextActive(uuid: UUID, isActive: boolean): void {
+export function setLayerContextActive(uuid: ELayerUUID, isActive: boolean): void {
   LAYER_ACTIVE = isActive ? resolveLayerContext(uuid) : undefined;
 }
 
@@ -70,11 +78,11 @@ export function getLayerContextActive(): EPreviewLayerContext | undefined {
   return LAYER_ACTIVE;
 }
 
-export function isLayerContextActive(uuid: UUID): boolean {
+export function isLayerContextActive(uuid: ELayerUUID): boolean {
   return LAYER_ACTIVE === LAYER_DATABASE.get(uuid);
 }
 
-export function resolveLayerContext(uuid: UUID): EPreviewLayerContext {
+export function resolveLayerContext(uuid: ELayerUUID): EPreviewLayerContext {
   const layerData = LAYER_DATABASE.get(uuid);
   if (!layerData) {
     throw new Error(`Layer not found: ${uuid}`);
@@ -82,7 +90,7 @@ export function resolveLayerContext(uuid: UUID): EPreviewLayerContext {
   return layerData;
 }
 
-export function resolveElement(uuidOwner: UUID, uuid: UUID): EAnyUIElement {
+export function resolveElement(uuidOwner: ELayerUUID, uuid: EElementUUID): EAnyUIElement {
   const element = resolveLayerContext(uuidOwner).elements.get(uuid);
   if (!element) {
     throw new Error(`Element not found: ${uuid}`);
@@ -90,7 +98,7 @@ export function resolveElement(uuidOwner: UUID, uuid: UUID): EAnyUIElement {
   return element;
 }
 
-export function resolveConstraint(uuidOwner: UUID, uuid: UUID): EAnyUIConstraint {
+export function resolveConstraint(uuidOwner: ELayerUUID, uuid: EConstraintUUID): EAnyUIConstraint {
   const constraint = resolveLayerContext(uuidOwner).constraints.get(uuid);
   if (!constraint) {
     throw new Error(`Constraint not found: ${uuid}`);
@@ -98,7 +106,7 @@ export function resolveConstraint(uuidOwner: UUID, uuid: UUID): EAnyUIConstraint
   return constraint;
 }
 
-export function resolveAsset(uuid: UUID): EAssetDataType {
+export function resolveAsset(uuid: EAssetUUID): EAssetDataType {
   const asset = ASSET_DATABASE.get(uuid);
   if (!asset) {
     throw new Error(`Asset not found: ${uuid}`);
@@ -106,7 +114,7 @@ export function resolveAsset(uuid: UUID): EAssetDataType {
   return asset;
 }
 
-export function resolveTextureAsset(uuid: UUID): Texture {
+export function resolveTextureAsset(uuid: EAssetUUID): Texture {
   const asset = resolveAsset(uuid);
   if (!(asset instanceof Texture)) {
     throw new Error(`Asset is not a texture: ${uuid}`);
@@ -114,7 +122,7 @@ export function resolveTextureAsset(uuid: UUID): Texture {
   return asset;
 }
 
-export function resolveFontAsset(uuid: UUID): FontFace {
+export function resolveFontAsset(uuid: EAssetUUID): FontFace {
   const asset = resolveAsset(uuid);
   if (!(asset instanceof FontFace)) {
     throw new Error(`Asset is not a font: ${uuid}`);
@@ -122,7 +130,7 @@ export function resolveFontAsset(uuid: UUID): FontFace {
   return asset;
 }
 
-export function ensureUniqueElement(uuid: UUID): void {
+export function ensureUniqueElement(uuid: EElementUUID): void {
   for (const { elements } of LAYER_DATABASE.values()) {
     if (elements.has(uuid)) {
       throw new Error(`Element already exists: ${uuid}`);
@@ -130,7 +138,7 @@ export function ensureUniqueElement(uuid: UUID): void {
   }
 }
 
-export function ensureUniqueConstraint(uuid: UUID): void {
+export function ensureUniqueConstraint(uuid: EConstraintUUID): void {
   for (const { constraints } of LAYER_DATABASE.values()) {
     if (constraints.has(uuid)) {
       throw new Error(`Constraint already exists: ${uuid}`);
@@ -138,13 +146,13 @@ export function ensureUniqueConstraint(uuid: UUID): void {
   }
 }
 
-export function ensureUniqueAsset(uuid: UUID): void {
+export function ensureUniqueAsset(uuid: EAssetUUID): void {
   if (ASSET_DATABASE.has(uuid)) {
     throw new Error(`Asset already exists: ${uuid}`);
   }
 }
 
-export function findLayerUuidForElement(elementUuid: UUID): string {
+export function findLayerUuidForElement(elementUuid: EElementUUID): ELayerUUID {
   for (const [layerUuid, ctx] of LAYER_DATABASE.entries()) {
     if (ctx.elements.has(elementUuid)) {
       return layerUuid;
@@ -153,7 +161,7 @@ export function findLayerUuidForElement(elementUuid: UUID): string {
   throw new Error(`Element not found in any layer: ${elementUuid}`);
 }
 
-export function findLayerUuidForConstraint(constraintUuid: UUID): UUID {
+export function findLayerUuidForConstraint(constraintUuid: EConstraintUUID): ELayerUUID {
   for (const [layerUuid, ctx] of LAYER_DATABASE.entries()) {
     if (ctx.constraints.has(constraintUuid)) {
       return layerUuid;
