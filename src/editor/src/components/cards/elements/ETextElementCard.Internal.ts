@@ -41,7 +41,7 @@ const FONT_WEIGHT_OPTIONS: ESelectControlOption<ETextFontWeight>[] = [
 
 export const RESIZE_MODE_OPTIONS: ESelectControlOption<ETextResizeMode>[] = [
   { label: "Scale", value: ETextResizeMode.SCALE },
-  { label: "World", value: ETextResizeMode.WORLD },
+  { label: "Break", value: ETextResizeMode.BREAK },
 ];
 
 const DEFAULT_CHUNK_STYLE: ETextChunk["style"] = {

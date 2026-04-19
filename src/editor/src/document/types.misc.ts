@@ -60,7 +60,7 @@ export enum ETextFontWeight {
 
 export enum ETextResizeMode {
   SCALE = "SCALE",
-  WORLD = "WORLD",
+  BREAK = "BREAK",
 }
 
 export enum EGraphicsDrawCommandType {
