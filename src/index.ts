@@ -3,6 +3,7 @@ import { EConstraintsTab } from "./src/components/tabs/constraints/EConstraintsT
 import { EElementsTab } from "./src/components/tabs/elements/EElementsTab";
 import { ELayersTab } from "./src/components/tabs/layers/ELayersTab";
 import { EProjectTab } from "./src/components/tabs/project/EProjectTab";
+import { EViewportPresets } from "./src/components/viewport/EViewportPresets";
 import { EActiveLayerGuard } from "./src/miscellaneous/EActiveLayerGuard";
 import { EDocumentAutoload } from "./src/miscellaneous/EDocumentAutoload";
 import { EDocumentAutosave } from "./src/miscellaneous/EDocumentAutosave";
@@ -14,6 +15,12 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("preview-frame") as HTMLIFrameElement,
     document.getElementById("viewport-content") as HTMLElement,
     document.getElementById("preview-resize-handle") as HTMLElement,
+  );
+
+  new EViewportPresets(
+    document.getElementById("viewport-toolbar-left") as HTMLElement,
+    document.getElementById("preview-container") as HTMLElement,
+    document.getElementById("viewport-content") as HTMLElement,
   );
 
   const tabButtons = document.querySelectorAll<HTMLButtonElement>(".tab-button");
@@ -35,7 +42,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const layersContainerElementId = "tab-layers";
   const elementsContainerElementId = "tab-elements";
   const constraintsContainerElementId = "tab-constraints";
-  const viewportToolbarContainerElementId = "viewport-toolbar";
+  const viewportToolbarContainerElementId = "viewport-toolbar-right";
 
   const projectContainer = document.getElementById(projectContainerElementId);
   const layersContainer = document.getElementById(layersContainerElementId);

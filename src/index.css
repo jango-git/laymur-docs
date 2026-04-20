@@ -16,6 +16,7 @@
 @import "./src/components/tabs/project/style.css";
 @import "./src/components/toast/style.css";
 @import "./src/components/debug/style.css";
+@import "./src/components/viewport/style.css";
 
 :root {
   /* Backgrounds */
@@ -89,7 +90,15 @@ body {
   border-bottom: 1px solid var(--border-strong);
   display: flex;
   align-items: center;
+  justify-content: space-between;
   padding: 0 12px;
+}
+
+#viewport-toolbar-left,
+#viewport-toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 2px;
 }
 
 #viewport-content {

@@ -1,0 +1,49 @@
+.viewport-preset-button {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  height: 26px;
+  padding: 0 8px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-label);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    color 0.15s;
+}
+
+.viewport-preset-button:hover {
+  background: var(--overlay-hover);
+  color: var(--text);
+}
+
+.viewport-preset-button--active {
+  background: var(--accent-light);
+  color: var(--accent);
+}
+
+.viewport-preset-icon {
+  display: block;
+  border: 1.5px solid currentColor;
+  border-radius: 1px;
+  flex-shrink: 0;
+}
+
+.viewport-preset-icon--portrait {
+  width: 7px;
+  height: 12px;
+}
+
+.viewport-preset-icon--landscape {
+  width: 12px;
+  height: 7px;
+}
+
+.viewport-preset-icon--square {
+  width: 10px;
+  height: 10px;
+}

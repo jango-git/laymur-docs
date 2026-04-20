@@ -29,39 +29,39 @@ const plugins = [
     ],
   }),
 
-  terser({
-    ecma: 2020,
-    module: true,
-    toplevel: true,
+  // terser({
+  //   ecma: 2020,
+  //   module: true,
+  //   toplevel: true,
 
-    compress: {
-      passes: 8,
-      drop_console: true,
-      drop_debugger: true,
-      pure_getters: true,
-      unsafe: false,
-      unsafe_arrows: true,
-      unsafe_methods: true,
-      unsafe_symbols: true,
+  //   compress: {
+  //     passes: 8,
+  //     drop_console: true,
+  //     drop_debugger: true,
+  //     pure_getters: true,
+  //     unsafe: false,
+  //     unsafe_arrows: true,
+  //     unsafe_methods: true,
+  //     unsafe_symbols: true,
 
-      hoist_funs: true,
-      hoist_vars: false,
+  //     hoist_funs: true,
+  //     hoist_vars: false,
 
-      booleans_as_integers: true,
-      module: true,
-    },
+  //     booleans_as_integers: true,
+  //     module: true,
+  //   },
 
-    mangle: {
-      toplevel: true,
-      properties: {
-        regex: /^_/,
-      },
-    },
+  //   mangle: {
+  //     toplevel: true,
+  //     properties: {
+  //       regex: /^_/,
+  //     },
+  //   },
 
-    format: {
-      comments: false,
-    },
-  }),
+  //   format: {
+  //     comments: false,
+  //   },
+  // }),
 ];
 
 export default [
