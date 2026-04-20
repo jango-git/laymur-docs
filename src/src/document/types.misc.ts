@@ -12,6 +12,8 @@ export type EElementUUID = string & { __brand: "EElementUUID" };
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export type EConstraintUUID = string & { __brand: "EConstraintUUID" };
 
+export type EAnyUUID = EAssetUUID | ELayerUUID | EElementUUID | EConstraintUUID;
+
 export enum EResizePolicyType {
   COVER = "COVER",
   CROSS = "CROSS",

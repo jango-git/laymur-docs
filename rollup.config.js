@@ -6,10 +6,6 @@ import replace from "@rollup/plugin-replace";
 import minifyPrivatesTransformer from "ts-transformer-minify-privates";
 import { readdirSync } from "node:fs";
 
-const exampleEntries = readdirSync("src/examples")
-  .filter((f) => f.endsWith("_content.ts"))
-  .map((f) => `src/examples/${f}`);
-
 const plugins = [
   replace({
     "process.env.NODE_ENV": JSON.stringify("production"),
@@ -33,69 +29,49 @@ const plugins = [
     ],
   }),
 
-  // terser({
-  //   ecma: 2020,
-  //   module: true,
-  //   toplevel: true,
+  terser({
+    ecma: 2020,
+    module: true,
+    toplevel: true,
 
-  //   compress: {
-  //     passes: 8,
-  //     drop_console: true,
-  //     drop_debugger: true,
-  //     pure_getters: true,
-  //     unsafe: false,
-  //     unsafe_arrows: true,
-  //     unsafe_methods: true,
-  //     unsafe_symbols: true,
+    compress: {
+      passes: 8,
+      drop_console: true,
+      drop_debugger: true,
+      pure_getters: true,
+      unsafe: false,
+      unsafe_arrows: true,
+      unsafe_methods: true,
+      unsafe_symbols: true,
 
-  //     hoist_funs: true,
-  //     hoist_vars: false,
+      hoist_funs: true,
+      hoist_vars: false,
 
-  //     booleans_as_integers: true,
-  //     module: true,
-  //   },
+      booleans_as_integers: true,
+      module: true,
+    },
 
-  //   mangle: {
-  //     toplevel: true,
-  //     properties: {
-  //       regex: /^_/,
-  //     },
-  //   },
+    mangle: {
+      toplevel: true,
+      properties: {
+        regex: /^_/,
+      },
+    },
 
-  //   format: {
-  //     comments: false,
-  //   },
-  // }),
+    format: {
+      comments: false,
+    },
+  }),
 ];
 
 export default [
   {
-    input: "src/editor/index.ts",
+    input: "src/index.ts",
     output: {
-      file: "dist/editor/index.js",
+      file: "dist/index.js",
       format: "es",
       sourcemap: false,
     },
     plugins,
   },
-
-  // {
-  //   input: "src/editor/src/preview/Preview.ts",
-  //   output: {
-  //     file: "dist/editor/preview.js",
-  //     format: "es",
-  //     sourcemap: false,
-  //   },
-  //   plugins,
-  // },
-
-  // ...exampleEntries.map((input) => ({
-  //   input,
-  //   output: {
-  //     file: input.replace("src/examples/", "dist/examples/").replace(".ts", ".js"),
-  //     format: "es",
-  //     sourcemap: false,
-  //   },
-  //   plugins,
-  // })),
 ];
