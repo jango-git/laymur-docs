@@ -65,8 +65,6 @@ export class EStoreCommandsAssets {
     this.signals["emitItem"]({ asset: clone(asset) });
   }
 
-  private get(uuid: EAssetUUID, type: EAssetType.FONT): EFontAsset;
-  private get(uuid: EAssetUUID, type: EAssetType.IMAGE): EImageAsset;
   private get<T extends EAnyAsset>(uuid: EAssetUUID, type: EAssetType): T {
     for (const asset of this.data.assets) {
       if (asset.type === type && asset.uuid === uuid) {
