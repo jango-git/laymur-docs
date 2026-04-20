@@ -16,7 +16,7 @@ export class EFontAssetCard {
 
   constructor(
     private readonly container: HTMLElement,
-    private readonly uuid: UUID,
+    private readonly uuid: EAssetUUID,
   ) {
     this.root = document.createElement("div");
     this.root.className = "asset-card";

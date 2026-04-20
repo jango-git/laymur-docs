@@ -1,5 +1,5 @@
-import { consoleDebug } from "../../../../miscellaneous/debug.print";
 import { STORE } from "../../../../document/store";
+import { consoleDebug } from "../../../../miscellaneous/debug.print";
 
 export class EResetAction {
   public execute(): void {

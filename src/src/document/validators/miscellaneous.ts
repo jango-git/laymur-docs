@@ -1,4 +1,4 @@
-const EPSILON = 1e-6;
+import { EPSILON } from "../../miscellaneous/math";
 
 export function isValidNumber(value: number): boolean {
   return !isNaN(value) && value !== Infinity && value !== -Infinity;

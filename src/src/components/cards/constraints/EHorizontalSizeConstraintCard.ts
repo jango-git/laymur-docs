@@ -7,7 +7,7 @@ import { EConstraintType } from "../../../document/types.constraints";
 import type { EConstraintUUID, ELayerUUID } from "../../../document/types.misc";
 import type { EElementConstraintTarget } from "../../../miscellaneous/constraint-targets";
 import { getElementConstraintTargets } from "../../../miscellaneous/constraint-targets";
-import { LARGE } from "../../../miscellaneous/math";
+import { LARGE_VALUE } from "../../../miscellaneous/math";
 import { makeRow } from "../../../miscellaneous/rows";
 import { EConstraintCard } from "./EConstraintCard";
 
@@ -30,7 +30,7 @@ export class EHorizontalSizeConstraintCard extends EConstraintCard {
     this.sizeControl = new ENumberControl(makeRow(this.bodyRoot, "Size"), {
       value: 100,
       min: 0,
-      max: LARGE,
+      max: LARGE_VALUE,
       step: 1,
       precision: 1,
     });

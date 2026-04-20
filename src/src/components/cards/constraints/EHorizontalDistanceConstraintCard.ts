@@ -14,7 +14,7 @@ import {
   getElementConstraintTargets,
   getUniversalConstraintTargets,
 } from "../../../miscellaneous/constraint-targets";
-import { LARGE } from "../../../miscellaneous/math";
+import { LARGE_VALUE } from "../../../miscellaneous/math";
 import { makeRow } from "../../../miscellaneous/rows";
 import { EConstraintCard } from "./EConstraintCard";
 
@@ -54,8 +54,8 @@ export class EHorizontalDistanceConstraintCard extends EConstraintCard {
 
     this.distanceControl = new ENumberControl(makeRow(this.bodyRoot, "Distance"), {
       value: 0,
-      min: -LARGE,
-      max: LARGE,
+      min: -LARGE_VALUE,
+      max: LARGE_VALUE,
       step: 1,
       precision: 1,
     });

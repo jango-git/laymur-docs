@@ -4,6 +4,7 @@ import type { EAnyConstraint } from "./types.constraints";
 import type { EAnyElement } from "./types.elements";
 import type { EAnyLayer } from "./types.layers";
 import type { EAnyUUID } from "./types.misc";
+
 export interface ELayerContext {
   layer: EAnyLayer;
   elements: EAnyElement[];

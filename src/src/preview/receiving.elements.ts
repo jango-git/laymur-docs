@@ -10,15 +10,16 @@ import {
 import type { EAnyElement } from "../document/types.elements";
 import { EElementType } from "../document/types.elements";
 import type { EElementUUID, ELayerUUID } from "../document/types.misc";
+import { consoleDebug } from "../miscellaneous/debug.print";
 import {
-  applyDrawSequence,
+  applyGraphicsDrawSequence,
+  buildAnimateImageLoopMode,
   buildCSSColor,
-  buildLoopMode,
+  buildNineSliceRegionMode,
   buildProgressMaskFunction,
-  buildRegionMode,
+  buildSceneUpdateMode,
   buildTextContent,
   buildTextResizeMode,
-  buildUpdateMode,
   ensureUniqueElement,
   findLayerUuidForElement,
   LAYER_DATABASE,
@@ -41,7 +42,7 @@ export function addElement(layerUuid: ELayerUUID, data: EAnyElement): void {
           color: buildCSSColor(data.color),
           frameRate: data.frameRate,
           timeScale: data.timeScale,
-          loopMode: buildLoopMode(data.loopMode),
+          loopMode: buildAnimateImageLoopMode(data.loopMode),
           playByDefault: data.playByDefault,
         },
       );
@@ -49,65 +50,65 @@ export function addElement(layerUuid: ELayerUUID, data: EAnyElement): void {
       break;
     }
     case EElementType.GRAPHICS: {
-      const e = new UIGraphics(layerContext.layer, {
+      const element = new UIGraphics(layerContext.layer, {
         width: data.resolution[0],
         height: data.resolution[1],
         color: buildCSSColor(data.color),
         name: data.name,
       });
-      applyDrawSequence(e, data.drawSequence);
-      layerContext.elements.set(data.uuid, e);
+      applyGraphicsDrawSequence(element, data.drawSequence);
+      layerContext.elements.set(data.uuid, element);
       break;
     }
     case EElementType.IMAGE: {
-      const e = new UIImage(layerContext.layer, resolveTextureAsset(data.texture), {
+      const element = new UIImage(layerContext.layer, resolveTextureAsset(data.texture), {
         color: buildCSSColor(data.color),
         name: data.name,
       });
-      layerContext.elements.set(data.uuid, e);
+      layerContext.elements.set(data.uuid, element);
       break;
     }
     case EElementType.NINE_SLICE: {
-      const e = new UINineSlice(layerContext.layer, resolveTextureAsset(data.texture), {
+      const element = new UINineSlice(layerContext.layer, resolveTextureAsset(data.texture), {
         color: buildCSSColor(data.color),
         name: data.name,
-        regionMode: buildRegionMode(data.regionMode),
+        regionMode: buildNineSliceRegionMode(data.regionMode),
         sliceBorders: data.sliceBorders,
         sliceRegions: data.sliceRegions,
       });
-      layerContext.elements.set(data.uuid, e);
+      layerContext.elements.set(data.uuid, element);
       break;
     }
     case EElementType.PROGRESS: {
-      const e = new UIProgress(layerContext.layer, resolveTextureAsset(data.texture), {
+      const element = new UIProgress(layerContext.layer, resolveTextureAsset(data.texture), {
         name: data.name,
         color: buildCSSColor(data.color),
         maskFunction: buildProgressMaskFunction(data.maskFunction),
         progress: data.progress,
       });
-      layerContext.elements.set(data.uuid, e);
+      layerContext.elements.set(data.uuid, element);
       break;
     }
     case EElementType.SCENE: {
-      console.warn("[preview] UIScene.enableDepthBuffer is not supported, ignoring");
-      const e = new UIScene(layerContext.layer, {
+      const element = new UIScene(layerContext.layer, {
         name: data.name,
         color: buildCSSColor(data.color),
         clearColor: buildCSSColor(data.clearColor),
         resolutionFactor: data.resolutionFactor,
-        updateMode: buildUpdateMode(data.updateMode),
+        updateMode: buildSceneUpdateMode(data.updateMode),
+        enableDepthBuffer: data.enableDepthBuffer,
       });
-      layerContext.elements.set(data.uuid, e);
+      layerContext.elements.set(data.uuid, element);
       break;
     }
     case EElementType.TEXT: {
-      const e = new UIText(layerContext.layer, buildTextContent(data.content), {
+      const element = new UIText(layerContext.layer, buildTextContent(data.content), {
         name: data.name,
         color: buildCSSColor(data.color),
         maxLineWidth: data.maxLineWidth,
         resizeMode: buildTextResizeMode(data.resizeMode),
       });
-      layerContext.elements.set(data.uuid, e);
+      layerContext.elements.set(data.uuid, element);
       break;
     }
   }
@@ -132,70 +133,72 @@ export function removeElement(layerUuid: ELayerUUID, uuid: EElementUUID): void {
   resolveLayerContext(layerUuid).elements.delete(uuid);
 }
 
-export function updateElement(element: EAnyElement): void {
-  const layerUuid = findLayerUuidForElement(element.uuid);
+export function updateElement(data: EAnyElement): void {
+  const layerUuid = findLayerUuidForElement(data.uuid);
 
-  switch (element.type) {
+  switch (data.type) {
     case EElementType.ANIMATED_IMAGE: {
-      const e = resolveElement(layerUuid, element.uuid) as UIAnimatedImage;
-      e.name = element.name;
-      e.color = buildCSSColor(element.color);
-      e.sequence = element.sequence.map(resolveTextureAsset);
-      e.frameRate = element.frameRate;
-      e.timeScale = element.timeScale;
-      e.loopMode = buildLoopMode(element.loopMode);
+      const element = resolveElement(layerUuid, data.uuid) as UIAnimatedImage;
+      element.name = data.name;
+      element.color = buildCSSColor(data.color);
+      element.sequence = data.sequence.map(resolveTextureAsset);
+      element.frameRate = data.frameRate;
+      element.timeScale = data.timeScale;
+      element.loopMode = buildAnimateImageLoopMode(data.loopMode);
       break;
     }
     case EElementType.GRAPHICS: {
-      const e = resolveElement(layerUuid, element.uuid) as UIGraphics;
-      e.name = element.name;
-      e.color = buildCSSColor(element.color);
-      applyDrawSequence(e, element.drawSequence);
+      const element = resolveElement(layerUuid, data.uuid) as UIGraphics;
+      element.name = data.name;
+      element.color = buildCSSColor(data.color);
+      applyGraphicsDrawSequence(element, data.drawSequence);
       break;
     }
     case EElementType.IMAGE: {
-      const e = resolveElement(layerUuid, element.uuid) as UIImage;
-      e.name = element.name;
-      e.color = buildCSSColor(element.color);
-      e.texture.set(resolveTextureAsset(element.texture));
+      const element = resolveElement(layerUuid, data.uuid) as UIImage;
+      element.name = data.name;
+      element.color = buildCSSColor(data.color);
+      element.texture.set(resolveTextureAsset(data.texture));
       break;
     }
     case EElementType.NINE_SLICE: {
-      const e = resolveElement(layerUuid, element.uuid) as UINineSlice;
-      e.name = element.name;
-      e.color = buildCSSColor(element.color);
-      e.texture.set(resolveTextureAsset(element.texture));
-      e.regionMode = buildRegionMode(element.regionMode);
-      e.sliceBorders = element.sliceBorders;
-      e.sliceRegions = element.sliceRegions;
+      const element = resolveElement(layerUuid, data.uuid) as UINineSlice;
+      element.name = data.name;
+      element.color = buildCSSColor(data.color);
+      element.texture.set(resolveTextureAsset(data.texture));
+      element.regionMode = buildNineSliceRegionMode(data.regionMode);
+      element.sliceBorders = data.sliceBorders;
+      element.sliceRegions = data.sliceRegions;
       break;
     }
     case EElementType.PROGRESS: {
-      const e = resolveElement(layerUuid, element.uuid) as UIProgress;
-      e.name = element.name;
-      e.color = buildCSSColor(element.color);
-      e.texture.set(resolveTextureAsset(element.texture));
-      e.maskFunction = buildProgressMaskFunction(element.maskFunction);
-      e.progress = element.progress;
+      const element = resolveElement(layerUuid, data.uuid) as UIProgress;
+      element.name = data.name;
+      element.color = buildCSSColor(data.color);
+      element.texture.set(resolveTextureAsset(data.texture));
+      element.maskFunction = buildProgressMaskFunction(data.maskFunction);
+      element.progress = data.progress;
       break;
     }
     case EElementType.SCENE: {
-      console.warn("[preview] UIScene.enableDepthBuffer is not supported, ignoring");
-      const e = resolveElement(layerUuid, element.uuid) as UIScene;
-      e.name = element.name;
-      e.color = buildCSSColor(element.color);
-      e.clearColor = buildCSSColor(element.clearColor);
-      e.resolutionFactor = element.resolutionFactor;
-      e.updateMode = buildUpdateMode(element.updateMode);
+      const element = resolveElement(layerUuid, data.uuid) as UIScene;
+      element.name = data.name;
+      element.color = buildCSSColor(data.color);
+      element.clearColor = buildCSSColor(data.clearColor);
+      element.resolutionFactor = data.resolutionFactor;
+      element.updateMode = buildSceneUpdateMode(data.updateMode);
+
+      consoleDebug("[preview] UIScene.enableDepthBuffer is not supported, ignoring");
+      // element.enableDepthBuffer = data.enableDepthBuffer;
       break;
     }
     case EElementType.TEXT: {
-      const e = resolveElement(layerUuid, element.uuid) as UIText;
-      e.name = element.name;
-      e.color = buildCSSColor(element.color);
-      e.content = buildTextContent(element.content);
-      e.maxLineWidth = element.maxLineWidth;
-      e.resizeMode = buildTextResizeMode(element.resizeMode);
+      const element = resolveElement(layerUuid, data.uuid) as UIText;
+      element.name = data.name;
+      element.color = buildCSSColor(data.color);
+      element.content = buildTextContent(data.content);
+      element.maxLineWidth = data.maxLineWidth;
+      element.resizeMode = buildTextResizeMode(data.resizeMode);
       break;
     }
   }

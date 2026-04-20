@@ -90,16 +90,16 @@ export function resolveLayerContext(uuid: ELayerUUID): EPreviewLayerContext {
   return layerData;
 }
 
-export function resolveElement(uuidOwner: ELayerUUID, uuid: EElementUUID): EAnyUIElement {
-  const element = resolveLayerContext(uuidOwner).elements.get(uuid);
+export function resolveElement(layerUuid: ELayerUUID, uuid: EElementUUID): EAnyUIElement {
+  const element = resolveLayerContext(layerUuid).elements.get(uuid);
   if (!element) {
     throw new Error(`Element not found: ${uuid}`);
   }
   return element;
 }
 
-export function resolveConstraint(uuidOwner: ELayerUUID, uuid: EConstraintUUID): EAnyUIConstraint {
-  const constraint = resolveLayerContext(uuidOwner).constraints.get(uuid);
+export function resolveConstraint(layerUuid: ELayerUUID, uuid: EConstraintUUID): EAnyUIConstraint {
+  const constraint = resolveLayerContext(layerUuid).constraints.get(uuid);
   if (!constraint) {
     throw new Error(`Constraint not found: ${uuid}`);
   }
@@ -130,6 +130,12 @@ export function resolveFontAsset(uuid: EAssetUUID): FontFace {
   return asset;
 }
 
+export function ensureUniqueAsset(uuid: EAssetUUID): void {
+  if (ASSET_DATABASE.has(uuid)) {
+    throw new Error(`Asset already exists: ${uuid}`);
+  }
+}
+
 export function ensureUniqueElement(uuid: EElementUUID): void {
   for (const { elements } of LAYER_DATABASE.values()) {
     if (elements.has(uuid)) {
@@ -146,15 +152,9 @@ export function ensureUniqueConstraint(uuid: EConstraintUUID): void {
   }
 }
 
-export function ensureUniqueAsset(uuid: EAssetUUID): void {
-  if (ASSET_DATABASE.has(uuid)) {
-    throw new Error(`Asset already exists: ${uuid}`);
-  }
-}
-
 export function findLayerUuidForElement(elementUuid: EElementUUID): ELayerUUID {
-  for (const [layerUuid, ctx] of LAYER_DATABASE.entries()) {
-    if (ctx.elements.has(elementUuid)) {
+  for (const [layerUuid, layerContext] of LAYER_DATABASE.entries()) {
+    if (layerContext.elements.has(elementUuid)) {
       return layerUuid;
     }
   }
@@ -162,12 +162,19 @@ export function findLayerUuidForElement(elementUuid: EElementUUID): ELayerUUID {
 }
 
 export function findLayerUuidForConstraint(constraintUuid: EConstraintUUID): ELayerUUID {
-  for (const [layerUuid, ctx] of LAYER_DATABASE.entries()) {
-    if (ctx.constraints.has(constraintUuid)) {
+  for (const [layerUuid, layerContext] of LAYER_DATABASE.entries()) {
+    if (layerContext.constraints.has(constraintUuid)) {
       return layerUuid;
     }
   }
   throw new Error(`Constraint not found in any layer: ${constraintUuid}`);
+}
+
+export function buildCSSColor(eColor: EColor): string {
+  const alphaHex = Math.round(eColor.alpha * 255)
+    .toString(16)
+    .padStart(2, "0");
+  return `${eColor.color}${alphaHex}`;
 }
 
 export function buildResizePolicy(
@@ -200,13 +207,6 @@ export function buildResizePolicy(
   }
 }
 
-export function buildCSSColor(eColor: EColor): string {
-  const alphaHex = Math.round(eColor.alpha * 255)
-    .toString(16)
-    .padStart(2, "0");
-  return `${eColor.color}${alphaHex}`;
-}
-
 export function buildProgressMaskFunction(
   maskFunction: EProgressMaskFunction,
 ): UIProgressMaskFunctionCircular | UIProgressMaskFunctionDirectional {
@@ -220,38 +220,46 @@ export function buildProgressMaskFunction(
   }
 }
 
-export function applyDrawSequence(
+export function applyGraphicsDrawSequence(
   graphics: UIGraphics,
   drawSequence: EAnyGraphicsDrawCommand[],
 ): void {
   graphics.clear();
 
-  for (const cmd of drawSequence) {
-    switch (cmd.type) {
+  for (const command of drawSequence) {
+    switch (command.type) {
       case EGraphicsDrawCommandType.POLYLINE:
-        graphics.drawPolyline(cmd.points, buildCSSColor(cmd.color), cmd.lineWidth);
+        graphics.drawPolyline(command.points, buildCSSColor(command.color), command.lineWidth);
         break;
       case EGraphicsDrawCommandType.ARC:
         graphics.drawArc(
-          cmd.x,
-          cmd.y,
-          cmd.radius,
-          cmd.startAngle,
-          cmd.endAngle,
-          buildCSSColor(cmd.color),
+          command.x,
+          command.y,
+          command.radius,
+          command.startAngle,
+          command.endAngle,
+          buildCSSColor(command.color),
         );
         break;
       case EGraphicsDrawCommandType.CIRCLE:
-        graphics.drawCircle(cmd.x, cmd.y, cmd.radius, buildCSSColor(cmd.color));
+        graphics.drawCircle(command.x, command.y, command.radius, buildCSSColor(command.color));
         break;
       case EGraphicsDrawCommandType.RECT:
-        graphics.drawRect(cmd.x, cmd.y, cmd.width, cmd.height, buildCSSColor(cmd.color));
+        graphics.drawRect(
+          command.x,
+          command.y,
+          command.width,
+          command.height,
+          buildCSSColor(command.color),
+        );
         break;
     }
   }
 }
 
-export function buildLoopMode(loopMode: EAnimatedImageLoopMode): UIAnimatedImageLoopMode {
+export function buildAnimateImageLoopMode(
+  loopMode: EAnimatedImageLoopMode,
+): UIAnimatedImageLoopMode {
   switch (loopMode) {
     case EAnimatedImageLoopMode.NONE:
       return UIAnimatedImageLoopMode.NONE;
@@ -262,7 +270,7 @@ export function buildLoopMode(loopMode: EAnimatedImageLoopMode): UIAnimatedImage
   }
 }
 
-export function buildRegionMode(regionMode: ENineSliceRegionMode): UINineSliceRegionMode {
+export function buildNineSliceRegionMode(regionMode: ENineSliceRegionMode): UINineSliceRegionMode {
   switch (regionMode) {
     case ENineSliceRegionMode.NORMALIZED:
       return UINineSliceRegionMode.NORMALIZED;
@@ -271,7 +279,7 @@ export function buildRegionMode(regionMode: ENineSliceRegionMode): UINineSliceRe
   }
 }
 
-export function buildUpdateMode(updateMode: ESceneUpdateMode): UISceneUpdateMode {
+export function buildSceneUpdateMode(updateMode: ESceneUpdateMode): UISceneUpdateMode {
   switch (updateMode) {
     case ESceneUpdateMode.EVERY_FRAME:
       return UISceneUpdateMode.EVERY_FRAME;
@@ -286,7 +294,7 @@ export function buildUpdateMode(updateMode: ESceneUpdateMode): UISceneUpdateMode
   }
 }
 
-export function buildAlign(align: ETextAlign): "left" | "center" | "right" {
+function buildTextAlign(align: ETextAlign): "left" | "center" | "right" {
   switch (align) {
     case ETextAlign.LEFT:
       return "left";
@@ -297,7 +305,7 @@ export function buildAlign(align: ETextAlign): "left" | "center" | "right" {
   }
 }
 
-export function buildFontStyle(style: ETextFontStyle): "normal" | "italic" | "oblique" {
+function buildTextFontStyle(style: ETextFontStyle): "normal" | "italic" | "oblique" {
   switch (style) {
     case ETextFontStyle.NORMAL:
       return "normal";
@@ -308,7 +316,7 @@ export function buildFontStyle(style: ETextFontStyle): "normal" | "italic" | "ob
   }
 }
 
-export function buildFontWeight(weight: ETextFontWeight): "normal" | "bold" | "bolder" | "lighter" {
+function buildTextFontWeight(weight: ETextFontWeight): "normal" | "bold" | "bolder" | "lighter" {
   switch (weight) {
     case ETextFontWeight.NORMAL:
       return "normal";
@@ -321,7 +329,7 @@ export function buildFontWeight(weight: ETextFontWeight): "normal" | "bold" | "b
   }
 }
 
-interface TextContent {
+interface ETextContent {
   text: string;
   style: Partial<{
     color: string;
@@ -342,17 +350,17 @@ interface TextContent {
   }>;
 }
 
-export function buildTextContent(chunks: ETextChunk[]): TextContent[] {
-  return chunks.map(({ text, style }): TextContent => {
+export function buildTextContent(chunks: ETextChunk[]): ETextContent[] {
+  return chunks.map(({ text, style }): ETextContent => {
     return {
       text,
       style: {
         color: style.color.color,
-        align: buildAlign(style.align),
+        align: buildTextAlign(style.align),
         fontFamily: resolveFontAsset(style.font).family,
         fontSize: style.fontSize,
-        fontStyle: buildFontStyle(style.fontStyle),
-        fontWeight: buildFontWeight(style.fontWeight),
+        fontStyle: buildTextFontStyle(style.fontStyle),
+        fontWeight: buildTextFontWeight(style.fontWeight),
         lineHeight: style.lineHeight,
         enableShadow: style.enableShadow,
         shadowOffsetX: style.shadowOffsetX,

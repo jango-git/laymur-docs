@@ -1,6 +1,6 @@
-import { consoleDebug } from "../../../../miscellaneous/debug.print";
 import { STORE } from "../../../../document/store";
 import type { EDocument } from "../../../../document/types";
+import { consoleDebug } from "../../../../miscellaneous/debug.print";
 
 export class ELoadAction {
   public execute(): void {

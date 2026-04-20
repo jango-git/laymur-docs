@@ -1,11 +1,11 @@
 import { EBoolControl } from "../../controls/EBoolControl/EBoolControl";
-import type { EUIDebugState } from "../../ui-state/EUIState.Internal";
-import { UI_STATE } from "../../ui-state/EUIState";
 import { makeRow } from "../../miscellaneous/rows";
+import { UI_STATE } from "../../ui-state/EUIState";
+import type { EUIDebugState } from "../../ui-state/EUIState.Internal";
 
-type DebugKey = keyof EUIDebugState;
+type EDebugStateKey = keyof EUIDebugState;
 
-const ITEMS: { key: DebugKey; label: string }[] = [
+const ITEMS: { key: EDebugStateKey; label: string }[] = [
   { key: "showAspect", label: "Aspect" },
   { key: "showHeight", label: "Height" },
   { key: "showWidth", label: "Width" },
@@ -16,7 +16,7 @@ const ITEMS: { key: DebugKey; label: string }[] = [
 ];
 
 export class EDebug {
-  private readonly controls = new Map<DebugKey, EBoolControl>();
+  private readonly controls = new Map<EDebugStateKey, EBoolControl>();
 
   constructor(container: HTMLElement) {
     const wrapper = document.createElement("div");

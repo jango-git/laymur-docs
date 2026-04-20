@@ -1,5 +1,5 @@
 import { EConstraintType } from "../../../document/types.constraints";
-import type { UUID } from "../../../document/types.misc";
+import type { EConstraintUUID, ELayerUUID } from "../../../document/types.misc";
 import { EAspectConstraintBuilder } from "../../builders/constraints/EAspectConstraintBuilder";
 import { EDistanceHorizontalConstraintBuilder } from "../../builders/constraints/EDistanceHorizontalConstraintBuilder";
 import { EDistanceVerticalConstraintBuilder } from "../../builders/constraints/EDistanceVerticalConstraintBuilder";
@@ -20,7 +20,7 @@ export interface ConstraintEntry {
   label: string;
   type: EConstraintType;
   createBuilder: (container: HTMLDivElement) => EAnyConstraintBuilder;
-  createCard: (container: HTMLElement, uuid: UUID, layerUuid: UUID) => void;
+  createCard: (container: HTMLElement, uuid: EConstraintUUID, layerUuid: ELayerUUID) => void;
 }
 
 export const CONSTRAINT_REGISTRY: readonly ConstraintEntry[] = [

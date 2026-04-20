@@ -1,5 +1,5 @@
-import { consoleDebug } from "../../../../miscellaneous/debug.print";
 import { STORE } from "../../../../document/store";
+import { consoleDebug } from "../../../../miscellaneous/debug.print";
 import { UI_STATE } from "../../../../ui-state/EUIState";
 import { generateLayerCode } from "./export-ts/generate-layer-code";
 

@@ -7,7 +7,7 @@ import type { ETextElement } from "../../../document/types.elements";
 import { EElementType } from "../../../document/types.elements";
 import type { EColor, EElementUUID, ELayerUUID, ETextChunk } from "../../../document/types.misc";
 import { ETextResizeMode } from "../../../document/types.misc";
-import { LARGE } from "../../../miscellaneous/math";
+import { LARGE_VALUE } from "../../../miscellaneous/math";
 import { makeRow, makeSectionHeader } from "../../../miscellaneous/rows";
 import { EElementCard } from "./EElementCard";
 import { contentTemplate, RESIZE_MODE_OPTIONS } from "./ETextElementCard.Internal";
@@ -35,7 +35,7 @@ export class ETextElementCard extends EElementCard {
     this.maxLineWidthControl = new ENumberControl(makeRow(this.bodyRoot, "Max Line Width"), {
       value: 0,
       min: 0,
-      max: LARGE,
+      max: LARGE_VALUE,
       step: 1,
       precision: 0,
     });

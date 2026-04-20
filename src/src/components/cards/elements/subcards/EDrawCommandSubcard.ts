@@ -7,7 +7,7 @@ import { EVec2Control } from "../../../../controls/EVec2Control/EVec2Control";
 import type { EAnyGraphicsDrawCommand } from "../../../../document/types.misc";
 import { EGraphicsDrawCommandType } from "../../../../document/types.misc";
 import { DEFAULT_ECOLOR } from "../../../../miscellaneous/defaults";
-import { LARGE } from "../../../../miscellaneous/math";
+import { LARGE_VALUE } from "../../../../miscellaneous/math";
 import { makeRow, makeSectionHeader } from "../../../../miscellaneous/rows";
 import type { EAnyDrawCommandControls } from "./EDrawCommandSubcard.Internal";
 import { REGISTRY, pointsTemplate } from "./EDrawCommandSubcard.Internal";
@@ -90,8 +90,8 @@ export class EDrawCommandSubcard {
           const position = new EVec2Control(makeRow(this.fieldsDiv, "Position"), {
             labels: ["X", "Y"],
             value: [command.x, command.y],
-            min: -LARGE,
-            max: LARGE,
+            min: -LARGE_VALUE,
+            max: LARGE_VALUE,
             step: 1,
             precision: 1,
           });
@@ -101,7 +101,7 @@ export class EDrawCommandSubcard {
             labels: ["W", "H"],
             value: [command.width, command.height],
             min: 2,
-            max: LARGE,
+            max: LARGE_VALUE,
             step: 1,
             precision: 1,
           });
@@ -120,8 +120,8 @@ export class EDrawCommandSubcard {
           const position = new EVec2Control(makeRow(this.fieldsDiv, "Center"), {
             labels: ["X", "Y"],
             value: [command.x, command.y],
-            min: -LARGE,
-            max: LARGE,
+            min: -LARGE_VALUE,
+            max: LARGE_VALUE,
             step: 1,
             precision: 1,
           });
@@ -130,7 +130,7 @@ export class EDrawCommandSubcard {
           const radius = new ENumberControl(makeRow(this.fieldsDiv, "Radius"), {
             value: command.radius,
             min: 0,
-            max: LARGE,
+            max: LARGE_VALUE,
             step: 1,
             precision: 1,
           });
@@ -149,8 +149,8 @@ export class EDrawCommandSubcard {
           const position = new EVec2Control(makeRow(this.fieldsDiv, "Center"), {
             labels: ["X", "Y"],
             value: [command.x, command.y],
-            min: -LARGE,
-            max: LARGE,
+            min: -LARGE_VALUE,
+            max: LARGE_VALUE,
             step: 1,
             precision: 1,
           });
@@ -159,7 +159,7 @@ export class EDrawCommandSubcard {
           const radius = new ENumberControl(makeRow(this.fieldsDiv, "Radius"), {
             value: command.radius,
             min: 0,
-            max: LARGE,
+            max: LARGE_VALUE,
             step: 1,
             precision: 1,
           });

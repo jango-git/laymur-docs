@@ -63,7 +63,7 @@ export abstract class ELayerCard {
     STORE.commands.layers.remove(this.uuid);
   };
 
-  private readonly onActiveLayerChanged = (uuid: UUID | undefined): void => {
+  private readonly onActiveLayerChanged = (uuid: ELayerUUID | undefined): void => {
     this.updateActivityStyles(uuid === this.uuid);
   };
 

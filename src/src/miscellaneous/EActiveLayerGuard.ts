@@ -1,5 +1,5 @@
-import type { EStoreDeltaLayerList } from "../document/signals";
 import { EStoreDeltaOperation } from "../document/signals";
+import type { EStoreDeltaLayerList } from "../document/signals/layers";
 import { STORE } from "../document/store";
 import { ELayerType } from "../document/types.layers";
 import { EResizePolicyType } from "../document/types.misc";

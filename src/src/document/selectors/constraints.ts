@@ -52,13 +52,4 @@ export class EStoreSelectorsConstraints {
     }
     return clone(result);
   }
-
-  public selectLayerInfo(layerUuid: ELayerUUID): { uuid: ELayerUUID; name: string } | undefined {
-    const layerContext = this.data.layerContexts.find(
-      (context) => context.layer.uuid === layerUuid,
-    );
-    return layerContext
-      ? { uuid: layerContext.layer.uuid, name: layerContext.layer.name }
-      : undefined;
-  }
 }

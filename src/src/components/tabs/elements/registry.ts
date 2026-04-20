@@ -1,5 +1,5 @@
 import { EElementType } from "../../../document/types.elements";
-import type { UUID } from "../../../document/types.misc";
+import type { EElementUUID, ELayerUUID } from "../../../document/types.misc";
 import { EAnimatedImageElementBuilder } from "../../builders/elements/EAnimatedImageElementBuilder";
 import { EGraphicsElementBuilder } from "../../builders/elements/EGraphicsElementBuilder";
 import { EImageElementBuilder } from "../../builders/elements/EImageElementBuilder";
@@ -20,7 +20,7 @@ export interface ElementEntry {
   label: string;
   type: EElementType;
   createBuilder: (container: HTMLDivElement) => EAnyElementBuilder;
-  createCard: (container: HTMLElement, uuid: UUID, layerUuid: UUID) => void;
+  createCard: (container: HTMLElement, uuid: EElementUUID, layerUuid: ELayerUUID) => void;
 }
 
 export const ELEMENT_REGISTRY: readonly ElementEntry[] = [

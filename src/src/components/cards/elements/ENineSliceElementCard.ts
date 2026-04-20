@@ -8,7 +8,7 @@ import type { ENineSliceElement } from "../../../document/types.elements";
 import { EElementType } from "../../../document/types.elements";
 import type { EColor, EElementUUID, ELayerUUID } from "../../../document/types.misc";
 import { ENineSliceRegionMode } from "../../../document/types.misc";
-import { LARGE } from "../../../miscellaneous/math";
+import { LARGE_VALUE } from "../../../miscellaneous/math";
 import { makeRow } from "../../../miscellaneous/rows";
 import { EElementCard } from "./EElementCard";
 import { REGION_MODE_OPTIONS } from "./ENineSliceElementCard.Internal";
@@ -46,7 +46,7 @@ export class ENineSliceElementCard extends EElementCard {
       labels: ["H", "V"],
       value: [100, 100],
       min: 1,
-      max: LARGE,
+      max: LARGE_VALUE,
       step: 1,
       precision: 0,
     });
@@ -83,7 +83,7 @@ export class ENineSliceElementCard extends EElementCard {
   private applyRegionMode(mode: ENineSliceRegionMode): void {
     if (mode === ENineSliceRegionMode.WORLD) {
       this.regionsControl.min = 1;
-      this.regionsControl.max = LARGE;
+      this.regionsControl.max = LARGE_VALUE;
       this.regionsControl.step = 1;
       this.regionsControl.precision = 0;
     } else {

@@ -1,5 +1,5 @@
 import { STORE } from "../document/store";
-import { consoleDebug } from "./debug.print";
+import { consoleDebug, consoleError } from "./debug.print";
 import { openDatabase, STORE_NAME } from "./open-database";
 
 export class EDocumentAutosave {
@@ -17,10 +17,6 @@ export class EDocumentAutosave {
     consoleDebug("[EDocumentAutosave] initialized");
   }
 
-  private readonly onAnyChange = (): void => {
-    void this.save();
-  };
-
   private async save(): Promise<void> {
     try {
       const database = await openDatabase();
@@ -33,7 +29,11 @@ export class EDocumentAutosave {
         request.onerror = (): void => reject(request.error);
       });
     } catch {
-      console.error("[EDocumentAutosave] failed to save project to IndexedDB");
+      consoleError("[EDocumentAutosave] failed to open IndexedDB");
     }
   }
+
+  private readonly onAnyChange = (): void => {
+    void this.save();
+  };
 }
