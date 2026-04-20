@@ -60,7 +60,10 @@ export class EStoreCommandsElements {
 
   public writeAnimatedImage(data: PartialExceptUUIDField<EAnimatedImageElement>): void {
     const copy = clone(data);
-    const element = this.get<EAnimatedImageElement>(copy.uuid, EElementType.ANIMATED_IMAGE);
+    const element = this.resolveElement(
+      copy.uuid,
+      EElementType.ANIMATED_IMAGE,
+    ) as EAnimatedImageElement;
     if (copy.name !== undefined) {
       element.name = copy.name;
     }
@@ -88,7 +91,7 @@ export class EStoreCommandsElements {
 
   public writeGraphics(data: PartialExceptUUIDField<EGraphicsElement>): void {
     const copy = clone(data);
-    const element = this.get<EGraphicsElement>(copy.uuid, EElementType.GRAPHICS);
+    const element = this.resolveElement(copy.uuid, EElementType.GRAPHICS) as EGraphicsElement;
     if (copy.name !== undefined) {
       element.name = copy.name;
     }
@@ -107,7 +110,7 @@ export class EStoreCommandsElements {
 
   public writeImage(data: PartialExceptUUIDField<EImageElement>): void {
     const copy = clone(data);
-    const element = this.get<EImageElement>(copy.uuid, EElementType.IMAGE);
+    const element = this.resolveElement(copy.uuid, EElementType.IMAGE) as EImageElement;
     if (copy.name !== undefined) {
       element.name = copy.name;
     }
@@ -123,7 +126,7 @@ export class EStoreCommandsElements {
 
   public writeNineSlice(data: PartialExceptUUIDField<ENineSliceElement>): void {
     const copy = clone(data);
-    const element = this.get<ENineSliceElement>(copy.uuid, EElementType.NINE_SLICE);
+    const element = this.resolveElement(copy.uuid, EElementType.NINE_SLICE) as ENineSliceElement;
     if (copy.name !== undefined) {
       element.name = copy.name;
     }
@@ -148,7 +151,7 @@ export class EStoreCommandsElements {
 
   public writeProgress(data: PartialExceptUUIDField<EProgressElement>): void {
     const copy = clone(data);
-    const element = this.get<EProgressElement>(copy.uuid, EElementType.PROGRESS);
+    const element = this.resolveElement(copy.uuid, EElementType.PROGRESS) as EProgressElement;
     if (copy.name !== undefined) {
       element.name = copy.name;
     }
@@ -170,7 +173,7 @@ export class EStoreCommandsElements {
 
   public writeScene(data: PartialExceptUUIDField<ESceneElement>): void {
     const copy = clone(data);
-    const element = this.get<ESceneElement>(copy.uuid, EElementType.SCENE);
+    const element = this.resolveElement(copy.uuid, EElementType.SCENE) as ESceneElement;
     if (copy.name !== undefined) {
       element.name = copy.name;
     }
@@ -195,7 +198,7 @@ export class EStoreCommandsElements {
 
   public writeText(data: PartialExceptUUIDField<ETextElement>): void {
     const copy = clone(data);
-    const element = this.get<ETextElement>(copy.uuid, EElementType.TEXT);
+    const element = this.resolveElement(copy.uuid, EElementType.TEXT) as ETextElement;
     if (copy.name !== undefined) {
       element.name = copy.name;
     }
@@ -225,11 +228,11 @@ export class EStoreCommandsElements {
     return layerContext;
   }
 
-  private get<T extends EAnyElement>(uuid: EElementUUID, type: EElementType): T {
+  private resolveElement(uuid: EElementUUID, type: EElementType): EAnyElement {
     for (const { elements } of this.data.layerContexts) {
       for (const element of elements) {
         if (element.type === type && element.uuid === uuid) {
-          return element as T;
+          return element;
         }
       }
     }

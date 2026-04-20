@@ -60,7 +60,10 @@ export class EStoreCommandsConstraints {
 
   public writeAspect(data: PartialExceptUUIDField<EAspectConstraint>): void {
     const copy = clone(data);
-    const constraint = this.get<EAspectConstraint>(copy.uuid, EConstraintType.ASPECT);
+    const constraint = this.resolveConstraint(
+      copy.uuid,
+      EConstraintType.ASPECT,
+    ) as EAspectConstraint;
     if (copy.name !== undefined) {
       constraint.name = copy.name;
     }
@@ -78,10 +81,10 @@ export class EStoreCommandsConstraints {
     data: PartialExceptUUIDField<EHorizontalDistanceConstraint>,
   ): void {
     const copy = clone(data);
-    const constraint = this.get<EHorizontalDistanceConstraint>(
+    const constraint = this.resolveConstraint(
       copy.uuid,
       EConstraintType.DISTANCE_HORIZONTAL,
-    );
+    ) as EHorizontalDistanceConstraint;
     if (copy.name !== undefined) {
       constraint.name = copy.name;
     }
@@ -109,10 +112,10 @@ export class EStoreCommandsConstraints {
 
   public writeVerticalDistance(data: PartialExceptUUIDField<EVerticalDistanceConstraint>): void {
     const copy = clone(data);
-    const constraint = this.get<EVerticalDistanceConstraint>(
+    const constraint = this.resolveConstraint(
       copy.uuid,
       EConstraintType.DISTANCE_VERTICAL,
-    );
+    ) as EVerticalDistanceConstraint;
     if (copy.name !== undefined) {
       constraint.name = copy.name;
     }
@@ -139,10 +142,10 @@ export class EStoreCommandsConstraints {
     data: PartialExceptUUIDField<EHorizontalProportionConstraint>,
   ): void {
     const copy = clone(data);
-    const constraint = this.get<EHorizontalProportionConstraint>(
+    const constraint = this.resolveConstraint(
       copy.uuid,
       EConstraintType.PROPORTION_HORIZONTAL,
-    );
+    ) as EHorizontalProportionConstraint;
     if (copy.name !== undefined) {
       constraint.name = copy.name;
     }
@@ -166,10 +169,10 @@ export class EStoreCommandsConstraints {
     data: PartialExceptUUIDField<EVerticalProportionConstraint>,
   ): void {
     const copy = clone(data);
-    const constraint = this.get<EVerticalProportionConstraint>(
+    const constraint = this.resolveConstraint(
       copy.uuid,
       EConstraintType.PROPORTION_VERTICAL,
-    );
+    ) as EVerticalProportionConstraint;
     if (copy.name !== undefined) {
       constraint.name = copy.name;
     }
@@ -191,10 +194,10 @@ export class EStoreCommandsConstraints {
 
   public writeHorizontalSize(data: PartialExceptUUIDField<EHorizontalSizeConstraint>): void {
     const copy = clone(data);
-    const constraint = this.get<EHorizontalSizeConstraint>(
+    const constraint = this.resolveConstraint(
       copy.uuid,
       EConstraintType.SIZE_HORIZONTAL,
-    );
+    ) as EHorizontalSizeConstraint;
     if (copy.name !== undefined) {
       constraint.name = copy.name;
     }
@@ -210,7 +213,10 @@ export class EStoreCommandsConstraints {
 
   public writeVerticalSize(data: PartialExceptUUIDField<EVerticalSizeConstraint>): void {
     const copy = clone(data);
-    const constraint = this.get<EVerticalSizeConstraint>(copy.uuid, EConstraintType.SIZE_VERTICAL);
+    const constraint = this.resolveConstraint(
+      copy.uuid,
+      EConstraintType.SIZE_VERTICAL,
+    ) as EVerticalSizeConstraint;
     if (copy.name !== undefined) {
       constraint.name = copy.name;
     }
@@ -234,11 +240,11 @@ export class EStoreCommandsConstraints {
     return layerContext;
   }
 
-  private get<T extends EAnyConstraint>(uuid: EConstraintUUID, type: EConstraintType): T {
+  private resolveConstraint(uuid: EConstraintUUID, type: EConstraintType): EAnyConstraint {
     for (const { constraints } of this.data.layerContexts) {
       for (const constraint of constraints) {
         if (constraint.type === type && constraint.uuid === uuid) {
-          return constraint as T;
+          return constraint;
         }
       }
     }

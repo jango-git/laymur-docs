@@ -41,7 +41,7 @@ export class EStoreCommandsAssets {
 
   public writeFontAsset(data: PartialExceptUUIDField<EFontAsset>): void {
     const copy = clone(data);
-    const asset = this.get(copy.uuid, EAssetType.FONT);
+    const asset = this.resolveAsset(copy.uuid, EAssetType.FONT);
     if (copy.name !== undefined) {
       asset.name = copy.name;
     }
@@ -54,7 +54,7 @@ export class EStoreCommandsAssets {
 
   public writeImageAsset(data: PartialExceptUUIDField<EImageAsset>): void {
     const copy = clone(data);
-    const asset = this.get(copy.uuid, EAssetType.IMAGE);
+    const asset = this.resolveAsset(copy.uuid, EAssetType.IMAGE);
     if (copy.name !== undefined) {
       asset.name = copy.name;
     }
@@ -65,10 +65,10 @@ export class EStoreCommandsAssets {
     this.signals["emitItem"]({ asset: clone(asset) });
   }
 
-  private get<T extends EAnyAsset>(uuid: EAssetUUID, type: EAssetType): T {
+  private resolveAsset(uuid: EAssetUUID, type: EAssetType): EAnyAsset {
     for (const asset of this.data.assets) {
       if (asset.type === type && asset.uuid === uuid) {
-        return asset as T;
+        return asset;
       }
     }
     throw new Error(`[EStoreCommandsAssets] Asset not found: (uuid: ${uuid}, type: ${type})`);

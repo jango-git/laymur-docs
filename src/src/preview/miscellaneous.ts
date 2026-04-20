@@ -39,6 +39,7 @@ import {
 import type {
   EAnyUIConstraint,
   EAnyUIElement,
+  EAnyUILayer,
   EAssetDataType,
   EPreviewLayerContext,
 } from "./types";
@@ -82,6 +83,30 @@ export function isLayerContextActive(uuid: ELayerUUID): boolean {
   return LAYER_ACTIVE === LAYER_DATABASE.get(uuid);
 }
 
+export function resolveAsset(uuid: EAssetUUID): EAssetDataType {
+  const asset = ASSET_DATABASE.get(uuid);
+  if (!asset) {
+    throw new Error(`Asset not found: ${uuid}`);
+  }
+  return asset;
+}
+
+export function resolveTextureAsset(uuid: EAssetUUID): Texture {
+  const asset = resolveAsset(uuid);
+  if (!(asset instanceof Texture)) {
+    throw new Error(`Asset is not a texture: ${uuid}`);
+  }
+  return asset;
+}
+
+export function resolveFontAsset(uuid: EAssetUUID): FontFace {
+  const asset = resolveAsset(uuid);
+  if (!(asset instanceof FontFace)) {
+    throw new Error(`Asset is not a font: ${uuid}`);
+  }
+  return asset;
+}
+
 export function resolveLayerContext(uuid: ELayerUUID): EPreviewLayerContext {
   const layerData = LAYER_DATABASE.get(uuid);
   if (!layerData) {
@@ -106,28 +131,19 @@ export function resolveConstraint(layerUuid: ELayerUUID, uuid: EConstraintUUID):
   return constraint;
 }
 
-export function resolveAsset(uuid: EAssetUUID): EAssetDataType {
-  const asset = ASSET_DATABASE.get(uuid);
-  if (!asset) {
-    throw new Error(`Asset not found: ${uuid}`);
+export function resolveUniversalConstraintTarget(
+  layerUuid: ELayerUUID,
+  uuid: ELayerUUID | EElementUUID,
+): EAnyUILayer | EAnyUIElement {
+  const layerContext = resolveLayerContext(layerUuid);
+  if (uuid === layerUuid) {
+    return layerContext.layer;
   }
-  return asset;
-}
-
-export function resolveTextureAsset(uuid: EAssetUUID): Texture {
-  const asset = resolveAsset(uuid);
-  if (!(asset instanceof Texture)) {
-    throw new Error(`Asset is not a texture: ${uuid}`);
+  const element = layerContext.elements.get(uuid as EElementUUID);
+  if (!element) {
+    throw new Error(`Element not found: ${uuid}`);
   }
-  return asset;
-}
-
-export function resolveFontAsset(uuid: EAssetUUID): FontFace {
-  const asset = resolveAsset(uuid);
-  if (!(asset instanceof FontFace)) {
-    throw new Error(`Asset is not a font: ${uuid}`);
-  }
-  return asset;
+  return element;
 }
 
 export function ensureUniqueAsset(uuid: EAssetUUID): void {
