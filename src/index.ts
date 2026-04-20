@@ -6,8 +6,16 @@ import { EProjectTab } from "./src/components/tabs/project/EProjectTab";
 import { EActiveLayerGuard } from "./src/miscellaneous/EActiveLayerGuard";
 import { EDocumentAutoload } from "./src/miscellaneous/EDocumentAutoload";
 import { EDocumentAutosave } from "./src/miscellaneous/EDocumentAutosave";
+import { EPreviewResizeHandle } from "./src/miscellaneous/EPreviewResizeHandle";
 
 document.addEventListener("DOMContentLoaded", () => {
+  new EPreviewResizeHandle(
+    document.getElementById("preview-container") as HTMLElement,
+    document.getElementById("preview-frame") as HTMLIFrameElement,
+    document.getElementById("viewport-content") as HTMLElement,
+    document.getElementById("preview-resize-handle") as HTMLElement,
+  );
+
   const tabButtons = document.querySelectorAll<HTMLButtonElement>(".tab-button");
   const tabPanels = document.querySelectorAll<HTMLElement>(".tab-panel");
 

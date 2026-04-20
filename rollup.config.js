@@ -74,4 +74,13 @@ export default [
     },
     plugins,
   },
+  {
+    input: "src/src/preview/preview.ts",
+    output: {
+      file: "dist/preview.js",
+      format: "es",
+      sourcemap: false,
+    },
+    plugins,
+  },
 ];

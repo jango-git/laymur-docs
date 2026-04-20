@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "build": "rollup -c",
-    "build:site": "rollup -c && node build-site.mjs",
+    "build:site": "rollup -c && postcss src/index.css -o dist/index.css && node build-site.mjs",
     "watch": "rollup -c --watch",
     "dev": "rollup -c --watch & npx serve ."
   },
@@ -27,6 +27,9 @@
     "@typescript-eslint/eslint-plugin": "^8.32.0",
     "@typescript-eslint/parser": "^8.32.0",
     "eslint": "^9.26.0",
+    "postcss": "^8",
+    "postcss-cli": "^11",
+    "postcss-import": "^16",
     "rollup": "^4.40.2",
     "rollup-plugin-string": "^3.0.0",
     "rollup-plugin-typescript2": "^0.36.0",

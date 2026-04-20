@@ -94,10 +94,49 @@ body {
 
 #viewport-content {
   flex: 1;
-  overflow: auto;
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+#preview-container {
+  position: relative;
+  width: 640px;
+  height: 360px;
+  min-width: 240px;
+  min-height: 160px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+}
+
+#preview-resize-handle {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 20px;
+  height: 20px;
+  cursor: nwse-resize;
+  z-index: 1;
+}
+
+#preview-resize-handle::after {
+  content: "";
+  position: absolute;
+  right: 3px;
+  bottom: 3px;
+  width: 10px;
+  height: 10px;
+  background-image: radial-gradient(circle, var(--text-secondary) 1px, transparent 0);
+  background-size: 4px 4px;
+  opacity: 0.5;
+  transition: opacity 0.15s;
+}
+
+#preview-resize-handle:hover::after {
+  opacity: 1;
 }
 
 #preview-frame {

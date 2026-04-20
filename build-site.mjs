@@ -1,35 +1,16 @@
-import { cpSync, mkdirSync, rmSync, existsSync, readdirSync, copyFileSync } from "node:fs";
+import { mkdirSync, rmSync, existsSync, copyFileSync } from "node:fs";
 import { join } from "node:path";
 
 const SITE = "_site";
 
-// 1. Clean
 if (existsSync(SITE)) rmSync(SITE, { recursive: true });
 mkdirSync(SITE);
 
-// 2. Root index.html
-copyFileSync("index.html", join(SITE, "index.html"));
-
-// 3. Copy non-TS static files from src subdirectories
-function copyStaticFiles(sourceDirectory, destinationDirectory) {
-  cpSync(sourceDirectory, destinationDirectory, {
-    recursive: true,
-    filter: (src) => !src.endsWith(".ts"),
-  });
-}
-
-copyStaticFiles("src/editor", join(SITE, "editor"));
-
-// 4. Copy JS bundles into js/ subdirectories
-function copyBundles(distDirectory, destinationDirectory) {
-  mkdirSync(destinationDirectory, { recursive: true });
-  for (const file of readdirSync(distDirectory)) {
-    if (file.endsWith(".js")) {
-      copyFileSync(join(distDirectory, file), join(destinationDirectory, file));
-    }
-  }
-}
-
-copyBundles("dist/editor", join(SITE, "editor", "js"));
+copyFileSync("src/index.html", join(SITE, "index.html"));
+copyFileSync("dist/index.css", join(SITE, "index.css"));
+copyFileSync("dist/index.js", join(SITE, "index.js"));
+copyFileSync("src/src/preview/preview.html", join(SITE, "preview.html"));
+copyFileSync("src/src/preview/preview.css", join(SITE, "preview.css"));
+copyFileSync("dist/preview.js", join(SITE, "preview.js"));
 
 console.log("✓ Built _site/");
