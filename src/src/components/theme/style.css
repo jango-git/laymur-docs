@@ -1,0 +1,29 @@
+.theme-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 8px;
+}
+
+.theme-switch__swatch {
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+/* Swatches are fixed indicators of the option, not the current theme. */
+.theme-switch__swatch--light {
+  background: #f0f0f0;
+}
+
+.theme-switch__swatch--dark {
+  background: #222;
+}
+
+.theme-switch__swatch--active {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}

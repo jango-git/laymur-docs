@@ -82,12 +82,7 @@ export class EElementsTab {
       STORE.commands.elements.reorder(this.currentLayerUuid, uuids as EElementUUID[]);
     });
 
-    const activeLayerUuid = UI_STATE.activeLayerUuid;
-    if (activeLayerUuid !== undefined) {
-      for (const element of STORE.selectors.elements.selectAll(activeLayerUuid)) {
-        this.addCard(element);
-      }
-    }
+    this.onActiveLayerChanged(UI_STATE.activeLayerUuid);
   }
 
   private setActiveBuilder(type: EElementType): void {

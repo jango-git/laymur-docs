@@ -116,6 +116,10 @@ export class EUIState {
     }
 
     consoleDebug(`[EUIState] debug changed: ${JSON.stringify(delta)}`);
+
+    if (Object.keys(delta).length > 0) {
+      this.signalDebugChangedInternal.emit(delta);
+    }
   }
 
   private readonly onLayersChanged = (delta: EStoreDeltaLayerList): void => {

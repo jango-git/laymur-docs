@@ -4,7 +4,7 @@
   align-items: center;
   gap: 8px;
   padding: 6px 8px;
-  background: #fff;
+  background: var(--bg-card-1);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
 }

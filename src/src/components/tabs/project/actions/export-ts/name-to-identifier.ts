@@ -10,3 +10,8 @@ export function nameToIdentifier(name: string): string {
     )
     .join("");
 }
+
+export function nameToPascalCase(name: string): string {
+  const identifier = nameToIdentifier(name);
+  return identifier.charAt(0).toUpperCase() + identifier.slice(1);
+}

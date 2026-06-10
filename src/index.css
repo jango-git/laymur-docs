@@ -17,8 +17,11 @@
 @import "./src/components/toast/style.css";
 @import "./src/components/debug/style.css";
 @import "./src/components/viewport/style.css";
+@import "./src/components/theme/style.css";
 
 :root {
+  color-scheme: light;
+
   /* Backgrounds */
   --bg-app: #f0f0f0;
   --bg-toolbar: #e8e8e8;
@@ -32,9 +35,9 @@
   --border-hover: #999;
 
   /* Accent */
-  --accent: #0066cc;
-  --accent-hover: #0052a3;
-  --accent-light: #e8f0ff;
+  --accent: #7c3aed;
+  --accent-hover: #6d28d9;
+  --accent-light: #ede9fe;
 
   /* Text */
   --text: #222;
@@ -48,6 +51,7 @@
   /* Misc */
   --radius-sm: 4px;
   --error: #e05252;
+  --error-bg: #fee2e2;
 
   /* Toast */
   --toast-warning-bg: #fffbea;
@@ -56,6 +60,48 @@
   --toast-error-bg: #fff5f5;
   --toast-error-border: #e05555;
   --toast-error-text: #8b1a1a;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  /* Backgrounds */
+  --bg-app: #1b1b1b;
+  --bg-toolbar: #232323;
+  --bg-panel: #1f1f1f;
+  --bg-card-1: #262626;
+  --bg-card-2: #2d2d2d;
+
+  /* Borders */
+  --border: #333;
+  --border-strong: #444;
+  --border-hover: #666;
+
+  /* Accent */
+  --accent: #a78bfa;
+  --accent-hover: #c4b5fd;
+  --accent-light: #2e1f4d;
+
+  /* Text */
+  --text: #e6e6e6;
+  --text-label: #aaa;
+  --text-secondary: #888;
+
+  /* Overlays */
+  --overlay-hover: rgba(255, 255, 255, 0.06);
+  --overlay-active: rgba(255, 255, 255, 0.1);
+
+  /* Misc */
+  --error: #ff6b6b;
+  --error-bg: #4a1f1f;
+
+  /* Toast */
+  --toast-warning-bg: #2e2a16;
+  --toast-warning-border: #e6a800;
+  --toast-warning-text: #f0d28a;
+  --toast-error-bg: #2e1a1a;
+  --toast-error-border: #e05555;
+  --toast-error-text: #f0a0a0;
 }
 
 * {

@@ -82,12 +82,7 @@ export class EConstraintsTab {
       STORE.commands.constraints.reorder(this.currentLayerUuid, uuids as EConstraintUUID[]);
     });
 
-    const activeLayerUuid = UI_STATE.activeLayerUuid;
-    if (activeLayerUuid !== undefined) {
-      for (const constraint of STORE.selectors.constraints.selectAll(activeLayerUuid)) {
-        this.addCard(constraint);
-      }
-    }
+    this.onActiveLayerChanged(UI_STATE.activeLayerUuid);
   }
 
   private setActiveBuilder(type: EConstraintType): void {

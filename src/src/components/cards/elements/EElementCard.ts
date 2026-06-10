@@ -51,6 +51,11 @@ export abstract class EElementCard {
   }
 
   private readonly onDeleteClicked = (): void => {
+    // laymur requires constraints to be destroyed before the elements they
+    // reference, so remove this element's linked constraints first.
+    for (const constraint of STORE.selectors.constraints.selectLinked(this.uuid)) {
+      STORE.commands.constraints.remove(this.layerUuid, constraint.uuid);
+    }
     STORE.commands.elements.remove(this.layerUuid, this.uuid);
   };
 }

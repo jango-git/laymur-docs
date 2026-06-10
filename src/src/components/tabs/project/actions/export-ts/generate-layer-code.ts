@@ -6,7 +6,7 @@ import type { EElementUUID, ELayerUUID } from "../../../../../document/types.mis
 import { generateConstraintStatement } from "./generate-constraint-statement";
 import { generateElementDeclaration } from "./generate-element-declaration";
 import { generateResizePolicyCode } from "./generate-resize-policy";
-import { nameToIdentifier } from "./name-to-identifier";
+import { nameToIdentifier, nameToPascalCase } from "./name-to-identifier";
 
 function layerTypeToClass(type: ELayerType): string {
   switch (type) {
@@ -16,12 +16,19 @@ function layerTypeToClass(type: ELayerType): string {
   }
 }
 
+export function layerClassName(layerName: string): string {
+  return `UI${nameToPascalCase(layerName)}Layer`;
+}
+
 export function generateLayerCode(
   layer: EAnyLayer,
   elements: EAnyElement[],
   constraints: EAnyConstraint[],
   assetMap: Map<string, string>,
+  typescript: boolean,
 ): string {
+  const fieldModifier = typescript ? "private readonly " : "";
+
   const fullscreenLayer = layer;
 
   const elementNames = new Map<string, string>();
@@ -43,7 +50,7 @@ export function generateLayerCode(
       return "this";
     }
     const name = elementNames.get(uuid);
-    return name !== undefined ? `this.${name}` : `/* unknown: ${uuid} */`;
+    return name !== undefined ? `this.${name}` : `undefined /* unknown: ${uuid} */`;
   };
 
   const imports = new Set<string>();
@@ -56,10 +63,17 @@ export function generateLayerCode(
   imports.add(resizePolicyImport);
 
   const elementDeclarations: string[] = [];
+  const elementStatements: string[] = [];
   for (const element of elements) {
     const name = elementNames.get(element.uuid)!;
-    const { code, imports: elImports } = generateElementDeclaration(name, element, assetMap);
-    elementDeclarations.push(code);
+    const { field, imports: elImports, statements } = generateElementDeclaration(
+      name,
+      element,
+      assetMap,
+      fieldModifier,
+    );
+    elementDeclarations.push(field);
+    elementStatements.push(...statements);
     for (const imp of elImports) {
       imports.add(imp);
     }
@@ -74,7 +88,7 @@ export function generateLayerCode(
     }
   }
 
-  const className = `UI${layer.name}Layer`;
+  const className = layerClassName(layer.name);
   const lines: string[] = [];
 
   lines.push(`import {`);
@@ -94,9 +108,16 @@ export function generateLayerCode(
 
   lines.push(`  constructor() {`);
   lines.push(`    super({`);
-  lines.push(`      name: "${layer.name}",`);
+  lines.push(`      name: ${JSON.stringify(layer.name)},`);
   lines.push(`      resizePolicy: ${resizePolicyCode},`);
   lines.push(`    });`);
+
+  if (elementStatements.length > 0) {
+    lines.push(``);
+    for (const stmt of elementStatements) {
+      lines.push(`    ${stmt}`);
+    }
+  }
 
   if (constraintStatements.length > 0) {
     lines.push(``);

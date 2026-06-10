@@ -9,7 +9,6 @@ import {
   isLayerContextActive,
   resetLayerContextActive,
   resolveLayerContext,
-  setLayerContextActive,
 } from "./miscellaneous";
 import { addConstraint } from "./receiving.constraints";
 import { addElement } from "./receiving.elements";
@@ -31,7 +30,9 @@ export function addLayerContext(layerContext: ELayerContext): void {
   };
 
   LAYER_DATABASE.set(layer.uuid, previewLayerContext);
-  setLayerContextActive(layer.uuid, true);
+
+  // Which layer is active is owned by UI_STATE and forwarded via
+  // ACTIVE_LAYER_CHANGED; building a layer never changes the active one.
 
   for (const element of elements) {
     addElement(layer.uuid, element);

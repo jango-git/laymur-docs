@@ -1,8 +1,10 @@
+import { EBridge } from "./src/bridge/bridge";
 import { EDebug } from "./src/components/debug/EDebug";
 import { EConstraintsTab } from "./src/components/tabs/constraints/EConstraintsTab";
 import { EElementsTab } from "./src/components/tabs/elements/EElementsTab";
 import { ELayersTab } from "./src/components/tabs/layers/ELayersTab";
 import { EProjectTab } from "./src/components/tabs/project/EProjectTab";
+import { EThemeSwitch } from "./src/components/theme/EThemeSwitch";
 import { EViewportPresets } from "./src/components/viewport/EViewportPresets";
 import { EActiveLayerGuard } from "./src/miscellaneous/EActiveLayerGuard";
 import { EDocumentAutoload } from "./src/miscellaneous/EDocumentAutoload";
@@ -77,6 +79,11 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   void (async (): Promise<void> => {
+    const bridge = new EBridge(
+      document.getElementById("preview-frame") as HTMLIFrameElement,
+    );
+    await bridge.preload();
+
     await EDocumentAutoload.load();
 
     new EActiveLayerGuard();
@@ -87,5 +94,9 @@ document.addEventListener("DOMContentLoaded", () => {
     new EConstraintsTab(constraintsContainer);
     new EProjectTab(projectContainer);
     new EDebug(viewportToolbarContainer);
+    new EThemeSwitch(
+      viewportToolbarContainer,
+      document.getElementById("preview-frame") as HTMLIFrameElement,
+    );
   })();
 });

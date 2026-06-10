@@ -6,9 +6,13 @@ import type {
 import type { EStoreDeltaElement, EStoreDeltaElementList } from "../document/signals/elements";
 import type { EStoreDeltaLayer, EStoreDeltaLayerList } from "../document/signals/layers";
 import type { EDocument } from "../document/types";
+import type { ELayerUUID } from "../document/types.misc";
+import type { EUIDebugState } from "../ui-state/EUIState.Internal";
 
 export enum EBridgeMessageType {
   SETUP = "SETUP",
+  ACTIVE_LAYER_CHANGED = "ACTIVE_LAYER_CHANGED",
+  DEBUG_CHANGED = "DEBUG_CHANGED",
   ASSETS_LIST_CHANGED = "ASSETS_LIST_CHANGED",
   ASSETS_ITEM_CHANGED = "ASSETS_ITEM_CHANGED",
   LAYERS_LIST_CHANGED = "LAYERS_LIST_CHANGED",
@@ -27,6 +31,16 @@ interface EBridgeMessage {
 export interface EBridgeMessageSetup extends EBridgeMessage {
   type: EBridgeMessageType.SETUP;
   payload: EDocument;
+}
+
+export interface EBridgeMessageActiveLayerChanged extends EBridgeMessage {
+  type: EBridgeMessageType.ACTIVE_LAYER_CHANGED;
+  payload: ELayerUUID | undefined;
+}
+
+export interface EBridgeMessageDebugChanged extends EBridgeMessage {
+  type: EBridgeMessageType.DEBUG_CHANGED;
+  payload: EUIDebugState;
 }
 
 export interface EBridgeMessageAssetsListChanged extends EBridgeMessage {
@@ -71,6 +85,8 @@ export interface EBridgeMessageConstraintsItemChanged extends EBridgeMessage {
 
 export type EAnyBridgeMessage =
   | EBridgeMessageSetup
+  | EBridgeMessageActiveLayerChanged
+  | EBridgeMessageDebugChanged
   | EBridgeMessageAssetsListChanged
   | EBridgeMessageAssetsItemChanged
   | EBridgeMessageLayersListChanged

@@ -1,45 +1,48 @@
 import type { EAnyConstraint } from "../../../../../document/types.constraints";
 import { EConstraintType } from "../../../../../document/types.constraints";
 import type { EElementUUID, ELayerUUID } from "../../../../../document/types.misc";
+import { stringLiteral } from "./serialize";
 
 export function generateConstraintStatement(
   constraint: EAnyConstraint,
   ref: (uuid: ELayerUUID | EElementUUID) => string,
 ): { code: string; imports: string[] } {
+  const name = stringLiteral(constraint.name);
+
   switch (constraint.type) {
     case EConstraintType.ASPECT:
       return {
-        code: `new UIAspectConstraint(${ref(constraint.element)}, { aspect: ${constraint.aspect} });`,
+        code: `new UIAspectConstraint(${ref(constraint.element)}, { name: ${name}, aspect: ${constraint.aspect} });`,
         imports: ["UIAspectConstraint"],
       };
     case EConstraintType.DISTANCE_HORIZONTAL:
       return {
-        code: `new UIHorizontalDistanceConstraint(${ref(constraint.elementA)}, ${ref(constraint.elementB)}, { anchorA: ${constraint.anchorA}, anchorB: ${constraint.anchorB}, distance: ${constraint.distance} });`,
+        code: `new UIHorizontalDistanceConstraint(${ref(constraint.elementA)}, ${ref(constraint.elementB)}, { name: ${name}, anchorA: ${constraint.anchorA}, anchorB: ${constraint.anchorB}, distance: ${constraint.distance} });`,
         imports: ["UIHorizontalDistanceConstraint"],
       };
     case EConstraintType.DISTANCE_VERTICAL:
       return {
-        code: `new UIVerticalDistanceConstraint(${ref(constraint.elementA)}, ${ref(constraint.elementB)}, { anchorA: ${constraint.anchorA}, anchorB: ${constraint.anchorB}, distance: ${constraint.distance} });`,
+        code: `new UIVerticalDistanceConstraint(${ref(constraint.elementA)}, ${ref(constraint.elementB)}, { name: ${name}, anchorA: ${constraint.anchorA}, anchorB: ${constraint.anchorB}, distance: ${constraint.distance} });`,
         imports: ["UIVerticalDistanceConstraint"],
       };
     case EConstraintType.PROPORTION_HORIZONTAL:
       return {
-        code: `new UIHorizontalProportionConstraint(${ref(constraint.elementA)}, ${ref(constraint.elementB)}, { proportion: ${constraint.proportion} });`,
+        code: `new UIHorizontalProportionConstraint(${ref(constraint.elementA)}, ${ref(constraint.elementB)}, { name: ${name}, proportion: ${constraint.proportion} });`,
         imports: ["UIHorizontalProportionConstraint"],
       };
     case EConstraintType.PROPORTION_VERTICAL:
       return {
-        code: `new UIVerticalProportionConstraint(${ref(constraint.elementA)}, ${ref(constraint.elementB)}, { proportion: ${constraint.proportion} });`,
+        code: `new UIVerticalProportionConstraint(${ref(constraint.elementA)}, ${ref(constraint.elementB)}, { name: ${name}, proportion: ${constraint.proportion} });`,
         imports: ["UIVerticalProportionConstraint"],
       };
     case EConstraintType.SIZE_HORIZONTAL:
       return {
-        code: `new UIWidthConstraint(${ref(constraint.element)}, { width: ${constraint.size} });`,
+        code: `new UIWidthConstraint(${ref(constraint.element)}, { name: ${name}, width: ${constraint.size} });`,
         imports: ["UIWidthConstraint"],
       };
     case EConstraintType.SIZE_VERTICAL:
       return {
-        code: `new UIHeightConstraint(${ref(constraint.element)}, { height: ${constraint.size} });`,
+        code: `new UIHeightConstraint(${ref(constraint.element)}, { name: ${name}, height: ${constraint.size} });`,
         imports: ["UIHeightConstraint"],
       };
   }

@@ -112,6 +112,23 @@ export function addElement(layerUuid: ELayerUUID, data: EAnyElement): void {
       break;
     }
   }
+
+  const created = layerContext.elements.get(data.uuid);
+  if (created !== undefined) {
+    // zIndex mirrors the element's position in the layer. The store appends on
+    // add, so the newest element is last (size - 1) and renders on top.
+    created.zIndex = layerContext.elements.size - 1;
+  }
+}
+
+export function reorderElements(layerUuid: ELayerUUID, uuids: EElementUUID[]): void {
+  const layerContext = resolveLayerContext(layerUuid);
+  uuids.forEach((uuid, index) => {
+    const element = layerContext.elements.get(uuid);
+    if (element !== undefined) {
+      element.zIndex = index;
+    }
+  });
 }
 
 export function removeElement(layerUuid: ELayerUUID, uuid: EElementUUID): void {
